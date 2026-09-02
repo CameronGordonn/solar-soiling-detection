@@ -1,0 +1,56 @@
+{
+  "date": "20260806",
+  "detector": "rf-detr",
+  "resolution": 728,
+  "epochs": 100,
+  "operating_conf": 0.25,
+  "iou_thresh": 0.5,
+  "gsd_m": 0.2044,
+  "checkpoint": "rfdetr_w1_20260806.pth",
+  "rf_metrics": {
+    "val": {
+      "ap50": 0.792,
+      "best_f1": 0.751,
+      "best_conf": 0.3,
+      "f1_at_report": 0.747,
+      "p_at_report": 0.766,
+      "r_at_report": 0.73,
+      "n_gt": 385
+    },
+    "test": {
+      "ap50": 0.85,
+      "best_f1": 0.809,
+      "best_conf": 0.25,
+      "f1_at_report": 0.803,
+      "p_at_report": 0.857,
+      "r_at_report": 0.755,
+      "n_gt": 636
+    }
+  },
+  "r2_baseline_metrics": {
+    "val": {
+      "ap50": 0.182,
+      "best_f1": 0.262,
+      "best_conf": 0.2,
+      "f1_at_report": 0.216,
+      "p_at_report": 0.649,
+      "r_at_report": 0.13,
+      "n_gt": 385
+    },
+    "test": {
+      "ap50": 0.28,
+      "best_f1": 0.369,
+      "best_conf": 0.15,
+      "f1_at_report": 0.222,
+      "p_at_report": 0.689,
+      "r_at_report": 0.132,
+      "n_gt": 636
+    }
+  },
+  "note": "W1 fair rematch; labels emit the infer.py .txt contract. Eval on current relabeled GT.",
+  "conf_tuned_on": "test",
+  "notes_20260806": [
+    "gsd_m corrected 0.6 -> 0.2044. 0.6 was stale from the 60cm NAIP notebook; using it inflates every area by 8.6x. Do not use the raw EPSG:3857 affine (0.2558) either -- Web Mercator inflates pixel size by 1/cos(lat), still 1.57x too large here. Derive per-tile GSD from the tile_index_chips.json affine * cos(lat).",
+    "operating_conf 0.30 -> 0.25, retuned on the TEST split (196 chips / 636 GT) rather than val (100 chips / 385 GT), per Cameron: test carries the most accurate labels. CONSEQUENCE: test F1 0.809 is no longer a held-out estimate -- it is tuned-on. Report VAL as the held-out number from here on; the two splits swap roles."
+  ]
+}

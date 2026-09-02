@@ -1,0 +1,17 @@
+outputs/soiling/training_matrix.parquet
+runs/soiling/run_optionb/calibrator.joblib
+runs/soiling/run_optionb/feature_medians.json
+runs/soiling/run_optionb/feature_names.json
+runs/soiling/run_optionb/holdout_ci.json
+runs/soiling/run_optionb/manifest.json
+runs/soiling/run_optionb/metrics.json
+runs/soiling/run_optionb/model.ubj
+runs/soiling/run_lossreg/loss_regressor/conformal.json
+runs/soiling/run_lossreg/loss_regressor/feature_medians.json
+runs/soiling/run_lossreg/loss_regressor/feature_names.json
+runs/soiling/run_lossreg/loss_regressor/loss_q10.ubj
+runs/soiling/run_lossreg/loss_regressor/loss_q50.ubj
+runs/soiling/run_lossreg/loss_regressor/loss_q90.ubj
+runs/soiling/run_lossreg/loss_regressor/metrics.json
+data/external/nrel_soiling_map_annual.csv
+data/external/static_features.csv

@@ -1,0 +1,201 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "solarsoiled"
+version = "0.5.0"
+description = "SolarSoiled — solar array detection (YOLOv11) + soiling-risk scoring (XGBoost) on public aerial imagery."
+readme = "README.md"
+requires-python = ">=3.10"
+# Apache-2.0. The full history of this line, because it has moved twice in one day
+# and the reasoning is what stops it moving back wrongly:
+#
+#   was:  license = { text = "MIT" }  with NO LICENSE file on disk at all
+#   then: AGPL-3.0, because `ultralytics` (AGPL-3.0) was a BASE dependency and
+#         `import solarsoiled.cli` loaded 98 ultralytics submodules, so MIT
+#         misstated the terms users were actually bound by
+#   now:  Apache-2.0, because that linkage is GONE. ultralytics and sahi moved to
+#         the `legacy` extra and the last module-scope imports were made lazy.
+#         Verified: `import solarsoiled.cli` now loads 0 ultralytics submodules.
+#
+# Apache-2.0 rather than MIT for the explicit patent grant (MIT is silent on
+# patents), and because it matches the upstream this stack deliberately migrated
+# to -- RF-DETR and Meta's SAM-2 are both Apache-2.0, so there is no
+# compatibility seam anywhere in the dependency graph.
+#
+# If ultralytics ever returns to `dependencies`, this line becomes false again.
+license = { text = "Apache-2.0" }
+authors = [
+    { name = "Cameron Gordon", email = "camerongordon8888@gmail.com" },
+]
+keywords = ["solar", "remote-sensing", "yolo", "segmentation", "soiling", "geospatial"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: GIS",
+    "Topic :: Scientific/Engineering :: Image Recognition",
+]
+
+dependencies = [
+    "numpy>=1.23",
+    "pandas>=1.5",
+    "pyarrow>=12.0",
+    "rasterio>=1.3",
+    "geopandas>=0.13",
+    "shapely>=2.0",
+    "pyproj>=3.5",
+    "geojson>=3.0",
+    "Pillow>=9.4",
+    "scikit-image>=0.20",
+    "torch>=2.0",
+    "scikit-learn>=1.2",
+    # xgboost-cpu on Linux ONLY. Plain `xgboost` declares
+    # `nvidia-nccl-cu12; platform_system == "Linux"` unconditionally, which puts
+    # 454 MB of CUDA collective-communication libraries into every Linux install
+    # and container image. Nothing here uses GPU xgboost: `tree_method` is unset
+    # in configs/soiling/model.yaml and no code passes device="cuda" to xgboost.
+    # xgboost-cpu ships the same `xgboost` module, so imports are unchanged.
+    #
+    # Linux-only because xgboost-cpu publishes NO macOS wheels (manylinux +
+    # win_amd64/arm64 only, checked 2026-09-01), and this team has Mac users
+    # (docs/CODEX_QUICKSTART_MAC.md). Mac loses nothing: the nccl dependency is
+    # already gated on platform_system == "Linux", so a Mac install never had it.
+    "xgboost-cpu>=2.1.1; platform_system == 'Linux'",
+    "xgboost>=1.7; platform_system != 'Linux'",
+    "roboflow>=1.0",
+    "requests-cache>=1.1",
+    "PyYAML>=6.0",
+    # Declared 2026-08-26 after a cold-clone audit: every package below is imported
+    # from src/ or a Makefile target and was reaching the working env only because
+    # it had been pip-installed by hand. A fresh `pip install -e .` did not get them.
+    "laspy>=2.5",            # src/risk/roof_geometry.py -- 3DEP EPT over HTTP, deliberately not PDAL
+    "planetary-computer>=1.0",  # src/risk/location_features.py -- WorldCover STAC signing
+    "pystac-client>=0.7",       # src/risk/location_features.py
+    "folium>=0.15",             # src/solarsoiled/viz.py -- the risk map
+    "matplotlib>=3.7",          # src/solarsoiled/eval_report.py + scripts/analyze/*
+    "scipy>=1.10",              # used directly by src/risk; do not rely on sklearn pulling it
+    "typer>=0.9",
+    "reportlab>=4.0",
+    "qrcode[pil]>=7.4",
+    # PROMOTED from the soiling-validation extra 2026-08-30, because src/ imports it.
+    # `src/risk/module_gamma.py` resolves each PVDAQ system's temperature coefficient
+    # against pvlib's CEC module database, and tests/test_module_gamma.py exercises
+    # that path. While pvlib sat in an extra, CI installed [dev,api] and every one of
+    # those tests died on ModuleNotFoundError -- but only once the disk failure above
+    # it was fixed, so the real error had been hidden behind a spurious one.
+    #
+    # Locally it passed because pvlib was pip-installed by hand. That is exactly the
+    # failure mode the 2026-08-26 cold-clone audit was run to catch, and the same one
+    # the comment block above records for laspy, folium and the rest.
+    "pvlib>=0.11",
+]
+
+[project.scripts]
+solarsoiled = "solarsoiled.cli:app"
+solarsoiled-api = "solarsoiled.api:main"
+
+[project.optional-dependencies]
+geoai = ["geoai-py"]
+api = [
+    "fastapi>=0.111",
+    "uvicorn[standard]>=0.29",
+]
+outreach = [
+    "lob-python>=6.0",
+    "pypdf>=4.0",        # scripts/outreach/{generate_mailers,mail_via_lob}.py
+    "pdfplumber>=0.11",  # County permit-PDF parsing
+]
+# Stage 1 inference/eval. Kept OUT of the default install because rfdetr pulls a
+# large torch/transformers stack and sam2 downloads a HF checkpoint on first use --
+# but WITHOUT this extra `scripts/detect/eval_tile_f1.py` cannot run at all, so the
+# detection lane must install it. See docs/ONBOARDING.md lane 2.
+detect = [
+    "rfdetr>=1.9",       # scripts/detect/rfdetr_infer.py -- the Apache-2.0 detector
+    # SAM-2 from Meta's own repository, pinned to a commit. This was `sam2>=1.1`
+    # until 2026-09-01, and that spelling was NOT Meta's package. Meta does not
+    # publish SAM 2 to PyPI: its setup.py declares NAME = "SAM-2", VERSION 1.0.
+    # The PyPI name `sam2` belongs to a third-party fork
+    # (github.com/JinsuaFeito-dev/segment-anything-2), and because Meta's version
+    # is 1.0, the `>=1.1` floor made resolution to that fork STRUCTURALLY
+    # guaranteed -- there was no version of this constraint the official package
+    # could have satisfied.
+    #
+    # That matters here more than it would elsewhere. The entire permissive-stack
+    # migration exists to control licensing (docs/PERMISSIVE_STACK_MIGRATION.md);
+    # SAM 3 was declined for being under a custom Meta licence rather than
+    # Apache-2.0. Taking the mask stage from an unaudited third-party
+    # redistribution instead undoes that diligence. Meta's LICENSE file was read
+    # directly on 2026-09-01 and is Apache-2.0; the fork's Apache claim is
+    # self-asserted package metadata that nobody has checked against its tree.
+    #
+    # Pinned to a commit, not a branch, so the mask stage cannot change under us.
+    "SAM-2 @ git+https://github.com/facebookresearch/sam2.git@2b90b9f5ceec907a1c18123530e92e794ad901a4",
+]
+# The AGPL-3.0 legacy lane: YOLOv11 via ultralytics, plus SAHI slicing. MOVED OUT
+# of the base dependencies on 2026-09-01, which is what makes an Apache-2.0 licence
+# on this package honest.
+#
+# Before that, `ultralytics` was a base dependency and `import solarsoiled.cli`
+# loaded 98 ultralytics submodules, so AGPL code was installed for every user and
+# present in the DEPLOYED API image (verified: ultralytics 8.4.138 in the
+# EXTRAS=api build). AGPL section 13 is the network-use clause, so a hosted API
+# containing it is precisely the exposure the permissive-stack migration existed
+# to remove -- and it had survived the migration untouched, because the migration
+# changed the MODEL and never the packaging.
+#
+# The fix was small: only scripts/detect/evaluate.py and eval_threshold_sweep.py
+# still imported ultralytics at module scope. Every other site was already lazy.
+# Nothing was deleted -- the 60cm eval path, the R2 anchor, the labeling QA tools
+# and the historical numbers all still reproduce, with `pip install -e ".[legacy]"`.
+#
+# Do NOT promote these back into `dependencies`. That single edit silently
+# relicenses the distributable.
+legacy = [
+    "ultralytics>=8.3",  # AGPL-3.0 -- eval-only, never on the shipping path
+    "sahi>=0.11",        # slicing helper used only by the ultralytics lane
+]
+# rdtools pulls in statsmodels, arch and h5py, so it stays out of the default
+# install: only scripts/analyze/washable_share_probe.py needs it and nothing under
+# src/ imports it.
+#
+# pvlib USED to live here under the same reasoning, and that reasoning expired when
+# src/risk/module_gamma.py started importing it. It is now a base dependency. Before
+# adding anything else here, check that src/ really does not import it -- an extra is
+# for what the scored pipeline can run without, not for what happens to be installed
+# on the machine that wrote it.
+soiling-validation = [
+    "rdtools>=3.2",
+]
+dev = [
+    "pytest>=7.0",
+    "pytest-timeout>=2.1",
+    "httpx>=0.24",
+    "pip-tools>=7.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/camerongordon/solar-soiling-ml"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["solarsoiled*"]
+namespaces = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# Put the repo root on sys.path so `from src.risk... import` (the project's import
+# convention, see CLAUDE.md) resolves under a bare `pytest` — CI runs without the
+# usual PYTHONPATH=. prefix, which is why collection failed there but not locally.
+pythonpath = ["."]
+timeout = 300
+markers = [
+    "smoke: end-to-end pipeline tests requiring trained weights on disk",
+    "integration: tests that hit real files, external services, or the GPU",
+    "contract: stage-boundary contract tests (Stage 1 → Stage 2 output schema)",
+]

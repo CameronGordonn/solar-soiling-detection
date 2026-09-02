@@ -1,0 +1,57 @@
+# SolarSoiled — docker-compose
+#
+# Two services:
+#   pipeline  — one-shot CLI run (override CMD to pass args)
+#   api       — persistent FastAPI server on port 8000
+#
+# Copy .env.example to .env and fill in your keys. As of 2026-09-01 .env is
+# OPTIONAL: it is gitignored, so on a fresh clone it does not exist, and the old
+# unconditional `env_file: .env` made every compose command fail on a clean
+# checkout with "env file .env not found" before anything could start. The
+# pipeline runs without it — NASA_EARTHDATA_TOKEN only adds MERRA-2 AQ backfill,
+# and SOLARSOILED_API_KEY is optional for local dev.
+#
+# Usage:
+#   docker compose run --rm pipeline run \
+#     --aoi "-122.05,36.90,-121.85,37.05" \
+#     --weights production \
+#     --soiling-model soiling_production \
+#     --last-cleaned 2026-01-01 \
+#     --partner-id smoketest
+#
+#   docker compose up api
+#
+# The ./.cache mount carries BOTH the weather/AQ SQLite cache and the
+# HuggingFace cache that SAM2's checkpoint downloads into (HF_HOME is set to
+# /app/.cache/huggingface in the Dockerfile), so the ~900 MB mask checkpoint is
+# fetched once rather than on every --rm run.
+
+x-common: &common
+  image: solarsoiled:latest
+  build:
+    context: .
+    args:
+      # api,detect = full pipeline. Set to `api` for a lean API-only image.
+      EXTRAS: api,detect
+  env_file:
+    - path: .env
+      required: false
+  volumes:
+    - ./models:/app/models
+    - ./runs:/app/runs
+    - ./outputs:/app/outputs
+    - ./.cache:/app/.cache
+    - ./data/external:/app/data/external
+
+services:
+  pipeline:
+    <<: *common
+    entrypoint: ["solarsoiled"]
+    command: ["--help"]
+
+  api:
+    <<: *common
+    entrypoint: ["solarsoiled-api"]
+    ports:
+      - "8000:8000"
+    restart: unless-stopped

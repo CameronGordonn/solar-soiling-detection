@@ -1,0 +1,80 @@
+rdtools 3.2.1 · pvlib 0.15.2
+
+raw span      2017-01-01 00:15:00-08:00 -> 2025-12-31 23:45:00-08:00  (315,551 15-min rows)
+ambient temp  Fahrenheit (p99 = 97.2), converted to C
+usable span   2017-12-01 -> 2025-12-31  (8.08 years, all three instruments)
+
+units sanity
+  AC power    p50      0.0  p99    685.4  max   1783.7   (DC nameplate 893 kW)
+  POA         p50      7.9  p99   1012.3  max   1308.5   W/m2
+  ambient C   p01      0.6  p50     15.6  p99     36.2
+  wind m/s    p50      4.2  p99     19.4
+
+── 3. degradation (the share a wash cannot touch) ─────────────────
+  year-on-year Rd  -0.076 %/yr   95% CI [-0.408, +0.358]
+  Jordan et al. 2016 x-Si field median: -0.5 to -0.6 %/yr
+
+  daily PI series  2,951 calendar days, 2017-12-01 -> 2025-12-29
+  observed         1,900 of them (64.4% coverage), PI p50 0.8347
+  coverage by year 2017:26%  2018:56%  2019:68%  2020:62%  2021:63%  2022:64%  2023:61%  2024:75%  2025:69%
+
+── 1. soiling_srr: perfect_clean vs the fitted half_norm_clean ────
+  half_norm_clean   insolation-weighted mean SR 0.92417   95% CI [0.90605, 0.93749]   loss 7.583 pts   (40/184 valid soiling intervals)
+  perfect_clean     insolation-weighted mean SR 0.97242   95% CI [0.97015, 0.97472]   loss 2.758 pts   (40/184 valid soiling intervals)
+
+  gap (perfect - half_norm)  4.826 pts of annual output
+  perfect_clean forces every soiling interval to start at SR = 1.0, which is
+  the branch NREL's published map takes. half_norm_clean fits the start of
+  each interval below 1.0 instead, so the gap is the standing deficit that
+  the resets in this record do not clear. It is a LEVEL, not a rate: it does
+  not divide by the length of the record. Whether it accumulates is the
+  separate question CODS answers below.
+  Note what the resets here mostly ARE: rain. The method labels recovery
+  events, not their cause, and no wash is recorded in this dataset. So this
+  number is the layer RAIN leaves behind. How much of it a paid wash removes
+  is not in this data and this script does not claim it.
+
+  performance at the START of each of the 40 valid intervals, i.e. just
+  after a reset. 1.0 is a full recovery; the gap above is what these fall short by:
+    p10 0.9665  p50 1.0914  p90 1.1510  max 1.1702  share >= 0.99: 82%
+  These inherit the weakness of the input: 64% daily coverage means many
+  resets are only partly observed, and a reset seen late reads as incomplete.
+
+── 2. CODS: degradation, soiling and seasonality, separated ───────
+  CODS insolation-weighted mean SR  0.92301  95% CI [0.94057, 0.89600]
+  CODS degradation                  -0.228 %/yr  95% CI [-1.139, +0.683]
+
+  annual behaviour of the CODS soiling ratio
+  (a maximum pinned at 1.0000 means the array reached its clean state that year)
+    2018   n=365   max 1.0000   p95 1.0000   p50 0.8892
+    2019   n=365   max 1.0000   p95 1.0000   p50 0.9467
+    2020   n=366   max 1.0000   p95 1.0000   p50 0.9511
+    2021   n=365   max 1.0000   p95 1.0000   p50 0.9620
+    2022   n=365   max 1.0000   p95 1.0000   p50 0.9849
+    2023   n=365   max 1.0000   p95 1.0000   p50 0.9845
+    2024   n=366   max 1.0000   p95 1.0000   p50 0.9835
+    2025   n=363   max 1.0000   p95 1.0000   p50 0.9042
+
+  linear trend over the whole record   -0.925 pts/yr  (OLS 95% [-1.062, -0.787], n=2951)
+  Positive would mean the ratio falls with age, which is the layer we are
+  looking for. Read the annual table above before this number: the series is
+  not linear in time, so a straight line through it is a summary of the two
+  end years more than of the trend, and its OLS interval ignores the
+  autocorrelation a sawtooth necessarily has.
+
+── the split ──────────────────────────────────────────────────────
+  degradation, which no wash touches         -0.076 %/yr  (YoY)   -0.228 %/yr (CODS)
+  standing layer the resets do not clear     4.826 pts, as a level
+  does that layer grow with age?             -0.925 pts/yr
+  section 12's outside ceiling on growth      0.600 pts/yr
+
+  What is still NOT measured, and cannot be from this dataset: the share of
+  that standing layer a paid wash removes. Nothing here records a wash. The
+  site currently assumes all of it (recovery 1.0), which is the generous end.
+
+  And the site this is measured on is Arbuckle: 893 kW ground-mount beside
+  Central Valley farmland, Csa, ~130 km inland of the AOI. Coastal Santa Cruz
+  is Csb with 27 heavy-rain resets a year and no adjacent tillage. Treat every
+  number above as an upper bound for a Santa Cruz rooftop, not a transfer.
+
+EXIT 0

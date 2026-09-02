@@ -1,0 +1,1901 @@
+{
+  "results": [
+    {
+      "meta": {
+        "system_id": 11248,
+        "lat": 37.29222,
+        "lon": -121.881711,
+        "elev_m": 43.47161865,
+        "capacity_kw": 3.78,
+        "tilt": 22.0,
+        "azimuth": 270.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csb",
+        "years": 5.4712,
+        "channels": 2.0,
+        "location": "ZIP: 95125",
+        "gamma_pdc": -0.0043,
+        "gamma_tier": "cec_manufacturer",
+        "gamma_matched": "REC"
+      },
+      "irradiance_at": "system",
+      "gamma_used": -0.0043,
+      "n_published_rows": 1898,
+      "median_dt_days": 1.0,
+      "fits": {
+        "energy": {
+          "n_obs": 1898,
+          "coverage_pct": 94.994994994995,
+          "pi_median": 0.5617271966064679,
+          "perfect_clean": {
+            "soiling_ratio": 0.9088730967828789,
+            "ci95": [
+              0.90395027061306,
+              0.9138746606389359
+            ],
+            "loss_pct": 9.112690321712114,
+            "n_intervals": 121,
+            "n_valid_intervals": 12,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.8321967964989491,
+            "ci95": [
+              0.7953504494817442,
+              0.8651657884224994
+            ],
+            "loss_pct": 16.780320350105093,
+            "n_intervals": 121,
+            "n_valid_intervals": 12,
+            "degenerate": false
+          }
+        },
+        "power_max": {
+          "n_obs": 1898,
+          "coverage_pct": 94.994994994995,
+          "pi_median": 0.7135325288880411,
+          "perfect_clean": {
+            "soiling_ratio": 0.9525923519283681,
+            "ci95": [
+              0.9475265493852478,
+              0.9579637611270077
+            ],
+            "loss_pct": 4.740764807163189,
+            "n_intervals": 103,
+            "n_valid_intervals": 8,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.9078027068486927,
+            "ci95": [
+              0.8703864958975107,
+              0.930205900055466
+            ],
+            "loss_pct": 9.219729315130731,
+            "n_intervals": 103,
+            "n_valid_intervals": 8,
+            "degenerate": false
+          }
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 10114,
+        "lat": 37.35115,
+        "lon": -120.6056,
+        "elev_m": 47.00376129,
+        "capacity_kw": 3.06,
+        "tilt": 0.0,
+        "azimuth": 180.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Bsk",
+        "years": 12.2438,
+        "channels": 2.0,
+        "location": "ZIP: 95301",
+        "gamma_pdc": -0.0039000000000000003,
+        "gamma_tier": "cec_manufacturer",
+        "gamma_matched": "LG"
+      },
+      "irradiance_at": "system",
+      "gamma_used": -0.0039000000000000003,
+      "n_published_rows": 4128,
+      "median_dt_days": 1.0,
+      "fits": {
+        "energy": {
+          "n_obs": 4128,
+          "coverage_pct": 92.3489932885906,
+          "pi_median": 0.9293575455430965,
+          "perfect_clean": {
+            "soiling_ratio": 0.9676985016232538,
+            "ci95": [
+              0.9648731844883152,
+              0.9704905902293464
+            ],
+            "loss_pct": 3.230149837674623,
+            "n_intervals": 317,
+            "n_valid_intervals": 14,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.8680961135779547,
+            "ci95": [
+              0.7759133139744547,
+              0.9309981834798043
+            ],
+            "loss_pct": 13.190388642204532,
+            "n_intervals": 317,
+            "n_valid_intervals": 14,
+            "degenerate": false
+          }
+        },
+        "power_max": {
+          "n_obs": 4128,
+          "coverage_pct": 92.3489932885906,
+          "pi_median": 0.8000293926050055,
+          "perfect_clean": {
+            "soiling_ratio": 0.9469481166891054,
+            "ci95": [
+              0.9447716415578044,
+              0.9490096250112598
+            ],
+            "loss_pct": 5.305188331089461,
+            "n_intervals": 225,
+            "n_valid_intervals": 37,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.8920327026727772,
+            "ci95": [
+              0.8647297534273921,
+              0.9169610157162132
+            ],
+            "loss_pct": 10.796729732722277,
+            "n_intervals": 225,
+            "n_valid_intervals": 37,
+            "degenerate": false
+          }
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 11066,
+        "lat": 34.125147,
+        "lon": -117.45818,
+        "elev_m": 0.0,
+        "capacity_kw": 7.59,
+        "tilt": 25.0,
+        "azimuth": 180.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csa",
+        "years": 6.5205,
+        "channels": 2.0,
+        "location": "ZIP: 92336",
+        "gamma_pdc": -0.0031,
+        "gamma_tier": "cec_manufacturer",
+        "gamma_matched": "PANASONIC"
+      },
+      "irradiance_at": "system",
+      "gamma_used": -0.0031,
+      "n_published_rows": 2304,
+      "median_dt_days": 1.0,
+      "fits": {
+        "energy": {
+          "n_obs": 2304,
+          "coverage_pct": 96.76606467870643,
+          "pi_median": 0.793943962958413,
+          "perfect_clean": {
+            "soiling_ratio": 0.9566066045305134,
+            "ci95": [
+              0.9531431450874284,
+              0.9598306551195098
+            ],
+            "loss_pct": 4.339339546948661,
+            "n_intervals": 118,
+            "n_valid_intervals": 29,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.8920507774779395,
+            "ci95": [
+              0.8512235905959649,
+              0.9206066865052508
+            ],
+            "loss_pct": 10.794922252206051,
+            "n_intervals": 118,
+            "n_valid_intervals": 29,
+            "degenerate": false
+          }
+        },
+        "power_max": {
+          "n_obs": 2304,
+          "coverage_pct": 96.76606467870643,
+          "pi_median": 0.7702917625336381,
+          "perfect_clean": {
+            "soiling_ratio": 0.9352690806504466,
+            "ci95": [
+              0.932273156345327,
+              0.9385028329398819
+            ],
+            "loss_pct": 6.4730919349553435,
+            "n_intervals": 103,
+            "n_valid_intervals": 22,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.864835199109619,
+            "ci95": [
+              0.8321258192882224,
+              0.8911319744724145
+            ],
+            "loss_pct": 13.516480089038097,
+            "n_intervals": 103,
+            "n_valid_intervals": 22,
+            "degenerate": false
+          }
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 10251,
+        "lat": 34.119245,
+        "lon": -117.8548,
+        "elev_m": 250.0606995,
+        "capacity_kw": 4.32,
+        "tilt": 1.0,
+        "azimuth": 180.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csb",
+        "years": 5.4739,
+        "channels": 2.0,
+        "location": "ZIP: 91740",
+        "gamma_pdc": -0.00458,
+        "gamma_tier": "cec_manufacturer",
+        "gamma_matched": "SHARP"
+      },
+      "irradiance_at": "system",
+      "gamma_used": -0.00458,
+      "n_published_rows": 1907,
+      "median_dt_days": 1.0,
+      "fits": {
+        "energy": {
+          "n_obs": 1907,
+          "coverage_pct": 95.39769884942471,
+          "pi_median": 0.98611432123409,
+          "perfect_clean": {
+            "soiling_ratio": 0.9766400092982953,
+            "ci95": [
+              0.973161660279518,
+              0.9804093117644417
+            ],
+            "loss_pct": 2.335999070170469,
+            "n_intervals": 128,
+            "n_valid_intervals": 17,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.9140334039085609,
+            "ci95": [
+              0.868157533957757,
+              0.9471656573197683
+            ],
+            "loss_pct": 8.59665960914391,
+            "n_intervals": 128,
+            "n_valid_intervals": 17,
+            "degenerate": false
+          }
+        },
+        "power_max": {
+          "n_obs": 1907,
+          "coverage_pct": 95.39769884942471,
+          "pi_median": 0.8386448680751973,
+          "perfect_clean": {
+            "soiling_ratio": 0.9440852900053123,
+            "ci95": [
+              0.9400771839248998,
+              0.9477345999021834
+            ],
+            "loss_pct": 5.591470999468773,
+            "n_intervals": 98,
+            "n_valid_intervals": 18,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.8893013629915053,
+            "ci95": [
+              0.8552725814975101,
+              0.9159769659588138
+            ],
+            "loss_pct": 11.069863700849469,
+            "n_intervals": 98,
+            "n_valid_intervals": 18,
+            "degenerate": false
+          }
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 10063,
+        "lat": 37.295092,
+        "lon": -121.89649,
+        "elev_m": 42.72908783,
+        "capacity_kw": 6.902,
+        "tilt": 0.0,
+        "azimuth": 225.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csb",
+        "years": 12.0739,
+        "channels": 2.0,
+        "location": "ZIP: 95125",
+        "gamma_pdc": -0.0043,
+        "gamma_tier": "cec_module",
+        "gamma_matched": "SPR238EWHTD"
+      },
+      "irradiance_at": "system",
+      "gamma_used": -0.0043,
+      "n_published_rows": 4036,
+      "median_dt_days": 1.0,
+      "fits": {
+        "energy": {
+          "n_obs": 4035,
+          "coverage_pct": 91.53811252268602,
+          "pi_median": 0.887750375901775,
+          "perfect_clean": {
+            "soiling_ratio": 0.9616473957516956,
+            "ci95": [
+              0.9585607501597205,
+              0.964478711028277
+            ],
+            "loss_pct": 3.8352604248304445,
+            "n_intervals": 247,
+            "n_valid_intervals": 42,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.9068116632747802,
+            "ci95": [
+              0.8790804750212269,
+              0.9266935806261637
+            ],
+            "loss_pct": 9.318833672521976,
+            "n_intervals": 247,
+            "n_valid_intervals": 42,
+            "degenerate": false
+          }
+        },
+        "power_max": {
+          "n_obs": 4036,
+          "coverage_pct": 91.56079854809437,
+          "pi_median": 0.7666921373611184,
+          "perfect_clean": {
+            "soiling_ratio": 0.9471671470205762,
+            "ci95": [
+              0.945047334989997,
+              0.9492031755098164
+            ],
+            "loss_pct": 5.283285297942375,
+            "n_intervals": 203,
+            "n_valid_intervals": 31,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.9041033315153848,
+            "ci95": [
+              0.8758560143255689,
+              0.9216864919227898
+            ],
+            "loss_pct": 9.589666848461519,
+            "n_intervals": 203,
+            "n_valid_intervals": 31,
+            "degenerate": false
+          }
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 10092,
+        "lat": 32.216326,
+        "lon": -110.88511,
+        "elev_m": 783.0465698,
+        "capacity_kw": 4.725,
+        "tilt": 30.0,
+        "azimuth": 180.0,
+        "tz": "America/Phoenix",
+        "climate": "Bsh",
+        "years": 12.441,
+        "channels": 2.0,
+        "location": "ZIP: 85711",
+        "gamma_pdc": -0.00466,
+        "gamma_tier": "cec_manufacturer",
+        "gamma_matched": "SCHOTT"
+      },
+      "irradiance_at": "system",
+      "gamma_used": -0.00466,
+      "n_published_rows": 4535,
+      "median_dt_days": 1.0,
+      "fits": {
+        "energy": {
+          "n_obs": 4534,
+          "coverage_pct": 99.82386613826507,
+          "pi_median": 0.9796861536183927,
+          "perfect_clean": {
+            "soiling_ratio": 0.974652745279561,
+            "ci95": [
+              0.9721158631379027,
+              0.977103980035477
+            ],
+            "loss_pct": 2.534725472043897,
+            "n_intervals": 289,
+            "n_valid_intervals": 58,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.9460567099075771,
+            "ci95": [
+              0.9315544269536437,
+              0.9553403003464697
+            ],
+            "loss_pct": 5.394329009242293,
+            "n_intervals": 289,
+            "n_valid_intervals": 58,
+            "degenerate": false
+          }
+        },
+        "power_max": {
+          "n_obs": 4535,
+          "coverage_pct": 99.84588287098195,
+          "pi_median": 1.004790450733594,
+          "perfect_clean": {
+            "soiling_ratio": 0.9604806235046266,
+            "ci95": [
+              0.9589437298353252,
+              0.9620110812339763
+            ],
+            "loss_pct": 3.9519376495373404,
+            "n_intervals": 184,
+            "n_valid_intervals": 43,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.9288934457598956,
+            "ci95": [
+              0.9134786547711683,
+              0.9379522100779494
+            ],
+            "loss_pct": 7.110655424010437,
+            "n_intervals": 184,
+            "n_valid_intervals": 43,
+            "degenerate": false
+          }
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 11964,
+        "lat": 37.295092,
+        "lon": -121.89649,
+        "elev_m": 0.0,
+        "capacity_kw": 3.96,
+        "tilt": 23.0,
+        "azimuth": 180.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csb",
+        "years": 6.315,
+        "channels": 2.0,
+        "location": "ZIP: 95125",
+        "gamma_pdc": -0.0032,
+        "gamma_tier": "cec_module",
+        "gamma_matched": "LG360Q1CA5"
+      },
+      "irradiance_at": "system",
+      "gamma_used": -0.0032,
+      "n_published_rows": 2303,
+      "median_dt_days": 1.0,
+      "fits": {
+        "energy": {
+          "n_obs": 2302,
+          "coverage_pct": 99.82653946227234,
+          "pi_median": 0.8837420291945478,
+          "perfect_clean": {
+            "soiling_ratio": 0.9684305204549373,
+            "ci95": [
+              0.9647458397411226,
+              0.9722153997849253
+            ],
+            "loss_pct": 3.156947954506273,
+            "n_intervals": 146,
+            "n_valid_intervals": 19,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.9265163609176326,
+            "ci95": [
+              0.8925294318458833,
+              0.9489527850547298
+            ],
+            "loss_pct": 7.348363908236744,
+            "n_intervals": 146,
+            "n_valid_intervals": 19,
+            "degenerate": false
+          }
+        },
+        "power_max": {
+          "n_obs": 2303,
+          "coverage_pct": 99.86990459670425,
+          "pi_median": 0.8509958092770029,
+          "perfect_clean": {
+            "soiling_ratio": 0.9699791092742096,
+            "ci95": [
+              0.9677011895353471,
+              0.9721384388873362
+            ],
+            "loss_pct": 3.0020890725790395,
+            "n_intervals": 139,
+            "n_valid_intervals": 23,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.9464719978410332,
+            "ci95": [
+              0.9308432748739938,
+              0.9579917763778265
+            ],
+            "loss_pct": 5.35280021589668,
+            "n_intervals": 139,
+            "n_valid_intervals": 23,
+            "degenerate": false
+          }
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 11670,
+        "lat": 37.295092,
+        "lon": -121.89649,
+        "elev_m": 0.0,
+        "capacity_kw": 6.72,
+        "tilt": 17.0,
+        "azimuth": 180.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csb",
+        "years": 7.926,
+        "channels": 2.0,
+        "location": "ZIP: 95125",
+        "gamma_pdc": -0.004118999999999999,
+        "gamma_tier": "cec_module",
+        "gamma_matched": "CS6K280M"
+      },
+      "irradiance_at": "system",
+      "gamma_used": -0.004118999999999999,
+      "n_published_rows": 2164,
+      "median_dt_days": 1.0,
+      "fits": {
+        "energy": {
+          "n_obs": 2164,
+          "coverage_pct": 74.77539737387698,
+          "pi_median": 0.7332938890711328,
+          "perfect_clean": {
+            "soiling_ratio": 0.9322899786526324,
+            "ci95": [
+              0.9274625638182602,
+              0.9372957787553952
+            ],
+            "loss_pct": 6.771002134736759,
+            "n_intervals": 133,
+            "n_valid_intervals": 25,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.871037177915178,
+            "ci95": [
+              0.8252015730531871,
+              0.9001322639964068
+            ],
+            "loss_pct": 12.896282208482202,
+            "n_intervals": 133,
+            "n_valid_intervals": 25,
+            "degenerate": false
+          }
+        },
+        "power_max": {
+          "n_obs": 2164,
+          "coverage_pct": 74.77539737387698,
+          "pi_median": 0.8101773252426292,
+          "perfect_clean": {
+            "soiling_ratio": 0.9330818447482614,
+            "ci95": [
+              0.930049967726823,
+              0.9357999265825916
+            ],
+            "loss_pct": 6.691815525173861,
+            "n_intervals": 127,
+            "n_valid_intervals": 17,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.8818424396323357,
+            "ci95": [
+              0.8423492112545571,
+              0.9043367844431712
+            ],
+            "loss_pct": 11.815756036766434,
+            "n_intervals": 127,
+            "n_valid_intervals": 17,
+            "degenerate": false
+          }
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 12308,
+        "lat": 32.719601,
+        "lon": -117.16246,
+        "elev_m": 22.42172241,
+        "capacity_kw": 4.95,
+        "tilt": 1.0,
+        "azimuth": 180.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Bsk",
+        "years": 8.178,
+        "channels": 2.0,
+        "location": "ZIP: 92101",
+        "gamma_pdc": -0.004779,
+        "gamma_tier": "cec_module",
+        "gamma_matched": "KD330GXLFB"
+      },
+      "irradiance_at": "system",
+      "gamma_used": -0.004779,
+      "n_published_rows": 2518,
+      "median_dt_days": 1.0,
+      "fits": {
+        "energy": {
+          "n_obs": 2518,
+          "coverage_pct": 84.32685867381112,
+          "pi_median": 0.848631084485674,
+          "perfect_clean": {
+            "soiling_ratio": 0.9781703567430033,
+            "ci95": [
+              0.9741737715234645,
+              0.9820319692211457
+            ],
+            "loss_pct": 2.1829643256996656,
+            "n_intervals": 150,
+            "n_valid_intervals": 19,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.8875353385084552,
+            "ci95": [
+              0.798956935110246,
+              0.9359513746262696
+            ],
+            "loss_pct": 11.246466149154477,
+            "n_intervals": 150,
+            "n_valid_intervals": 19,
+            "degenerate": false
+          }
+        },
+        "power_max": {
+          "n_obs": 2518,
+          "coverage_pct": 84.32685867381112,
+          "pi_median": 0.6965122320398187,
+          "perfect_clean": {
+            "soiling_ratio": 0.977434095476982,
+            "ci95": [
+              0.9750645532908063,
+              0.979841014161345
+            ],
+            "loss_pct": 2.2565904523017988,
+            "n_intervals": 132,
+            "n_valid_intervals": 13,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.8971202397303564,
+            "ci95": [
+              0.8512194834674417,
+              0.9370920054829532
+            ],
+            "loss_pct": 10.287976026964362,
+            "n_intervals": 132,
+            "n_valid_intervals": 13,
+            "degenerate": false
+          }
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 12023,
+        "lat": 34.122658,
+        "lon": -118.11296,
+        "elev_m": 0.0,
+        "capacity_kw": 3.91,
+        "tilt": 20.0,
+        "azimuth": 180.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csb",
+        "years": 10.5123,
+        "channels": 2.0,
+        "location": "ZIP: 91108",
+        "gamma_pdc": -0.0045000000000000005,
+        "gamma_tier": "cec_module",
+        "gamma_matched": "P660"
+      },
+      "irradiance_at": "system",
+      "gamma_used": -0.0045000000000000005,
+      "n_published_rows": 3692,
+      "median_dt_days": 1.0,
+      "fits": {
+        "energy": {
+          "n_obs": 3691,
+          "coverage_pct": 96.16988014590933,
+          "pi_median": 0.8115928687486649,
+          "perfect_clean": {
+            "soiling_ratio": 0.974154503173969,
+            "ci95": [
+              0.9708816305469709,
+              0.9775924285767345
+            ],
+            "loss_pct": 2.584549682603099,
+            "n_intervals": 228,
+            "n_valid_intervals": 37,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.9284137144076059,
+            "ci95": [
+              0.9036706497880224,
+              0.9455899839356505
+            ],
+            "loss_pct": 7.1586285592394105,
+            "n_intervals": 228,
+            "n_valid_intervals": 37,
+            "degenerate": false
+          }
+        },
+        "power_max": {
+          "n_obs": 3692,
+          "coverage_pct": 96.19593538301199,
+          "pi_median": 0.7912675945059477,
+          "perfect_clean": {
+            "soiling_ratio": 0.9697689691105069,
+            "ci95": [
+              0.9677998255318212,
+              0.9717573669752637
+            ],
+            "loss_pct": 3.0231030889493082,
+            "n_intervals": 210,
+            "n_valid_intervals": 41,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.9212861109544157,
+            "ci95": [
+              0.8942827763256068,
+              0.9398575321330304
+            ],
+            "loss_pct": 7.8713889045584295,
+            "n_intervals": 210,
+            "n_valid_intervals": 41,
+            "degenerate": false
+          }
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 10826,
+        "lat": 32.249551,
+        "lon": -110.8878,
+        "elev_m": 753.5637817,
+        "capacity_kw": 10.2,
+        "tilt": 17.0,
+        "azimuth": 180.0,
+        "tz": "America/Phoenix",
+        "climate": "Bsh",
+        "years": 7.9041,
+        "channels": 2.0,
+        "location": "ZIP: 85712",
+        "gamma_pdc": -0.0043,
+        "gamma_tier": "cec_manufacturer",
+        "gamma_matched": "SOLARWORLD"
+      },
+      "irradiance_at": "system",
+      "gamma_used": -0.0043,
+      "n_published_rows": 2873,
+      "median_dt_days": 1.0,
+      "fits": {
+        "energy": {
+          "n_obs": 2873,
+          "coverage_pct": 99.54954954954955,
+          "pi_median": 0.8493651204240512,
+          "perfect_clean": {
+            "soiling_ratio": 0.9842913193413623,
+            "ci95": [
+              0.9819035566524408,
+              0.9865876378430618
+            ],
+            "loss_pct": 1.570868065863773,
+            "n_intervals": 177,
+            "n_valid_intervals": 23,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.9128878232566715,
+            "ci95": [
+              0.8695955119179608,
+              0.9437385618898183
+            ],
+            "loss_pct": 8.71121767433285,
+            "n_intervals": 177,
+            "n_valid_intervals": 23,
+            "degenerate": false
+          }
+        },
+        "power_max": {
+          "n_obs": 2873,
+          "coverage_pct": 99.54954954954955,
+          "pi_median": 0.932095512306545,
+          "perfect_clean": {
+            "soiling_ratio": 0.9595787753825564,
+            "ci95": [
+              0.957516664728305,
+              0.9616966311147583
+            ],
+            "loss_pct": 4.042122461744357,
+            "n_intervals": 126,
+            "n_valid_intervals": 27,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.9151707008456632,
+            "ci95": [
+              0.8974226175158244,
+              0.9304977856986965
+            ],
+            "loss_pct": 8.48292991543368,
+            "n_intervals": 126,
+            "n_valid_intervals": 27,
+            "degenerate": false
+          }
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 11539,
+        "lat": 34.478797,
+        "lon": -118.65255,
+        "elev_m": 486.8535767,
+        "capacity_kw": 5.61,
+        "tilt": 20.0,
+        "azimuth": 135.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csb",
+        "years": 6.6904,
+        "channels": 2.0,
+        "location": "ZIP: 91384",
+        "gamma_pdc": -0.0031,
+        "gamma_tier": "cec_manufacturer",
+        "gamma_matched": "PANASONIC"
+      },
+      "irradiance_at": "system",
+      "gamma_used": -0.0031,
+      "n_published_rows": 2441,
+      "median_dt_days": 1.0,
+      "fits": {
+        "energy": {
+          "n_obs": 2441,
+          "coverage_pct": 99.91813344248874,
+          "pi_median": 1.0053954507687657,
+          "perfect_clean": {
+            "soiling_ratio": 0.9589181312531019,
+            "ci95": [
+              0.9547561251312816,
+              0.9628063627306777
+            ],
+            "loss_pct": 4.108186874689812,
+            "n_intervals": 156,
+            "n_valid_intervals": 24,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.8971280259377632,
+            "ci95": [
+              0.8374218229253505,
+              0.931522021957299
+            ],
+            "loss_pct": 10.28719740622368,
+            "n_intervals": 156,
+            "n_valid_intervals": 24,
+            "degenerate": false
+          }
+        },
+        "power_max": {
+          "n_obs": 2441,
+          "coverage_pct": 99.91813344248874,
+          "pi_median": 0.8835494375308868,
+          "perfect_clean": {
+            "soiling_ratio": 0.9559879528070854,
+            "ci95": [
+              0.9534498734446287,
+              0.9586330381049532
+            ],
+            "loss_pct": 4.401204719291463,
+            "n_intervals": 115,
+            "n_valid_intervals": 24,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.9019959532645597,
+            "ci95": [
+              0.8822304912283636,
+              0.9207357430251658
+            ],
+            "loss_pct": 9.800404673544028,
+            "n_intervals": 115,
+            "n_valid_intervals": 24,
+            "degenerate": false
+          }
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 10817,
+        "lat": 33.581533,
+        "lon": -117.72474,
+        "elev_m": 127.6264801,
+        "capacity_kw": 6.08,
+        "tilt": 20.0,
+        "azimuth": 270.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csa",
+        "years": 7.1287,
+        "channels": 2.0,
+        "location": "ZIP: 92656",
+        "gamma_pdc": -0.0039000000000000003,
+        "gamma_tier": "cec_manufacturer",
+        "gamma_matched": "LG"
+      },
+      "irradiance_at": "system",
+      "gamma_used": -0.0039000000000000003,
+      "n_published_rows": 2595,
+      "median_dt_days": 1.0,
+      "fits": {
+        "energy": {
+          "n_obs": 2595,
+          "coverage_pct": 99.6926623127161,
+          "pi_median": 0.8919669379688316,
+          "perfect_clean": {
+            "soiling_ratio": 0.9812316257623213,
+            "ci95": [
+              0.9781595829456352,
+              0.984154107817074
+            ],
+            "loss_pct": 1.8768374237678742,
+            "n_intervals": 149,
+            "n_valid_intervals": 25,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.921496317922869,
+            "ci95": [
+              0.8756234697538606,
+              0.9519031959233158
+            ],
+            "loss_pct": 7.850368207713099,
+            "n_intervals": 149,
+            "n_valid_intervals": 25,
+            "degenerate": false
+          }
+        },
+        "power_max": {
+          "n_obs": 2595,
+          "coverage_pct": 99.6926623127161,
+          "pi_median": 0.8018415518394324,
+          "perfect_clean": {
+            "soiling_ratio": 0.909404219514778,
+            "ci95": [
+              0.9060361197555079,
+              0.9127415963713317
+            ],
+            "loss_pct": 9.059578048522198,
+            "n_intervals": 93,
+            "n_valid_intervals": 9,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.8047546530785257,
+            "ci95": [
+              0.7485241813157746,
+              0.8573220101044341
+            ],
+            "loss_pct": 19.524534692147434,
+            "n_intervals": 93,
+            "n_valid_intervals": 9,
+            "degenerate": false
+          }
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 12028,
+        "lat": 33.581533,
+        "lon": -117.72474,
+        "elev_m": 0.0,
+        "capacity_kw": 5.12,
+        "tilt": 20.0,
+        "azimuth": 135.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csa",
+        "years": 7.8986,
+        "channels": 2.0,
+        "location": "ZIP: 92656",
+        "gamma_pdc": -0.0038,
+        "gamma_tier": "cec_module",
+        "gamma_matched": "LG320N1CG4"
+      },
+      "irradiance_at": "system",
+      "gamma_used": -0.0038,
+      "n_published_rows": 2508,
+      "median_dt_days": 1.0,
+      "fits": {
+        "energy": {
+          "n_obs": 2507,
+          "coverage_pct": 86.92787794729543,
+          "pi_median": 0.9290445425839844,
+          "perfect_clean": {
+            "soiling_ratio": 0.9785711115394435,
+            "ci95": [
+              0.9745775256284837,
+              0.9824493690143115
+            ],
+            "loss_pct": 2.142888846055646,
+            "n_intervals": 132,
+            "n_valid_intervals": 24,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.8849155561703579,
+            "ci95": [
+              0.8259813889938312,
+              0.9269467700128718
+            ],
+            "loss_pct": 11.50844438296421,
+            "n_intervals": 132,
+            "n_valid_intervals": 24,
+            "degenerate": false
+          }
+        },
+        "power_max": {
+          "n_obs": 2508,
+          "coverage_pct": 86.9625520110957,
+          "pi_median": 0.8652868950880417,
+          "perfect_clean": {
+            "soiling_ratio": 0.9721908421120371,
+            "ci95": [
+              0.9699595118789724,
+              0.974621913272305
+            ],
+            "loss_pct": 2.78091578879629,
+            "n_intervals": 126,
+            "n_valid_intervals": 19,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.9082147969695227,
+            "ci95": [
+              0.8643460728724766,
+              0.9370150843236226
+            ],
+            "loss_pct": 9.178520303047733,
+            "n_intervals": 126,
+            "n_valid_intervals": 19,
+            "degenerate": false
+          }
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 10415,
+        "lat": 33.601629,
+        "lon": -117.639943,
+        "elev_m": 208.2307587,
+        "capacity_kw": 5.985,
+        "tilt": 22.0,
+        "azimuth": 180.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csa",
+        "years": 6.1616,
+        "channels": 2.0,
+        "location": "ZIP: 92692",
+        "gamma_pdc": -0.0043,
+        "gamma_tier": "cec_manufacturer",
+        "gamma_matched": "SOLARWORLD"
+      },
+      "irradiance_at": "system",
+      "gamma_used": -0.0043,
+      "n_published_rows": 2249,
+      "median_dt_days": 1.0,
+      "fits": {
+        "energy": {
+          "n_obs": 2249,
+          "coverage_pct": 99.95555555555555,
+          "pi_median": 0.8592911137030178,
+          "perfect_clean": {
+            "soiling_ratio": 0.9910426115295686,
+            "ci95": [
+              0.9888647140922274,
+              0.9934505877354353
+            ],
+            "loss_pct": 0.8957388470431371,
+            "n_intervals": 155,
+            "n_valid_intervals": 14,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.9253758271299661,
+            "ci95": [
+              0.874423312483312,
+              0.9594746395807472
+            ],
+            "loss_pct": 7.462417287003387,
+            "n_intervals": 155,
+            "n_valid_intervals": 14,
+            "degenerate": false
+          }
+        },
+        "power_max": {
+          "n_obs": 2249,
+          "coverage_pct": 99.95555555555555,
+          "pi_median": 0.8552234541630613,
+          "perfect_clean": {
+            "soiling_ratio": 0.9733157678960002,
+            "ci95": [
+              0.9703799979946988,
+              0.9762606632370516
+            ],
+            "loss_pct": 2.668423210399984,
+            "n_intervals": 106,
+            "n_valid_intervals": 25,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.9287514339319256,
+            "ci95": [
+              0.9032635108444051,
+              0.9474623621562723
+            ],
+            "loss_pct": 7.124856606807439,
+            "n_intervals": 106,
+            "n_valid_intervals": 25,
+            "degenerate": false
+          }
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 10349,
+        "lat": 33.628273,
+        "lon": -117.631338,
+        "elev_m": 277.8401794,
+        "capacity_kw": 10.464,
+        "tilt": 18.5,
+        "azimuth": 180.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csa",
+        "years": 9.9945,
+        "channels": 2.0,
+        "location": "ZIP: 92692",
+        "gamma_pdc": -0.00386,
+        "gamma_tier": "cec_module",
+        "gamma_matched": "E20327"
+      },
+      "irradiance_at": "system",
+      "gamma_used": -0.00386,
+      "n_published_rows": 2864,
+      "median_dt_days": 1.0,
+      "fits": {
+        "energy": {
+          "n_obs": 2863,
+          "coverage_pct": 78.45985201425047,
+          "pi_median": 0.8723998687546675,
+          "perfect_clean": {
+            "soiling_ratio": 0.9800549171792492,
+            "ci95": [
+              0.977085116518175,
+              0.9827988887411184
+            ],
+            "loss_pct": 1.9945082820750804,
+            "n_intervals": 190,
+            "n_valid_intervals": 28,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.9038445777920809,
+            "ci95": [
+              0.8551490725705977,
+              0.942211477923754
+            ],
+            "loss_pct": 9.615542220791905,
+            "n_intervals": 190,
+            "n_valid_intervals": 28,
+            "degenerate": false
+          }
+        },
+        "power_max": {
+          "n_obs": 2864,
+          "coverage_pct": 78.48725678268019,
+          "pi_median": 0.8511611903536881,
+          "perfect_clean": {
+            "soiling_ratio": 0.9537706792572507,
+            "ci95": [
+              0.9513506309887318,
+              0.9562580933886747
+            ],
+            "loss_pct": 4.6229320742749325,
+            "n_intervals": 130,
+            "n_valid_intervals": 24,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.909431647438332,
+            "ci95": [
+              0.8924393303829168,
+              0.9240835486457338
+            ],
+            "loss_pct": 9.056835256166796,
+            "n_intervals": 130,
+            "n_valid_intervals": 24,
+            "degenerate": false
+          }
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 10411,
+        "lat": 33.562698,
+        "lon": -117.69941,
+        "elev_m": 110.2840042,
+        "capacity_kw": 7.8,
+        "tilt": 19.0,
+        "azimuth": 225.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csa",
+        "years": 9.1232,
+        "channels": 2.0,
+        "location": "ZIP: 92677",
+        "gamma_pdc": -0.004079999999999999,
+        "gamma_tier": "cec_module",
+        "gamma_matched": "LG300"
+      },
+      "irradiance_at": "system",
+      "gamma_used": -0.004079999999999999,
+      "n_published_rows": 3315,
+      "median_dt_days": 1.0,
+      "fits": {
+        "energy": {
+          "n_obs": 3315,
+          "coverage_pct": 99.51966376463524,
+          "pi_median": 0.8237803391280081,
+          "perfect_clean": {
+            "soiling_ratio": 0.9647906453594062,
+            "ci95": [
+              0.9621268772926049,
+              0.967620118606447
+            ],
+            "loss_pct": 3.5209354640593826,
+            "n_intervals": 162,
+            "n_valid_intervals": 32,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.9087826896546345,
+            "ci95": [
+              0.8667183961033601,
+              0.933265901435003
+            ],
+            "loss_pct": 9.121731034536552,
+            "n_intervals": 162,
+            "n_valid_intervals": 32,
+            "degenerate": false
+          }
+        },
+        "power_max": {
+          "n_obs": 3315,
+          "coverage_pct": 99.51966376463524,
+          "pi_median": 0.7794703702567203,
+          "perfect_clean": {
+            "soiling_ratio": 0.9091806844026247,
+            "ci95": [
+              0.9064362313432967,
+              0.9119787280888191
+            ],
+            "loss_pct": 9.081931559737534,
+            "n_intervals": 149,
+            "n_valid_intervals": 24,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.8404607267175538,
+            "ci95": [
+              0.8103675985005906,
+              0.865063194910419
+            ],
+            "loss_pct": 15.953927328244621,
+            "n_intervals": 149,
+            "n_valid_intervals": 24,
+            "degenerate": false
+          }
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 11687,
+        "lat": 33.615462,
+        "lon": -117.64093,
+        "elev_m": 0.0,
+        "capacity_kw": 5.61,
+        "tilt": 1.0,
+        "azimuth": 225.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csa",
+        "years": 6.2657,
+        "channels": 2.0,
+        "location": "ZIP: 92692",
+        "gamma_pdc": -0.0031,
+        "gamma_tier": "cec_manufacturer",
+        "gamma_matched": "PANASONIC"
+      },
+      "irradiance_at": "system",
+      "gamma_used": -0.0031,
+      "n_published_rows": 2131,
+      "median_dt_days": 1.0,
+      "fits": {
+        "energy": {
+          "n_obs": 2131,
+          "coverage_pct": 93.1381118881119,
+          "pi_median": 0.7905694654379203,
+          "perfect_clean": {
+            "soiling_ratio": 0.976460436168997,
+            "ci95": [
+              0.9715892024660799,
+              0.9807342112868365
+            ],
+            "loss_pct": 2.3539563831002974,
+            "n_intervals": 128,
+            "n_valid_intervals": 27,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.8931979717007438,
+            "ci95": [
+              0.8392595349408142,
+              0.9340055101492654
+            ],
+            "loss_pct": 10.680202829925623,
+            "n_intervals": 128,
+            "n_valid_intervals": 27,
+            "degenerate": false
+          }
+        },
+        "power_max": {
+          "n_obs": 2131,
+          "coverage_pct": 93.1381118881119,
+          "pi_median": 0.6959626456975125,
+          "perfect_clean": {
+            "soiling_ratio": 0.9655094190681974,
+            "ci95": [
+              0.961738656734918,
+              0.96946493054455
+            ],
+            "loss_pct": 3.4490580931802572,
+            "n_intervals": 104,
+            "n_valid_intervals": 16,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.9049845256386968,
+            "ci95": [
+              0.835080557846672,
+              0.9396369573200625
+            ],
+            "loss_pct": 9.50154743613032,
+            "n_intervals": 104,
+            "n_valid_intervals": 16,
+            "degenerate": false
+          }
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 10365,
+        "lat": 33.615462,
+        "lon": -117.64093,
+        "elev_m": 213.5056458,
+        "capacity_kw": 8.71,
+        "tilt": 30.0,
+        "azimuth": 90.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csa",
+        "years": 9.9315,
+        "channels": 2.0,
+        "location": "ZIP: 92692",
+        "gamma_pdc": -0.0045000000000000005,
+        "gamma_tier": "cec_technology",
+        "gamma_matched": "Mono-c-Si"
+      },
+      "irradiance_at": "system",
+      "gamma_used": -0.0045000000000000005,
+      "n_published_rows": 3610,
+      "median_dt_days": 1.0,
+      "fits": {
+        "energy": {
+          "n_obs": 3610,
+          "coverage_pct": 99.55874241588528,
+          "pi_median": 0.957279611072986,
+          "perfect_clean": {
+            "soiling_ratio": 0.9821209765087013,
+            "ci95": [
+              0.9790678794242491,
+              0.9854546226714574
+            ],
+            "loss_pct": 1.7879023491298662,
+            "n_intervals": 202,
+            "n_valid_intervals": 23,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.9037418851959551,
+            "ci95": [
+              0.8572244707300547,
+              0.9397198957706397
+            ],
+            "loss_pct": 9.62581148040449,
+            "n_intervals": 202,
+            "n_valid_intervals": 23,
+            "degenerate": false
+          }
+        },
+        "power_max": {
+          "n_obs": 3610,
+          "coverage_pct": 99.55874241588528,
+          "pi_median": 0.8284775832705564,
+          "perfect_clean": {
+            "soiling_ratio": 0.9720965517345748,
+            "ci95": [
+              0.9695741972122064,
+              0.9744430053908776
+            ],
+            "loss_pct": 2.7903448265425235,
+            "n_intervals": 163,
+            "n_valid_intervals": 24,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.9086048922808656,
+            "ci95": [
+              0.8823922007184639,
+              0.9289367121263162
+            ],
+            "loss_pct": 9.13951077191344,
+            "n_intervals": 163,
+            "n_valid_intervals": 24,
+            "degenerate": false
+          }
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 10068,
+        "lat": 37.296355,
+        "lon": -121.917905,
+        "elev_m": 48.4643364,
+        "capacity_kw": 3.675,
+        "tilt": 16.0,
+        "azimuth": 180.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csb",
+        "years": 12.0739,
+        "channels": 2.0,
+        "location": "ZIP: 95125",
+        "gamma_pdc": -0.0032400000000000003,
+        "gamma_tier": "cec_module",
+        "gamma_matched": "SUNPOWERSPR245NEWHTD"
+      },
+      "irradiance_at": "system",
+      "gamma_used": -0.0032400000000000003,
+      "n_published_rows": 3987,
+      "median_dt_days": 1.0,
+      "fits": {
+        "energy": {
+          "n_obs": 3985,
+          "coverage_pct": 90.4038112522686,
+          "pi_median": 0.7324599380276321,
+          "perfect_clean": {
+            "soiling_ratio": 0.9764328715193002,
+            "ci95": [
+              0.9732123804332755,
+              0.9796921143526074
+            ],
+            "loss_pct": 2.356712848069975,
+            "n_intervals": 217,
+            "n_valid_intervals": 33,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.9117036712239053,
+            "ci95": [
+              0.8806855648449103,
+              0.9351999576806944
+            ],
+            "loss_pct": 8.829632877609473,
+            "n_intervals": 217,
+            "n_valid_intervals": 33,
+            "degenerate": false
+          }
+        },
+        "power_max": {
+          "n_obs": 3987,
+          "coverage_pct": 90.4491833030853,
+          "pi_median": 0.5974020378193935,
+          "perfect_clean": {
+            "soiling_ratio": 0.9612282623185622,
+            "ci95": [
+              0.9584712570257266,
+              0.9637578768594806
+            ],
+            "loss_pct": 3.8771737681437823,
+            "n_intervals": 211,
+            "n_valid_intervals": 46,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.9286552017329844,
+            "ci95": [
+              0.9160532285805659,
+              0.9389058045998674
+            ],
+            "loss_pct": 7.134479826701556,
+            "n_intervals": 211,
+            "n_valid_intervals": 46,
+            "degenerate": false
+          }
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 11927,
+        "lat": 34.481172,
+        "lon": -118.42821,
+        "elev_m": 0.0,
+        "capacity_kw": 9.15,
+        "tilt": 1.0,
+        "azimuth": 270.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csb",
+        "years": 5.041,
+        "channels": 2.0,
+        "location": "ZIP: 91350",
+        "gamma_pdc": -0.0045,
+        "gamma_tier": "fleet_default",
+        "gamma_matched": "cec_xsi_median"
+      },
+      "irradiance_at": "system",
+      "gamma_used": -0.0045,
+      "n_published_rows": 1791,
+      "median_dt_days": 1.0,
+      "fits": {
+        "energy": {
+          "n_obs": 1790,
+          "coverage_pct": 97.22976643128735,
+          "pi_median": 0.7563610954477358,
+          "perfect_clean": {
+            "soiling_ratio": 0.9818149720986187,
+            "ci95": [
+              0.9777608663447732,
+              0.9856847320669153
+            ],
+            "loss_pct": 1.8185027901381323,
+            "n_intervals": 107,
+            "n_valid_intervals": 17,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.916604676173762,
+            "ci95": [
+              0.8575164039110583,
+              0.949738182329363
+            ],
+            "loss_pct": 8.339532382623805,
+            "n_intervals": 107,
+            "n_valid_intervals": 17,
+            "degenerate": false
+          }
+        },
+        "power_max": {
+          "n_obs": 1791,
+          "coverage_pct": 97.28408473655622,
+          "pi_median": 0.6376391009573856,
+          "perfect_clean": {
+            "soiling_ratio": 0.9583645034259756,
+            "ci95": [
+              0.9551704422979829,
+              0.9614440315618583
+            ],
+            "loss_pct": 4.163549657402443,
+            "n_intervals": 84,
+            "n_valid_intervals": 10,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.8309203127950802,
+            "ci95": [
+              0.7696848225408748,
+              0.8923228377564417
+            ],
+            "loss_pct": 16.907968720491983,
+            "n_intervals": 84,
+            "n_valid_intervals": 10,
+            "degenerate": false
+          }
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 10158,
+        "lat": 34.481172,
+        "lon": -118.42821,
+        "elev_m": 0.0,
+        "capacity_kw": 5.88,
+        "tilt": 22.5,
+        "azimuth": 225.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csb",
+        "years": 11.5452,
+        "channels": 2.0,
+        "location": "ZIP: 91350",
+        "gamma_pdc": -0.004301,
+        "gamma_tier": "cec_manufacturer",
+        "gamma_matched": "SUNTECH"
+      },
+      "irradiance_at": "system",
+      "gamma_used": -0.004301,
+      "n_published_rows": 3833,
+      "median_dt_days": 1.0,
+      "fits": {
+        "energy": {
+          "n_obs": 3832,
+          "coverage_pct": 90.91340450771055,
+          "pi_median": 0.8025110963222089,
+          "perfect_clean": {
+            "soiling_ratio": 0.9745206296103255,
+            "ci95": [
+              0.9720853698593074,
+              0.9769137767231112
+            ],
+            "loss_pct": 2.5479370389674516,
+            "n_intervals": 228,
+            "n_valid_intervals": 51,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.9300238135833498,
+            "ci95": [
+              0.9005056526042924,
+              0.9494829882715498
+            ],
+            "loss_pct": 6.9976186416650155,
+            "n_intervals": 228,
+            "n_valid_intervals": 51,
+            "degenerate": false
+          }
+        },
+        "power_max": {
+          "n_obs": 3833,
+          "coverage_pct": 90.93712930011863,
+          "pi_median": 0.834958163305552,
+          "perfect_clean": {
+            "soiling_ratio": 0.9492126957961629,
+            "ci95": [
+              0.9468802771035465,
+              0.9513466531796211
+            ],
+            "loss_pct": 5.078730420383715,
+            "n_intervals": 145,
+            "n_valid_intervals": 34,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.9122750518497735,
+            "ci95": [
+              0.8977131265647842,
+              0.923847697598125
+            ],
+            "loss_pct": 8.772494815022647,
+            "n_intervals": 145,
+            "n_valid_intervals": 34,
+            "degenerate": false
+          }
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 10666,
+        "lat": 37.269343,
+        "lon": -121.84939,
+        "elev_m": 48.01668549,
+        "capacity_kw": 6.71,
+        "tilt": 25.0,
+        "azimuth": 270.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csb",
+        "years": 8.6794,
+        "channels": 2.0,
+        "location": "ZIP: 95136",
+        "gamma_pdc": -0.0038,
+        "gamma_tier": "cec_module",
+        "gamma_matched": "LG305N1CG4"
+      },
+      "irradiance_at": "system",
+      "gamma_used": -0.0038,
+      "n_published_rows": 3135,
+      "median_dt_days": 1.0,
+      "fits": {
+        "energy": {
+          "n_obs": 3134,
+          "coverage_pct": 98.89555064689176,
+          "pi_median": 0.767649293503476,
+          "perfect_clean": {
+            "soiling_ratio": 0.9442856928890657,
+            "ci95": [
+              0.9416420562375521,
+              0.9470312423212243
+            ],
+            "loss_pct": 5.571430711093428,
+            "n_intervals": 183,
+            "n_valid_intervals": 24,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.8908385430844761,
+            "ci95": [
+              0.86422772046769,
+              0.9116695034150016
+            ],
+            "loss_pct": 10.916145691552392,
+            "n_intervals": 183,
+            "n_valid_intervals": 24,
+            "degenerate": false
+          }
+        },
+        "power_max": {
+          "n_obs": 3135,
+          "coverage_pct": 98.92710634269486,
+          "pi_median": 0.6976333380157772,
+          "perfect_clean": {
+            "soiling_ratio": 0.8922970516496063,
+            "ci95": [
+              0.8881295114651054,
+              0.8967328078307565
+            ],
+            "loss_pct": 10.770294835039373,
+            "n_intervals": 147,
+            "n_valid_intervals": 15,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.7944854848327687,
+            "ci95": [
+              0.7134449744336909,
+              0.8341962474404865
+            ],
+            "loss_pct": 20.55145151672313,
+            "n_intervals": 147,
+            "n_valid_intervals": 15,
+            "degenerate": false
+          }
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 11881,
+        "lat": 37.257643,
+        "lon": -121.89072,
+        "elev_m": 0.0,
+        "capacity_kw": 5.5,
+        "tilt": 1.0,
+        "azimuth": 225.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csb",
+        "years": 9.052,
+        "channels": 2.0,
+        "location": "ZIP: 95118",
+        "gamma_pdc": -0.0043,
+        "gamma_tier": "cec_module",
+        "gamma_matched": "LG275S1CB3"
+      },
+      "irradiance_at": "system",
+      "gamma_used": -0.0043,
+      "n_published_rows": 3050,
+      "median_dt_days": 1.0,
+      "fits": {
+        "energy": {
+          "n_obs": 3049,
+          "coverage_pct": 92.25416036308623,
+          "pi_median": 0.8753488335627598,
+          "perfect_clean": {
+            "soiling_ratio": 0.9700543714615899,
+            "ci95": [
+              0.9666480964296909,
+              0.97304855733792
+            ],
+            "loss_pct": 2.9945628538410096,
+            "n_intervals": 223,
+            "n_valid_intervals": 33,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.9068323434701542,
+            "ci95": [
+              0.8700869949691926,
+              0.9332735571757054
+            ],
+            "loss_pct": 9.316765652984582,
+            "n_intervals": 223,
+            "n_valid_intervals": 33,
+            "degenerate": false
+          }
+        },
+        "power_max": {
+          "n_obs": 3050,
+          "coverage_pct": 92.28441754916793,
+          "pi_median": 0.758097987729783,
+          "perfect_clean": {
+            "soiling_ratio": 0.9407505232685233,
+            "ci95": [
+              0.9375014219522806,
+              0.943893243343926
+            ],
+            "loss_pct": 5.924947673147674,
+            "n_intervals": 187,
+            "n_valid_intervals": 23,
+            "degenerate": false
+          },
+          "half_norm_clean": {
+            "soiling_ratio": 0.8635952318623528,
+            "ci95": [
+              0.8062071515269772,
+              0.9014409255183156
+            ],
+            "loss_pct": 13.640476813764725,
+            "n_intervals": 187,
+            "n_valid_intervals": 23,
+            "degenerate": false
+          }
+        }
+      }
+    }
+  ],
+  "failures": []
+}

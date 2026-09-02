@@ -1,0 +1,50 @@
+[
+  {
+    "site": "Santa Cruz CA (AOI)",
+    "mm_yr": 863,
+    "light_yr": 51.1,
+    "heavy_yr": 25.5,
+    "ratio": 2.0,
+    "dry_yr": 289
+  },
+  {
+    "site": "Berkeley CA (microbial study)",
+    "mm_yr": 582,
+    "light_yr": 57.9,
+    "heavy_yr": 18.9,
+    "ratio": 3.06,
+    "dry_yr": 288
+  },
+  {
+    "site": "Xi'an CN (bands, ~3 deg tilt)",
+    "mm_yr": 682,
+    "light_yr": 100.3,
+    "heavy_yr": 20.9,
+    "ratio": 4.8,
+    "dry_yr": 244
+  },
+  {
+    "site": "Kaifeng CN (bands, ~4 deg tilt)",
+    "mm_yr": 668,
+    "light_yr": 87.5,
+    "heavy_yr": 19.4,
+    "ratio": 4.51,
+    "dry_yr": 258
+  },
+  {
+    "site": "Guangzhou CN (bands, 1800 mm/yr)",
+    "mm_yr": 2255,
+    "light_yr": 162.4,
+    "heavy_yr": 72.6,
+    "ratio": 2.24,
+    "dry_yr": 130
+  },
+  {
+    "site": "Arbuckle CA (PVDAQ 2107)",
+    "mm_yr": 480,
+    "light_yr": 57.0,
+    "heavy_yr": 15.3,
+    "ratio": 3.73,
+    "dry_yr": 293
+  }
+]

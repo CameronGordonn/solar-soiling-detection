@@ -1,0 +1,51 @@
+name: CI
+
+# Runs the fast test subset on every PR and on pushes to main.
+# "Fast" = unit tests only; smoke/integration/contract are skipped because they
+# need trained weights or data that aren't in the repo (see DATA.md).
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-fast:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      # CPU-ONLY TORCH, added 2026-08-30 to fix a hard CI failure.
+      #
+      # `torch` is a base dependency, and its default PyPI wheel for Linux is the
+      # CUDA build: it drags in ~2 GB of nvidia-* wheels (cuBLAS 423 MB, NCCL 342 MB,
+      # cuFFT 214 MB, cuSOLVER 201 MB, Triton 198 MB, cuSPARSE 146 MB, nvrtc 90 MB
+      # and more), and unpacked they are several times that again. On 2026-08-30 the
+      # runner started failing with `OSError: [Errno 28] No space left on device`
+      # during install, on main as well as on PRs, with the last green run on 08-27.
+      # Nothing changed in pyproject.toml between those dates — the CUDA wheels grew.
+      #
+      # Resolving torch from the CPU index first means the CUDA stack is never
+      # downloaded. The `pip install -e` below then sees torch>=2.0 already satisfied
+      # and leaves it alone. Nothing in the fast subset touches a GPU: it is unit
+      # tests only, and the runner has no CUDA device to use in any case.
+      - name: Install CPU-only torch
+        run: |
+          python -m pip install --upgrade pip
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+
+      - name: Install package + dev/api extras
+        run: pip install -e ".[dev,api]"
+
+      - name: Run fast tests
+        run: pytest tests/ -m "not smoke and not integration and not contract" -q

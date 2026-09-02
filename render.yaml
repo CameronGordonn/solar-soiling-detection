@@ -1,0 +1,52 @@
+# Render.com deployment config for the SolarSoiled FastAPI backend.
+#
+# One-click deploy:
+#   1. Push this file to your repo
+#   2. Go to https://dashboard.render.com → New → Blueprint
+#   3. Connect your GitHub repo
+#   4. Set the env vars marked as sync=false (SOLARSOILED_API_KEY, NASA_EARTHDATA_TOKEN)
+#
+# The free tier spins down after 15 min of inactivity (cold start ~30s).
+# Upgrade to Starter ($7/mo) to keep it warm for partner demos.
+
+services:
+  - type: web
+    name: solarsoiled-api
+    # runtime: python — Render builds this natively from pyproject.toml and does
+    # NOT use the repo's Dockerfile. `dockerCommand` below is therefore INERT:
+    # Render only honors it under `runtime: docker`. It is kept because the start
+    # command it names is still the correct one, but if you change the Dockerfile
+    # expecting the deployed API to change, it will not. Flip to `runtime: docker`
+    # to make this file and the Dockerfile the same artifact — note the image now
+    # defaults to EXTRAS=api,detect, which is 6.4 GB of rfdetr/sam2 the API never
+    # calls (10.1 GB vs 3.68 GB, re-measured 2026-09-02), so build it with
+    # --build-arg EXTRAS=api for Render.
+    runtime: python
+    region: oregon
+    plan: free
+
+    dockerCommand: uvicorn solarsoiled.api:app --host 0.0.0.0 --port $PORT
+
+    healthCheckPath: /health/live
+
+    envVars:
+      - key: SOLARSOILED_API_KEY
+        sync: false          # set in Render dashboard — never commit the real value
+
+      - key: NASA_EARTHDATA_TOKEN
+        sync: false          # optional: enables MERRA-2 AQ backfill
+
+      - key: PYTHONUNBUFFERED
+        value: "1"
+
+      - key: PORT
+        value: "8000"
+
+    # Persist model weights and pipeline outputs across deploys.
+    # Upload weights once via Render Shell, or mount a Render Disk (paid).
+    # For free-tier demo: bake the Santa Cruz risk.geojson into the repo
+    # (see scripts/20_select_outreach_targets.py --dry-run output).
+    disk:
+      name: solarsoiled-data
+      mountPath: /opt/render/project/src/outputs
+      sizeGB: 1              # free tier allows 1 GB

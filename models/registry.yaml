@@ -1,0 +1,234 @@
+# SolarSoiled model registry.
+#
+# Single source of truth mapping semantic model names to weight files plus the
+# metadata that flows into every `manifest.json`. The CLI's `--weights` flag
+# accepts a registered name, an alias, or a filesystem path (passthrough mode).
+#
+# Add a new entry whenever a training cut produces weights worth shipping.
+# Keep `aliases.production` pointed at the safe checkpoint and bump
+# `aliases.latest` to whatever's freshest (may be the same as production).
+
+schema_version: 1
+
+models:
+  stage1-v0.5-baseline:
+    path: models/sahi_baseline_train7.pt
+    stage: stage1
+    map50_test: 0.563
+    map50_calibrated_val: 0.687
+    sahi_f1_val: 0.345
+    sahi_conf_val: 0.15
+    beta: true
+    notes: NAIP-only baseline, SAHI warm start. Superseded by r2-cameron-20260509.
+    known_limitations:
+      - Below 70% mAP50 GA target
+      - Trained on Santa Cruz NAIP only; cross-region generalization unverified
+
+  r0-cameron-20260510:
+    path: models/r0_cameron_20260510.pt
+    stage: stage1
+    map50_test: 0.346
+    map50_test_precision: 0.426
+    map50_test_recall: 0.465
+    beta: true
+    notes: R0 retrain from SAHI warm-start on relabeled NAIP, trained 2026-05-10 on Colab. Regression vs sahi baseline — do not use as production.
+    known_limitations:
+      - Regression from sahi_baseline_train7 (0.346 vs 0.563 NAIP test mAP50)
+      - Trained on Santa Cruz NAIP only; cross-region generalization unverified
+
+  r2-cameron-20260509:
+    path: models/r2_cameron_20260509.pt
+    stage: stage1
+    map50_test: 0.263
+    sahi_f1_val: 0.396
+    sahi_conf_val: 0.40
+    beta: true
+    notes: R2 joint NAIP+Duke (naip_repeat=200), trained 2026-05-09 on Colab. Best available SAHI F1 on current val labels (0.396 vs baseline 0.345). map50 is low because model relies on SAHI slicing.
+    known_limitations:
+      - Below 70% mAP50 GA target
+      - map50 (non-SAHI) is 0.263 — model depends on SAHI inference path
+      - Trained on Santa Cruz NAIP only; cross-region generalization unverified
+
+  rfdetr-w2-20260807:
+    path: models/rfdetr_w2_20260807.pth
+    stage: stage1
+    detector: rf-detr
+    resolution: 728
+    license: Apache-2.0
+    permissive_stack: true
+    mask_stage: sam2-hiera-large
+    # Tile-level box F1 @ IoU 0.50 through the production chip-grid path.
+    # NOT comparable to any sahi_f1_* or map50_* field on the entries below --
+    # different labels, imagery, and metric. See .claude/rules/stage1-detect.md.
+    gate_metric: tile_f1_iou50_chipgrid
+    tile_f1_test: 0.826
+    tile_f1_test_ci95: [0.798, 0.853]
+    tile_precision_test: 0.850
+    tile_recall_test: 0.803
+    tile_n_gt_test: 585
+    conf: 0.50            # tuned on val, frozen; test never influenced it
+    iou_nms: 0.55
+    gsd_ground_m: 0.2044
+    gate_passed: true     # F1 >= 0.75, CI-lower >= 0.70, recall >= 0.70
+    beta: false           # production alias flipped here 2026-08-23; GA for the SCC
+                          # 21cm path only -- see the constraint note under `aliases`
+    notes: >
+      RF-DETR @728 trained on the full 21cm Santa Cruz relabel (170 train tiles / 680 chips),
+      2026-08-07 on Colab. First permissively-licensed Stage 1 model to clear a GA gate.
+      Paired bootstrap vs the W1 checkpoint on the same 49 test tiles: F1 +0.0246
+      [+0.0051, +0.0441], recall +0.0479 [+0.0202, +0.0753] -- a real gain, not noise.
+      Drive names this file rfdetr_w1_20260807.pth; the notebook hardcodes a "w1" prefix.
+      It is the W2 run and is renamed here so the W1 anchor stays distinct.
+    known_limitations:
+      - Santa Cruz County 2025 21cm imagery only; unvalidated at 60cm NAIP, so this model does
+        not replace R2 outside the SCC AOI (see scripts/data/build_gsd_ablation.py)
+      - Areas require the SAM2 mask stage. Without it the polygon is the detector box, measured
+        at 0.509 median IoU / 78.5% area error, which is not fit for the m2 -> kW -> $ chain
+      - SAM2 set_image costs ~30.6 s/chip on CPU (~8.5 h per full AOI); not viable behind a
+        request without a GPU or an offline batch step
+      - val and test disagree on the operating point more than W1 did (test's own best-F1 is
+        0.843 vs 0.826 at the val-frozen conf)
+
+  yolo11s-base:
+    path: models/yolo11s-seg.pt
+    stage: stage1-pretrained
+    beta: true
+    notes: Ultralytics base weights. Not for production; warm-start only.
+    known_limitations:
+      - Generic COCO-pretrained; no solar-array fine-tuning
+
+  yolo11m-base:
+    path: models/yolo11m-seg.pt
+    stage: stage1-pretrained
+    beta: true
+    notes: Ultralytics base weights. Not for production; warm-start only.
+    known_limitations:
+      - Generic COCO-pretrained; no solar-array fine-tuning
+
+  yolov8s-solar-v1:
+    path: models/yolov8s_solar_array_v1.pt
+    stage: stage1-legacy
+    beta: true
+    notes: Pre-Phase-4 v8s checkpoint. Kept for regression comparison only.
+    known_limitations:
+      - YOLOv8 architecture; superseded by stage1-v0.5-baseline
+
+aliases:
+  # FLIPPED 2026-08-23 (Cameron's call) from r2-cameron-20260509 to the permissive
+  # RF-DETR checkpoint. Two reasons, in order of weight:
+  #
+  #  1. RF-DETR ALREADY PRODUCED THE SHIPPING DATA. The live dashboard's 1,865 sites
+  #     come from outputs/aoi/santa-cruz-w2-21cm, whose detect/manifest.json records
+  #     model_version rfdetr-w2-20260807 across all 249 tiles. The old alias did not
+  #     describe what shipped; this one does.
+  #  2. R2 is AGPL-3.0 and api.py serves `production` by default, so every default
+  #     resolution handed out the one checkpoint the permissive migration exists to
+  #     avoid distributing. See docs/COMMERCIALIZATION.md.
+  #
+  # ⚠️ LIVE OPERATING CONSTRAINT -- this did not go away with the flip, but it is
+  # GEOGRAPHIC, not plumbing. W2 was trained and gated on Santa Cruz County 2025
+  # 21cm imagery ONLY (gsd_ground_m 0.2044), and its own known_limitations say it
+  # does not replace R2 outside the SCC AOI.
+  #
+  # The tiling is already handled and needs no flags: since 95d3368 (2026-08-07)
+  # `solarsoiled run` reads the RESOLVED model's gsd_ground_m and tiles from the
+  # 21cm county service below 0.35, NAIP otherwise, and `detect` refuses a GSD
+  # mismatch rather than quietly regressing. Verified end to end on 2026-08-26 --
+  # `run --weights production` on a small SCC bbox tiled scc21, detected 36 arrays
+  # as rfdetr-w2-20260807, scored and recommended. An earlier draft of this note
+  # said `cli.py tile` fetches 60cm so a new AOI needs pre-staged tiles: that was
+  # true of the bare `tile` subcommand's default, never of `run`, and --skip-tile
+  # is not required.
+  #
+  #   - Inside the SCC AOI: just run it. This is the path that produced the
+  #     dashboard and the 0.826 gate number.
+  #   - Outside it: the county service has no coverage, so resolve
+  #     `stage1-60cm-legacy` explicitly and know that it is AGPL and eval-only, or
+  #     re-gate W2 at 60cm first (scripts/data/build_gsd_ablation.py).
+  production: rfdetr-w2-20260807
+  # Freshest cut, per this file's own header rule. Same as production since the flip.
+  latest: rfdetr-w2-20260807
+  # Explicit handle for the 60cm path so it is reachable without resurrecting the
+  # alias. AGPL, eval-only, never ships.
+  stage1-60cm-legacy: r2-cameron-20260509
+  smoketest: r2-cameron-20260509
+
+# ── Stage 2 soiling models ───────────────────────────────────────────────────
+# Same resolution rules as `models`: name, alias, or filesystem path to model.ubj.
+
+soiling_models:
+  run_k_patched_holdout2022:
+    path: runs/soiling/run_k_patched_holdout2022/model.ubj
+    stage: stage2
+    cv_auc: 0.630
+    holdout_auc: 0.655
+    holdout_year: 2022
+    beta: true
+    notes: NREL panel labels, 10 km spatial CV, isotonic calibrated, leakage-free medians. Superseded by run_optionb.
+    known_limitations:
+      - Below 0.70 AUC GA bar
+      - AQ features sparse pre-2022; PM columns dropped at training
+      - N≈640 training rows; limited by NREL station count
+
+  run_optionb:
+    path: runs/soiling/run_optionb/model.ubj
+    stage: stage2
+    cv_auc: 0.728
+    holdout_auc: 0.679
+    holdout_year: 2022
+    beta: true
+    notes: nrel_merged national labels (1000 rows, 15 states); lat/lon + month_of_year features; 10 km spatial CV; isotonic calibrated. Spatial-CV gate cleared (≥0.70). Holdout gate pending MERRA-2 AQ data.
+    known_limitations:
+      - Holdout AUC 0.679 — below 0.70 GA bar (2.1 pts short)
+      - AQ features only populated for 2022 + 2026; MERRA-2 prefetch in progress for 2008-2021
+      - Coordinate memorization risk partially mitigated by 10 km spatial CV
+
+  # ── loss REGRESSION head (not a classifier) ────────────────────────────────
+  # Different artifact shape from the entries above: three quantile heads
+  # (loss_q10/q50/q90.ubj) plus conformal.json, not a single model.ubj. Resolve it
+  # with risk.loss_model.load_bundle(<dir>), NOT risk_model.load_model().
+  run_lossreg:
+    path: runs/soiling/run_lossreg/loss_regressor
+    artifact: quantile_bundle          # loss_q10.ubj / loss_q50.ubj / loss_q90.ubj
+    loader: risk.loss_model.load_bundle
+    stage: stage2
+    target: annual_soiling_loss_pct    # (1 - iwsr) * 100 — a MAGNITUDE, not a probability
+    quantiles: [0.10, 0.50, 0.90]
+    oof_mae_pts: 1.746
+    oof_rmse_pts: 2.497
+    oof_spearman: 0.310
+    oof_spread_ratio: 0.481
+    pi_coverage_raw: 0.558
+    pi_coverage_conformal: 0.802       # CQR-calibrated on out-of-fold predictions
+    conformal_offset_pct: 0.918
+    n_train_rows: 891
+    beta: true
+    notes: >-
+      Replaces economics.RISK_TO_LOSS_PCT = 8.0, which multiplied a calibrated
+      CLASSIFICATION PROBABILITY by 8 to manufacture a loss magnitude. Trained on NREL
+      panel rows with 10 km spatial CV; intervals conformalised (Romano et al. 2019)
+      because the raw quantile heads under-covered badly (0.558 vs nominal 0.80).
+      Full writeup: docs/ECONOMICS_GROUNDING_20260809.md.
+    known_limitations:
+      # The one that decides whether this is usable for lead-gen. Read it before shipping
+      # any ranked, within-AOI output built on this model.
+      - >-
+        DOES NOT DISCRIMINATE WITHIN AN AOI. Predicted loss spans only 0.78 pts p10-p90
+        across the 1,865-site Santa Cruz AOI. NREL labels are station-level, so the model
+        learns between-CLIMATE variation only; AOI feature SDs are 0.3-23% of training
+        SDs. Valid for "what is the soiling level here"; NOT valid for ranking homes
+        against each other in one metro.
+      - Spearman 0.310 on the continuous target — modest rank skill even between sites
+      - >-
+        worldcover_* is supplied at inference as of 2026-08-09 but does not help; the
+        model learned "forested region" from station data, not "tree over this roof"
+      - tilt_deg is absent from AOI feature matrices and median-filled at inference
+
+soiling_aliases:
+  soiling_production: run_optionb
+  soiling_latest: run_optionb
+  soiling_smoketest: run_optionb
+  # Loss magnitude + prediction interval for the $ chain. Deliberately NOT aliased to
+  # soiling_production: that name resolves to a classifier and callers expect
+  # model.ubj + calibrator.joblib.
+  soiling_loss_regressor: run_lossreg

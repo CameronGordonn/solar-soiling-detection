@@ -1,0 +1,38 @@
+# Ablation-only config: the PRE-regularization XGBoost block, i.e. what
+# configs/soiling/model.yaml held before commit ad947bf (2026-07-05) introduced
+# max_depth=4 / reg_lambda=5.0.
+#
+# This exists so the 0.684 -> 0.728 improvement can be decomposed into its
+# feature-set component and its hyperparameter component while everything else
+# (10 km GroupKFold, 5 folds, uniform + summary x0.5 weights, per-fold median
+# imputation) is held identical to production. Do NOT train production runs with
+# this file — it is a measurement control, not a candidate config.
+#
+# Used by:
+#   scripts/predict/ablate_features.py  (hp: "old" variants)
+#   scripts/predict/holdout_ci.py --model-config configs/soiling/model_prepatch_hp.yaml
+target_mode: binary
+
+xgboost:
+  n_estimators: 200
+  max_depth: 5                        # was 4 in production since 2026-07-05
+  learning_rate: 0.05
+  subsample: 0.8
+  colsample_bytree: 0.8
+  # reg_lambda intentionally omitted -> XGBoost default 1.0 (production uses 5.0)
+  random_state: 42
+
+# Identical to production — only the xgboost block differs.
+spatial_cv:
+  n_folds: 5
+  cluster_km: 10.0
+  random_state: 42
+
+sample_weights:
+  mode: uniform
+  clip_percentiles: [5, 95]
+  feedback_weight_multiplier: 3.0
+  summary_weight_factor: 0.5
+
+acceptance:
+  min_mean_auc: 0.70

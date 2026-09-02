@@ -1,0 +1,1607 @@
+{
+  "results": [
+    {
+      "meta": {
+        "system_id": 10109,
+        "lat": 37.057575,
+        "lon": -122.01507,
+        "elev_m": 229.5130768,
+        "capacity_kw": 5.88,
+        "tilt": 34.0,
+        "azimuth": 180.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csb",
+        "years": 8.0739,
+        "channels": 2.0,
+        "location": "ZIP: 95066",
+        "gamma_pdc": -0.0045000000000000005,
+        "gamma_tier": "cec_module",
+        "gamma_matched": "TSM245PA05"
+      },
+      "arms": {
+        "openmeteo__resolved": {
+          "loss_pct": 1.796086275163955,
+          "ci95": [
+            0.978483119778678,
+            0.9852860920299408
+          ],
+          "n_valid_intervals": 16,
+          "degenerate": false,
+          "pi_median": 0.8234394331403292,
+          "gamma": -0.0045000000000000005
+        },
+        "pvgis__resolved": {
+          "loss_pct": 1.8481178925487507,
+          "ci95": [
+            0.9780819099067701,
+            0.9852445463334558
+          ],
+          "n_valid_intervals": 17,
+          "degenerate": false,
+          "pi_median": 0.7705995691273071,
+          "gamma": -0.0045000000000000005
+        },
+        "openmeteo__fleet": {
+          "loss_pct": 1.796086275163955,
+          "ci95": [
+            0.978483119778678,
+            0.9852860920299408
+          ],
+          "n_valid_intervals": 16,
+          "degenerate": false,
+          "pi_median": 0.823439433140329,
+          "gamma": -0.0045
+        },
+        "pvgis__fleet": {
+          "loss_pct": 1.8481178925487507,
+          "ci95": [
+            0.9780819099067701,
+            0.9852445463334558
+          ],
+          "n_valid_intervals": 17,
+          "degenerate": false,
+          "pi_median": 0.7705995691273071,
+          "gamma": -0.0045
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 10112,
+        "lat": 37.198875,
+        "lon": -121.84287,
+        "elev_m": 111.6747589,
+        "capacity_kw": 6.0,
+        "tilt": 26.0,
+        "azimuth": 135.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csb",
+        "years": 8.0493,
+        "channels": 2.0,
+        "location": "ZIP: 95120",
+        "gamma_pdc": -0.0045000000000000005,
+        "gamma_tier": "cec_module",
+        "gamma_matched": "ETP660250WB"
+      },
+      "arms": {
+        "openmeteo__resolved": {
+          "loss_pct": 1.984996069902345,
+          "ci95": [
+            0.976126707779596,
+            0.9841747277414667
+          ],
+          "n_valid_intervals": 28,
+          "degenerate": false,
+          "pi_median": 0.8485810782549711,
+          "gamma": -0.0045000000000000005
+        },
+        "pvgis__resolved": {
+          "loss_pct": 1.819403357071958,
+          "ci95": [
+            0.9785169064969165,
+            0.9849723452252397
+          ],
+          "n_valid_intervals": 27,
+          "degenerate": false,
+          "pi_median": 0.7634563799672747,
+          "gamma": -0.0045000000000000005
+        },
+        "openmeteo__fleet": {
+          "loss_pct": 1.984996069902345,
+          "ci95": [
+            0.976126707779596,
+            0.9841747277414667
+          ],
+          "n_valid_intervals": 28,
+          "degenerate": false,
+          "pi_median": 0.8485810782549711,
+          "gamma": -0.0045
+        },
+        "pvgis__fleet": {
+          "loss_pct": 1.819403357071958,
+          "ci95": [
+            0.9785169064969163,
+            0.9849723452252397
+          ],
+          "n_valid_intervals": 27,
+          "degenerate": false,
+          "pi_median": 0.7634563799672746,
+          "gamma": -0.0045
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 10251,
+        "lat": 34.119245,
+        "lon": -117.8548,
+        "elev_m": 250.0606995,
+        "capacity_kw": 4.32,
+        "tilt": 1.0,
+        "azimuth": 180.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csb",
+        "years": 5.4739,
+        "channels": 2.0,
+        "location": "ZIP: 91740",
+        "gamma_pdc": -0.00458,
+        "gamma_tier": "cec_manufacturer",
+        "gamma_matched": "SHARP"
+      },
+      "arms": {
+        "openmeteo__resolved": {
+          "loss_pct": 2.335999070170469,
+          "ci95": [
+            0.973161660279518,
+            0.9804093117644417
+          ],
+          "n_valid_intervals": 17,
+          "degenerate": false,
+          "pi_median": 0.98611432123409,
+          "gamma": -0.00458
+        },
+        "pvgis__resolved": {
+          "loss_pct": 2.5868180272133667,
+          "ci95": [
+            0.9708205059277497,
+            0.9777045006097357
+          ],
+          "n_valid_intervals": 22,
+          "degenerate": false,
+          "pi_median": 0.9432493228414425,
+          "gamma": -0.00458
+        },
+        "openmeteo__fleet": {
+          "loss_pct": 2.6459290103785893,
+          "ci95": [
+            0.9692786000713254,
+            0.9772625983757673
+          ],
+          "n_valid_intervals": 17,
+          "degenerate": false,
+          "pi_median": 0.9833218078977132,
+          "gamma": -0.0045
+        },
+        "pvgis__fleet": {
+          "loss_pct": 2.686070396627338,
+          "ci95": [
+            0.9700797161181457,
+            0.9764282578472985
+          ],
+          "n_valid_intervals": 23,
+          "degenerate": false,
+          "pi_median": 0.940395406810179,
+          "gamma": -0.0045
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 10477,
+        "lat": 37.444879,
+        "lon": -122.26253,
+        "elev_m": 157.7673645,
+        "capacity_kw": 9.0,
+        "tilt": 18.0,
+        "azimuth": 225.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csb",
+        "years": 9.2958,
+        "channels": 2.0,
+        "location": "ZIP: 94062",
+        "gamma_pdc": -0.0039000000000000003,
+        "gamma_tier": "cec_manufacturer",
+        "gamma_matched": "LG"
+      },
+      "arms": {
+        "openmeteo__resolved": {
+          "loss_pct": 2.0530054413012255,
+          "ci95": [
+            0.9759437370265487,
+            0.9827179856552986
+          ],
+          "n_valid_intervals": 26,
+          "degenerate": false,
+          "pi_median": 0.8028909838398564,
+          "gamma": -0.0039000000000000003
+        },
+        "pvgis__resolved": {
+          "loss_pct": 2.437497817980905,
+          "ci95": [
+            0.9718327453530222,
+            0.9790508200982155
+          ],
+          "n_valid_intervals": 24,
+          "degenerate": false,
+          "pi_median": 0.7974258207946293,
+          "gamma": -0.0039000000000000003
+        },
+        "openmeteo__fleet": {
+          "loss_pct": 1.5575081609714214,
+          "ci95": [
+            0.9812903132421693,
+            0.9874143398600701
+          ],
+          "n_valid_intervals": 23,
+          "degenerate": false,
+          "pi_median": 0.8169838366496607,
+          "gamma": -0.0045
+        },
+        "pvgis__fleet": {
+          "loss_pct": 2.4824359406399266,
+          "ci95": [
+            0.9717180630421576,
+            0.9784808895284871
+          ],
+          "n_valid_intervals": 26,
+          "degenerate": false,
+          "pi_median": 0.8091159101894626,
+          "gamma": -0.0045
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 11758,
+        "lat": 37.551586,
+        "lon": -122.32773,
+        "elev_m": 0.0,
+        "capacity_kw": 6.3,
+        "tilt": 28.0,
+        "azimuth": 225.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csb",
+        "years": 8.6657,
+        "channels": 2.0,
+        "location": "ZIP: 94402",
+        "gamma_pdc": -0.0038,
+        "gamma_tier": "cec_module",
+        "gamma_matched": "LG315N1CG4"
+      },
+      "arms": {
+        "openmeteo__resolved": {
+          "loss_pct": 2.3533612410437277,
+          "ci95": [
+            0.9732431657046119,
+            0.9795409832845269
+          ],
+          "n_valid_intervals": 23,
+          "degenerate": false,
+          "pi_median": 0.7837769520735616,
+          "gamma": -0.0038
+        },
+        "pvgis__resolved": {
+          "loss_pct": 1.7373421022115143,
+          "ci95": [
+            0.9797172050425422,
+            0.9858032986035745
+          ],
+          "n_valid_intervals": 22,
+          "degenerate": false,
+          "pi_median": 0.816078000331915,
+          "gamma": -0.0038
+        },
+        "openmeteo__fleet": {
+          "loss_pct": 2.6636581831700035,
+          "ci95": [
+            0.9697566942830799,
+            0.9766711494266652
+          ],
+          "n_valid_intervals": 28,
+          "degenerate": false,
+          "pi_median": 0.7979739264616235,
+          "gamma": -0.0045
+        },
+        "pvgis__fleet": {
+          "loss_pct": 2.017079674172151,
+          "ci95": [
+            0.9764035486224395,
+            0.9829850467037482
+          ],
+          "n_valid_intervals": 25,
+          "degenerate": false,
+          "pi_median": 0.8335631779366593,
+          "gamma": -0.0045
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 11881,
+        "lat": 37.257643,
+        "lon": -121.89072,
+        "elev_m": 0.0,
+        "capacity_kw": 5.5,
+        "tilt": 1.0,
+        "azimuth": 225.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csb",
+        "years": 9.052,
+        "channels": 2.0,
+        "location": "ZIP: 95118",
+        "gamma_pdc": -0.0043,
+        "gamma_tier": "cec_module",
+        "gamma_matched": "LG275S1CB3"
+      },
+      "arms": {
+        "openmeteo__resolved": {
+          "loss_pct": 2.9945628538410096,
+          "ci95": [
+            0.9666480964296909,
+            0.97304855733792
+          ],
+          "n_valid_intervals": 33,
+          "degenerate": false,
+          "pi_median": 0.8753488335627598,
+          "gamma": -0.0043
+        },
+        "pvgis__resolved": {
+          "loss_pct": 2.7286291058971957,
+          "ci95": [
+            0.968991044067596,
+            0.9767559538686064
+          ],
+          "n_valid_intervals": 34,
+          "degenerate": false,
+          "pi_median": 0.8560588837926519,
+          "gamma": -0.0043
+        },
+        "openmeteo__fleet": {
+          "loss_pct": 4.13075534958055,
+          "ci95": [
+            0.9550948361829522,
+            0.9620928126767055
+          ],
+          "n_valid_intervals": 34,
+          "degenerate": false,
+          "pi_median": 0.8801493337164205,
+          "gamma": -0.0045
+        },
+        "pvgis__fleet": {
+          "loss_pct": 2.9297479425324013,
+          "ci95": [
+            0.9672589297029555,
+            0.9741654125769657
+          ],
+          "n_valid_intervals": 29,
+          "degenerate": false,
+          "pi_median": 0.8615976220366516,
+          "gamma": -0.0045
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 10063,
+        "lat": 37.295092,
+        "lon": -121.89649,
+        "elev_m": 42.72908783,
+        "capacity_kw": 6.902,
+        "tilt": 0.0,
+        "azimuth": 225.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csb",
+        "years": 12.0739,
+        "channels": 2.0,
+        "location": "ZIP: 95125",
+        "gamma_pdc": -0.0043,
+        "gamma_tier": "cec_module",
+        "gamma_matched": "SPR238EWHTD"
+      },
+      "arms": {
+        "openmeteo__resolved": {
+          "loss_pct": 3.8352604248304445,
+          "ci95": [
+            0.9585607501597205,
+            0.964478711028277
+          ],
+          "n_valid_intervals": 42,
+          "degenerate": false,
+          "pi_median": 0.887750375901775,
+          "gamma": -0.0043
+        },
+        "pvgis__resolved": {
+          "loss_pct": 3.662098043701678,
+          "ci95": [
+            0.9599997719410165,
+            0.9668742866938882
+          ],
+          "n_valid_intervals": 30,
+          "degenerate": false,
+          "pi_median": 0.853600922747829,
+          "gamma": -0.0043
+        },
+        "openmeteo__fleet": {
+          "loss_pct": 4.231447521551013,
+          "ci95": [
+            0.9545750393104832,
+            0.9607517426572474
+          ],
+          "n_valid_intervals": 44,
+          "degenerate": false,
+          "pi_median": 0.8926477640546402,
+          "gamma": -0.0045
+        },
+        "pvgis__fleet": {
+          "loss_pct": 3.4458562584674834,
+          "ci95": [
+            0.9625652103743347,
+            0.9684862992690715
+          ],
+          "n_valid_intervals": 30,
+          "degenerate": false,
+          "pi_median": 0.8591277515691222,
+          "gamma": -0.0045
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 11539,
+        "lat": 34.478797,
+        "lon": -118.65255,
+        "elev_m": 486.8535767,
+        "capacity_kw": 5.61,
+        "tilt": 20.0,
+        "azimuth": 135.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csb",
+        "years": 6.6904,
+        "channels": 2.0,
+        "location": "ZIP: 91384",
+        "gamma_pdc": -0.0031,
+        "gamma_tier": "cec_manufacturer",
+        "gamma_matched": "PANASONIC"
+      },
+      "arms": {
+        "openmeteo__resolved": {
+          "loss_pct": 4.108186874689812,
+          "ci95": [
+            0.9547561251312816,
+            0.9628063627306777
+          ],
+          "n_valid_intervals": 24,
+          "degenerate": false,
+          "pi_median": 1.0053954507687657,
+          "gamma": -0.0031
+        },
+        "pvgis__resolved": {
+          "loss_pct": 2.3456588242640186,
+          "ci95": [
+            0.9736288856605826,
+            0.9800698958248941
+          ],
+          "n_valid_intervals": 27,
+          "degenerate": false,
+          "pi_median": 0.9275872395919177,
+          "gamma": -0.0031
+        },
+        "openmeteo__fleet": {
+          "loss_pct": 3.1676233432173073,
+          "ci95": [
+            0.965382457211361,
+            0.9710899462330792
+          ],
+          "n_valid_intervals": 23,
+          "degenerate": false,
+          "pi_median": 1.059885000598519,
+          "gamma": -0.0045
+        },
+        "pvgis__fleet": {
+          "loss_pct": 1.6273372852679602,
+          "ci95": [
+            0.9810458636137039,
+            0.986303265697328
+          ],
+          "n_valid_intervals": 17,
+          "degenerate": false,
+          "pi_median": 0.9766449497753504,
+          "gamma": -0.0045
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 10158,
+        "lat": 34.481172,
+        "lon": -118.42821,
+        "elev_m": 0.0,
+        "capacity_kw": 5.88,
+        "tilt": 22.5,
+        "azimuth": 225.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csb",
+        "years": 11.5452,
+        "channels": 2.0,
+        "location": "ZIP: 91350",
+        "gamma_pdc": -0.004301,
+        "gamma_tier": "cec_manufacturer",
+        "gamma_matched": "SUNTECH"
+      },
+      "arms": {
+        "openmeteo__resolved": {
+          "loss_pct": 2.5479370389674516,
+          "ci95": [
+            0.9720853698593074,
+            0.9769137767231112
+          ],
+          "n_valid_intervals": 51,
+          "degenerate": false,
+          "pi_median": 0.8025110963222089,
+          "gamma": -0.004301
+        },
+        "pvgis__resolved": {
+          "loss_pct": 2.455764102922764,
+          "ci95": [
+            0.9729045946117687,
+            0.9780512654145697
+          ],
+          "n_valid_intervals": 44,
+          "degenerate": false,
+          "pi_median": 0.8336992310108017,
+          "gamma": -0.004301
+        },
+        "openmeteo__fleet": {
+          "loss_pct": 2.49692832602193,
+          "ci95": [
+            0.9725101636397132,
+            0.9773403766442839
+          ],
+          "n_valid_intervals": 54,
+          "degenerate": false,
+          "pi_median": 0.8079879299410424,
+          "gamma": -0.0045
+        },
+        "pvgis__fleet": {
+          "loss_pct": 2.5809385175018296,
+          "ci95": [
+            0.9715847907921422,
+            0.9768425305301043
+          ],
+          "n_valid_intervals": 44,
+          "degenerate": false,
+          "pi_median": 0.8393022645677142,
+          "gamma": -0.0045
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 12023,
+        "lat": 34.122658,
+        "lon": -118.11296,
+        "elev_m": 0.0,
+        "capacity_kw": 3.91,
+        "tilt": 20.0,
+        "azimuth": 180.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csb",
+        "years": 10.5123,
+        "channels": 2.0,
+        "location": "ZIP: 91108",
+        "gamma_pdc": -0.0045000000000000005,
+        "gamma_tier": "cec_module",
+        "gamma_matched": "P660"
+      },
+      "arms": {
+        "openmeteo__resolved": {
+          "loss_pct": 2.584549682603099,
+          "ci95": [
+            0.9708816305469709,
+            0.9775924285767345
+          ],
+          "n_valid_intervals": 37,
+          "degenerate": false,
+          "pi_median": 0.8115928687486649,
+          "gamma": -0.0045000000000000005
+        },
+        "pvgis__resolved": {
+          "loss_pct": 3.073926449780029,
+          "ci95": [
+            0.9664358312141456,
+            0.9720032522646846
+          ],
+          "n_valid_intervals": 35,
+          "degenerate": false,
+          "pi_median": 0.7610604389506876,
+          "gamma": -0.0045000000000000005
+        },
+        "openmeteo__fleet": {
+          "loss_pct": 2.584549682603099,
+          "ci95": [
+            0.9708816305469709,
+            0.9775924285767345
+          ],
+          "n_valid_intervals": 37,
+          "degenerate": false,
+          "pi_median": 0.8115928687486649,
+          "gamma": -0.0045
+        },
+        "pvgis__fleet": {
+          "loss_pct": 3.073926449780029,
+          "ci95": [
+            0.9664358312141456,
+            0.9720032522646845
+          ],
+          "n_valid_intervals": 35,
+          "degenerate": false,
+          "pi_median": 0.7610604389506876,
+          "gamma": -0.0045
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 10068,
+        "lat": 37.296355,
+        "lon": -121.917905,
+        "elev_m": 48.4643364,
+        "capacity_kw": 3.675,
+        "tilt": 16.0,
+        "azimuth": 180.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csb",
+        "years": 12.0739,
+        "channels": 2.0,
+        "location": "ZIP: 95125",
+        "gamma_pdc": -0.0032400000000000003,
+        "gamma_tier": "cec_module",
+        "gamma_matched": "SUNPOWERSPR245NEWHTD"
+      },
+      "arms": {
+        "openmeteo__resolved": {
+          "loss_pct": 2.356712848069975,
+          "ci95": [
+            0.9732123804332755,
+            0.9796921143526074
+          ],
+          "n_valid_intervals": 33,
+          "degenerate": false,
+          "pi_median": 0.7324599380276321,
+          "gamma": -0.0032400000000000003
+        },
+        "pvgis__resolved": {
+          "loss_pct": 2.799909673012202,
+          "ci95": [
+            0.9684578738775177,
+            0.9750221618003742
+          ],
+          "n_valid_intervals": 38,
+          "degenerate": false,
+          "pi_median": 0.700995444306066,
+          "gamma": -0.0032400000000000003
+        },
+        "openmeteo__fleet": {
+          "loss_pct": 2.349947742340297,
+          "ci95": [
+            0.9731354730284396,
+            0.9797916565236081
+          ],
+          "n_valid_intervals": 39,
+          "degenerate": false,
+          "pi_median": 0.7555208646465665,
+          "gamma": -0.0045
+        },
+        "pvgis__fleet": {
+          "loss_pct": 2.5048075959538285,
+          "ci95": [
+            0.9719174918499853,
+            0.9780133651393004
+          ],
+          "n_valid_intervals": 32,
+          "degenerate": false,
+          "pi_median": 0.7259857062802392,
+          "gamma": -0.0045
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 11964,
+        "lat": 37.295092,
+        "lon": -121.89649,
+        "elev_m": 0.0,
+        "capacity_kw": 3.96,
+        "tilt": 23.0,
+        "azimuth": 180.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csb",
+        "years": 6.315,
+        "channels": 2.0,
+        "location": "ZIP: 95125",
+        "gamma_pdc": -0.0032,
+        "gamma_tier": "cec_module",
+        "gamma_matched": "LG360Q1CA5"
+      },
+      "arms": {
+        "openmeteo__resolved": {
+          "loss_pct": 3.156947954506273,
+          "ci95": [
+            0.9647458397411226,
+            0.9722153997849253
+          ],
+          "n_valid_intervals": 19,
+          "degenerate": false,
+          "pi_median": 0.8837420291945478,
+          "gamma": -0.0032
+        },
+        "pvgis__resolved": {
+          "loss_pct": 2.472585498673796,
+          "ci95": [
+            0.9710808725377269,
+            0.9797264641162584
+          ],
+          "n_valid_intervals": 19,
+          "degenerate": false,
+          "pi_median": 0.8635713719522254,
+          "gamma": -0.0032
+        },
+        "openmeteo__fleet": {
+          "loss_pct": 2.4007386896389704,
+          "ci95": [
+            0.9721885067181334,
+            0.9797456602982257
+          ],
+          "n_valid_intervals": 20,
+          "degenerate": false,
+          "pi_median": 0.9202290158306268,
+          "gamma": -0.0045
+        },
+        "pvgis__fleet": {
+          "loss_pct": 1.6997383014662026,
+          "ci95": [
+            0.980129716796488,
+            0.986038773149663
+          ],
+          "n_valid_intervals": 12,
+          "degenerate": false,
+          "pi_median": 0.90169967154121,
+          "gamma": -0.0045
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 10666,
+        "lat": 37.269343,
+        "lon": -121.84939,
+        "elev_m": 48.01668549,
+        "capacity_kw": 6.71,
+        "tilt": 25.0,
+        "azimuth": 270.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csb",
+        "years": 8.6794,
+        "channels": 2.0,
+        "location": "ZIP: 95136",
+        "gamma_pdc": -0.0038,
+        "gamma_tier": "cec_module",
+        "gamma_matched": "LG305N1CG4"
+      },
+      "arms": {
+        "openmeteo__resolved": {
+          "loss_pct": 5.571430711093428,
+          "ci95": [
+            0.9416420562375521,
+            0.9470312423212243
+          ],
+          "n_valid_intervals": 24,
+          "degenerate": false,
+          "pi_median": 0.767649293503476,
+          "gamma": -0.0038
+        },
+        "pvgis__resolved": {
+          "loss_pct": 4.247812391798167,
+          "ci95": [
+            0.954122831866216,
+            0.9609594283869252
+          ],
+          "n_valid_intervals": 34,
+          "degenerate": false,
+          "pi_median": 0.837525937547736,
+          "gamma": -0.0038
+        },
+        "openmeteo__fleet": {
+          "loss_pct": 6.092271480714495,
+          "ci95": [
+            0.9364294781097953,
+            0.942080282197456
+          ],
+          "n_valid_intervals": 26,
+          "degenerate": false,
+          "pi_median": 0.7843043421848157,
+          "gamma": -0.0045
+        },
+        "pvgis__fleet": {
+          "loss_pct": 4.999949773685053,
+          "ci95": [
+            0.9467175206151787,
+            0.9532232294841907
+          ],
+          "n_valid_intervals": 31,
+          "degenerate": false,
+          "pi_median": 0.8550379874570988,
+          "gamma": -0.0045
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 11670,
+        "lat": 37.295092,
+        "lon": -121.89649,
+        "elev_m": 0.0,
+        "capacity_kw": 6.72,
+        "tilt": 17.0,
+        "azimuth": 180.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csb",
+        "years": 7.926,
+        "channels": 2.0,
+        "location": "ZIP: 95125",
+        "gamma_pdc": -0.004118999999999999,
+        "gamma_tier": "cec_module",
+        "gamma_matched": "CS6K280M"
+      },
+      "arms": {
+        "openmeteo__resolved": {
+          "loss_pct": 6.771002134736759,
+          "ci95": [
+            0.9274625638182602,
+            0.9372957787553952
+          ],
+          "n_valid_intervals": 25,
+          "degenerate": false,
+          "pi_median": 0.7332938890711328,
+          "gamma": -0.004118999999999999
+        },
+        "pvgis__resolved": {
+          "loss_pct": 4.5988042951154995,
+          "ci95": [
+            0.9503802626182758,
+            0.9579020951668388
+          ],
+          "n_valid_intervals": 13,
+          "degenerate": false,
+          "pi_median": 0.7111462833835447,
+          "gamma": -0.004118999999999999
+        },
+        "openmeteo__fleet": {
+          "loss_pct": 7.045063848422783,
+          "ci95": [
+            0.9246937268843568,
+            0.9343799712003203
+          ],
+          "n_valid_intervals": 24,
+          "degenerate": false,
+          "pi_median": 0.7418492098214615,
+          "gamma": -0.0045
+        },
+        "pvgis__fleet": {
+          "loss_pct": 6.819096710294659,
+          "ci95": [
+            0.9273887997144823,
+            0.9359206271995981
+          ],
+          "n_valid_intervals": 12,
+          "degenerate": false,
+          "pi_median": 0.7176354936085477,
+          "gamma": -0.0045
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 10817,
+        "lat": 33.581533,
+        "lon": -117.72474,
+        "elev_m": 127.6264801,
+        "capacity_kw": 6.08,
+        "tilt": 20.0,
+        "azimuth": 270.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csa",
+        "years": 7.1287,
+        "channels": 2.0,
+        "location": "ZIP: 92656",
+        "gamma_pdc": -0.0039000000000000003,
+        "gamma_tier": "cec_manufacturer",
+        "gamma_matched": "LG"
+      },
+      "arms": {
+        "openmeteo__resolved": {
+          "loss_pct": 1.8768374237678742,
+          "ci95": [
+            0.9781595829456352,
+            0.984154107817074
+          ],
+          "n_valid_intervals": 25,
+          "degenerate": false,
+          "pi_median": 0.8919669379688316,
+          "gamma": -0.0039000000000000003
+        },
+        "pvgis__resolved": {
+          "loss_pct": 1.7613251908961902,
+          "ci95": [
+            0.9785643831392117,
+            0.9862339624479431
+          ],
+          "n_valid_intervals": 25,
+          "degenerate": false,
+          "pi_median": 0.9285240836959201,
+          "gamma": -0.0039000000000000003
+        },
+        "openmeteo__fleet": {
+          "loss_pct": 2.0440120087316327,
+          "ci95": [
+            0.9763659975964963,
+            0.9822873452892048
+          ],
+          "n_valid_intervals": 28,
+          "degenerate": false,
+          "pi_median": 0.9085353890265978,
+          "gamma": -0.0045
+        },
+        "pvgis__fleet": {
+          "loss_pct": 1.4768622300988965,
+          "ci95": [
+            0.9823005722581617,
+            0.9881013891722287
+          ],
+          "n_valid_intervals": 21,
+          "degenerate": false,
+          "pi_median": 0.9455406952919854,
+          "gamma": -0.0045
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 12028,
+        "lat": 33.581533,
+        "lon": -117.72474,
+        "elev_m": 0.0,
+        "capacity_kw": 5.12,
+        "tilt": 20.0,
+        "azimuth": 135.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csa",
+        "years": 7.8986,
+        "channels": 2.0,
+        "location": "ZIP: 92656",
+        "gamma_pdc": -0.0038,
+        "gamma_tier": "cec_module",
+        "gamma_matched": "LG320N1CG4"
+      },
+      "arms": {
+        "openmeteo__resolved": {
+          "loss_pct": 2.142888846055646,
+          "ci95": [
+            0.9745775256284837,
+            0.9824493690143115
+          ],
+          "n_valid_intervals": 24,
+          "degenerate": false,
+          "pi_median": 0.9290445425839844,
+          "gamma": -0.0038
+        },
+        "pvgis__resolved": {
+          "loss_pct": 3.0678244301727275,
+          "ci95": [
+            0.9644921614184472,
+            0.9739221611570604
+          ],
+          "n_valid_intervals": 24,
+          "degenerate": false,
+          "pi_median": 0.8115330678109852,
+          "gamma": -0.0038
+        },
+        "openmeteo__fleet": {
+          "loss_pct": 1.5617523787444076,
+          "ci95": [
+            0.9812226750128555,
+            0.987866632232503
+          ],
+          "n_valid_intervals": 17,
+          "degenerate": false,
+          "pi_median": 0.9485994038630309,
+          "gamma": -0.0045
+        },
+        "pvgis__fleet": {
+          "loss_pct": 2.5467045939452038,
+          "ci95": [
+            0.9703659663752429,
+            0.9785664031381891
+          ],
+          "n_valid_intervals": 16,
+          "degenerate": false,
+          "pi_median": 0.827413810514065,
+          "gamma": -0.0045
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 10415,
+        "lat": 33.601629,
+        "lon": -117.639943,
+        "elev_m": 208.2307587,
+        "capacity_kw": 5.985,
+        "tilt": 22.0,
+        "azimuth": 180.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csa",
+        "years": 6.1616,
+        "channels": 2.0,
+        "location": "ZIP: 92692",
+        "gamma_pdc": -0.0043,
+        "gamma_tier": "cec_manufacturer",
+        "gamma_matched": "SOLARWORLD"
+      },
+      "arms": {
+        "openmeteo__resolved": {
+          "loss_pct": 0.8957388470431371,
+          "ci95": [
+            0.9888647140922274,
+            0.9934505877354353
+          ],
+          "n_valid_intervals": 14,
+          "degenerate": false,
+          "pi_median": 0.8592911137030178,
+          "gamma": -0.0043
+        },
+        "pvgis__resolved": {
+          "loss_pct": 1.423741577419102,
+          "ci95": [
+            0.981684881474057,
+            0.98961220571294
+          ],
+          "n_valid_intervals": 18,
+          "degenerate": false,
+          "pi_median": 0.8278318778076432,
+          "gamma": -0.0043
+        },
+        "openmeteo__fleet": {
+          "loss_pct": 0.9143943747764505,
+          "ci95": [
+            0.9885054202877149,
+            0.9931873962040758
+          ],
+          "n_valid_intervals": 15,
+          "degenerate": false,
+          "pi_median": 0.8657988593772511,
+          "gamma": -0.0045
+        },
+        "pvgis__fleet": {
+          "loss_pct": 1.4615865306040088,
+          "ci95": [
+            0.9813344343594054,
+            0.9892775852591803
+          ],
+          "n_valid_intervals": 19,
+          "degenerate": false,
+          "pi_median": 0.8344736774986145,
+          "gamma": -0.0045
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 10349,
+        "lat": 33.628273,
+        "lon": -117.631338,
+        "elev_m": 277.8401794,
+        "capacity_kw": 10.464,
+        "tilt": 18.5,
+        "azimuth": 180.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csa",
+        "years": 9.9945,
+        "channels": 2.0,
+        "location": "ZIP: 92692",
+        "gamma_pdc": -0.00386,
+        "gamma_tier": "cec_module",
+        "gamma_matched": "E20327"
+      },
+      "arms": {
+        "openmeteo__resolved": {
+          "loss_pct": 1.9945082820750804,
+          "ci95": [
+            0.977085116518175,
+            0.9827988887411184
+          ],
+          "n_valid_intervals": 28,
+          "degenerate": false,
+          "pi_median": 0.8723998687546675,
+          "gamma": -0.00386
+        },
+        "pvgis__resolved": {
+          "loss_pct": 2.152790514351044,
+          "ci95": [
+            0.9756940318134478,
+            0.9809595113713435
+          ],
+          "n_valid_intervals": 25,
+          "degenerate": false,
+          "pi_median": 0.8103781744499621,
+          "gamma": -0.00386
+        },
+        "openmeteo__fleet": {
+          "loss_pct": 2.126951362302243,
+          "ci95": [
+            0.9758186220222501,
+            0.981672873519978
+          ],
+          "n_valid_intervals": 27,
+          "degenerate": false,
+          "pi_median": 0.8927395788264952,
+          "gamma": -0.0045
+        },
+        "pvgis__fleet": {
+          "loss_pct": 1.9808799151341927,
+          "ci95": [
+            0.9775216703959091,
+            0.9830442369325806
+          ],
+          "n_valid_intervals": 26,
+          "degenerate": false,
+          "pi_median": 0.8275777579868451,
+          "gamma": -0.0045
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 11066,
+        "lat": 34.125147,
+        "lon": -117.45818,
+        "elev_m": 0.0,
+        "capacity_kw": 7.59,
+        "tilt": 25.0,
+        "azimuth": 180.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csa",
+        "years": 6.5205,
+        "channels": 2.0,
+        "location": "ZIP: 92336",
+        "gamma_pdc": -0.0031,
+        "gamma_tier": "cec_manufacturer",
+        "gamma_matched": "PANASONIC"
+      },
+      "arms": {
+        "openmeteo__resolved": {
+          "loss_pct": 4.339339546948661,
+          "ci95": [
+            0.9531431450874284,
+            0.9598306551195098
+          ],
+          "n_valid_intervals": 29,
+          "degenerate": false,
+          "pi_median": 0.793943962958413,
+          "gamma": -0.0031
+        },
+        "pvgis__resolved": {
+          "loss_pct": 4.226128267493479,
+          "ci95": [
+            0.9537114627722383,
+            0.9617498878562479
+          ],
+          "n_valid_intervals": 16,
+          "degenerate": false,
+          "pi_median": 0.724624139704674,
+          "gamma": -0.0031
+        },
+        "openmeteo__fleet": {
+          "loss_pct": 4.16068438760111,
+          "ci95": [
+            0.9554096057184872,
+            0.9611696192725424
+          ],
+          "n_valid_intervals": 20,
+          "degenerate": false,
+          "pi_median": 0.8330091080659694,
+          "gamma": -0.0045
+        },
+        "pvgis__fleet": {
+          "loss_pct": 4.863419172763905,
+          "ci95": [
+            0.9474155684248213,
+            0.9554742190730682
+          ],
+          "n_valid_intervals": 16,
+          "degenerate": false,
+          "pi_median": 0.7641972009943307,
+          "gamma": -0.0045
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 12308,
+        "lat": 32.719601,
+        "lon": -117.16246,
+        "elev_m": 22.42172241,
+        "capacity_kw": 4.95,
+        "tilt": 1.0,
+        "azimuth": 180.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Bsk",
+        "years": 8.178,
+        "channels": 2.0,
+        "location": "ZIP: 92101",
+        "gamma_pdc": -0.004779,
+        "gamma_tier": "cec_module",
+        "gamma_matched": "KD330GXLFB"
+      },
+      "arms": {
+        "openmeteo__resolved": {
+          "loss_pct": 2.1829643256996656,
+          "ci95": [
+            0.9741737715234645,
+            0.9820319692211457
+          ],
+          "n_valid_intervals": 19,
+          "degenerate": false,
+          "pi_median": 0.848631084485674,
+          "gamma": -0.004779
+        },
+        "pvgis__resolved": {
+          "loss_pct": 1.900268931694904,
+          "ci95": [
+            0.9781904504876904,
+            0.9840911259166548
+          ],
+          "n_valid_intervals": 14,
+          "degenerate": false,
+          "pi_median": 0.772684434068131,
+          "gamma": -0.004779
+        },
+        "openmeteo__fleet": {
+          "loss_pct": 2.2066026915104953,
+          "ci95": [
+            0.9739513110951556,
+            0.9820378852944719
+          ],
+          "n_valid_intervals": 20,
+          "degenerate": false,
+          "pi_median": 0.8426217353970145,
+          "gamma": -0.0045
+        },
+        "pvgis__fleet": {
+          "loss_pct": 1.9552995347028368,
+          "ci95": [
+            0.9775255818905978,
+            0.9835478483466821
+          ],
+          "n_valid_intervals": 15,
+          "degenerate": false,
+          "pi_median": 0.7656090274292449,
+          "gamma": -0.0045
+        }
+      }
+    }
+  ],
+  "summary": {
+    "n_systems": 20,
+    "sd_pts": {
+      "irrad": 0.776207046595189,
+      "gamma": 0.4647254365490901,
+      "diag1": 0.7246157156336887,
+      "diag2": 0.9180584602474028,
+      "total": 0.8270124762587184,
+      "per_label_sigma": 0.507430522267574
+    },
+    "mean_pts": {
+      "irrad": 0.22679346991453736,
+      "gamma": -0.01397924974165301,
+      "diag1": 0.15315289096257123,
+      "diag2": 0.24077271965619035,
+      "total": 0.1969628053093808
+    },
+    "bootstrap_ciw_median": 0.6699154030922527,
+    "spread_to_noise_total": 1.7049319574701345,
+    "within_cell_sd_assumed": 1.41,
+    "per_system": [
+      {
+        "sid": 10109,
+        "gamma_res": -0.0045000000000000005,
+        "gamma_tier": "cec_module",
+        "om_ciw": 0.6802972251262807,
+        "om_res": 1.796086275163955,
+        "pv_res": 1.8481178925487507,
+        "om_fle": 1.796086275163955,
+        "pv_fle": 1.8481178925487507,
+        "d_irrad": -0.05203161738479567,
+        "d_gamma": 0.0,
+        "d_diag1": -0.05203161738479567,
+        "d_diag2": -0.05203161738479567
+      },
+      {
+        "sid": 10112,
+        "gamma_res": -0.0045000000000000005,
+        "gamma_tier": "cec_module",
+        "om_ciw": 0.8048019961870767,
+        "om_res": 1.984996069902345,
+        "pv_res": 1.819403357071958,
+        "om_fle": 1.984996069902345,
+        "pv_fle": 1.819403357071958,
+        "d_irrad": 0.1655927128303869,
+        "d_gamma": 0.0,
+        "d_diag1": 0.1655927128303869,
+        "d_diag2": 0.1655927128303869
+      },
+      {
+        "sid": 10251,
+        "gamma_res": -0.00458,
+        "gamma_tier": "cec_manufacturer",
+        "om_ciw": 0.7247651484923678,
+        "om_res": 2.335999070170469,
+        "pv_res": 2.5868180272133667,
+        "om_fle": 2.6459290103785893,
+        "pv_fle": 2.686070396627338,
+        "d_irrad": -0.2508189570428976,
+        "d_gamma": -0.30992994020812015,
+        "d_diag1": -0.3500713264568689,
+        "d_diag2": 0.059110983165222564
+      },
+      {
+        "sid": 10477,
+        "gamma_res": -0.0039000000000000003,
+        "gamma_tier": "cec_manufacturer",
+        "om_ciw": 0.6774248628749868,
+        "om_res": 2.0530054413012255,
+        "pv_res": 2.437497817980905,
+        "om_fle": 1.5575081609714214,
+        "pv_fle": 2.4824359406399266,
+        "d_irrad": -0.3844923766796793,
+        "d_gamma": 0.4954972803298041,
+        "d_diag1": -0.42943049933870103,
+        "d_diag2": -0.8799896570094834
+      },
+      {
+        "sid": 11758,
+        "gamma_res": -0.0038,
+        "gamma_tier": "cec_module",
+        "om_ciw": 0.6297817579914988,
+        "om_res": 2.3533612410437277,
+        "pv_res": 1.7373421022115143,
+        "om_fle": 2.6636581831700035,
+        "pv_fle": 2.017079674172151,
+        "d_irrad": 0.6160191388322134,
+        "d_gamma": -0.3102969421262758,
+        "d_diag1": 0.33628156687157684,
+        "d_diag2": 0.9263160809584892
+      },
+      {
+        "sid": 11881,
+        "gamma_res": -0.0043,
+        "gamma_tier": "cec_module",
+        "om_ciw": 0.64004609082291,
+        "om_res": 2.9945628538410096,
+        "pv_res": 2.7286291058971957,
+        "om_fle": 4.13075534958055,
+        "pv_fle": 2.9297479425324013,
+        "d_irrad": 0.26593374794381397,
+        "d_gamma": -1.1361924957395404,
+        "d_diag1": 0.06481491130860828,
+        "d_diag2": 1.4021262436833544
+      },
+      {
+        "sid": 10063,
+        "gamma_res": -0.0043,
+        "gamma_tier": "cec_module",
+        "om_ciw": 0.5917960868556449,
+        "om_res": 3.8352604248304445,
+        "pv_res": 3.662098043701678,
+        "om_fle": 4.231447521551013,
+        "pv_fle": 3.4458562584674834,
+        "d_irrad": 0.17316238112876636,
+        "d_gamma": -0.39618709672056873,
+        "d_diag1": 0.38940416636296105,
+        "d_diag2": 0.5693494778493351
+      },
+      {
+        "sid": 11539,
+        "gamma_res": -0.0031,
+        "gamma_tier": "cec_manufacturer",
+        "om_ciw": 0.8050237599396048,
+        "om_res": 4.108186874689812,
+        "pv_res": 2.3456588242640186,
+        "om_fle": 3.1676233432173073,
+        "pv_fle": 1.6273372852679602,
+        "d_irrad": 1.7625280504257934,
+        "d_gamma": 0.9405635314725047,
+        "d_diag1": 2.480849589421852,
+        "d_diag2": 0.8219645189532887
+      },
+      {
+        "sid": 10158,
+        "gamma_res": -0.004301,
+        "gamma_tier": "cec_manufacturer",
+        "om_ciw": 0.48284068638038136,
+        "om_res": 2.5479370389674516,
+        "pv_res": 2.455764102922764,
+        "om_fle": 2.49692832602193,
+        "pv_fle": 2.5809385175018296,
+        "d_irrad": 0.09217293604468768,
+        "d_gamma": 0.05100871294552167,
+        "d_diag1": -0.03300147853437796,
+        "d_diag2": 0.04116422309916601
+      },
+      {
+        "sid": 12023,
+        "gamma_res": -0.0045000000000000005,
+        "gamma_tier": "cec_module",
+        "om_ciw": 0.6710798029763598,
+        "om_res": 2.584549682603099,
+        "pv_res": 3.073926449780029,
+        "om_fle": 2.584549682603099,
+        "pv_fle": 3.073926449780029,
+        "d_irrad": -0.48937676717693,
+        "d_gamma": 0.0,
+        "d_diag1": -0.48937676717693,
+        "d_diag2": -0.48937676717693
+      },
+      {
+        "sid": 10068,
+        "gamma_res": -0.0032400000000000003,
+        "gamma_tier": "cec_module",
+        "om_ciw": 0.6479733919331876,
+        "om_res": 2.356712848069975,
+        "pv_res": 2.799909673012202,
+        "om_fle": 2.349947742340297,
+        "pv_fle": 2.5048075959538285,
+        "d_irrad": -0.4431968249422269,
+        "d_gamma": 0.006765105729678034,
+        "d_diag1": -0.14809474788385346,
+        "d_diag2": -0.44996193067190493
+      },
+      {
+        "sid": 11964,
+        "gamma_res": -0.0032,
+        "gamma_tier": "cec_module",
+        "om_ciw": 0.7469560043802725,
+        "om_res": 3.156947954506273,
+        "pv_res": 2.472585498673796,
+        "om_fle": 2.4007386896389704,
+        "pv_fle": 1.6997383014662026,
+        "d_irrad": 0.6843624558324768,
+        "d_gamma": 0.7562092648673024,
+        "d_diag1": 1.4572096530400702,
+        "d_diag2": -0.07184680903482565
+      },
+      {
+        "sid": 10666,
+        "gamma_res": -0.0038,
+        "gamma_tier": "cec_module",
+        "om_ciw": 0.5389186083672115,
+        "om_res": 5.571430711093428,
+        "pv_res": 4.247812391798167,
+        "om_fle": 6.092271480714495,
+        "pv_fle": 4.999949773685053,
+        "d_irrad": 1.323618319295261,
+        "d_gamma": -0.5208407696210671,
+        "d_diag1": 0.5714809374083751,
+        "d_diag2": 1.8444590889163281
+      },
+      {
+        "sid": 11670,
+        "gamma_res": -0.004118999999999999,
+        "gamma_tier": "cec_module",
+        "om_ciw": 0.983321493713496,
+        "om_res": 6.771002134736759,
+        "pv_res": 4.5988042951154995,
+        "om_fle": 7.045063848422783,
+        "pv_fle": 6.819096710294659,
+        "d_irrad": 2.1721978396212593,
+        "d_gamma": -0.2740617136860246,
+        "d_diag1": -0.048094575557899866,
+        "d_diag2": 2.446259553307284
+      },
+      {
+        "sid": 10817,
+        "gamma_res": -0.0039000000000000003,
+        "gamma_tier": "cec_manufacturer",
+        "om_ciw": 0.5994524871438811,
+        "om_res": 1.8768374237678742,
+        "pv_res": 1.7613251908961902,
+        "om_fle": 2.0440120087316327,
+        "pv_fle": 1.4768622300988965,
+        "d_irrad": 0.115512232871684,
+        "d_gamma": -0.16717458496375848,
+        "d_diag1": 0.3999751936689777,
+        "d_diag2": 0.28268681783544247
+      },
+      {
+        "sid": 12028,
+        "gamma_res": -0.0038,
+        "gamma_tier": "cec_module",
+        "om_ciw": 0.7871843385827804,
+        "om_res": 2.142888846055646,
+        "pv_res": 3.0678244301727275,
+        "om_fle": 1.5617523787444076,
+        "pv_fle": 2.5467045939452038,
+        "d_irrad": -0.9249355841170814,
+        "d_gamma": 0.5811364673112385,
+        "d_diag1": -0.40381574788955765,
+        "d_diag2": -1.50607205142832
+      },
+      {
+        "sid": 10415,
+        "gamma_res": -0.0043,
+        "gamma_tier": "cec_manufacturer",
+        "om_ciw": 0.45858736432078384,
+        "om_res": 0.8957388470431371,
+        "pv_res": 1.423741577419102,
+        "om_fle": 0.9143943747764505,
+        "pv_fle": 1.4615865306040088,
+        "d_irrad": -0.5280027303759649,
+        "d_gamma": -0.01865552773331336,
+        "d_diag1": -0.5658476835608717,
+        "d_diag2": -0.5093472026426515
+      },
+      {
+        "sid": 10349,
+        "gamma_res": -0.00386,
+        "gamma_tier": "cec_module",
+        "om_ciw": 0.5713772222943447,
+        "om_res": 1.9945082820750804,
+        "pv_res": 2.152790514351044,
+        "om_fle": 2.126951362302243,
+        "pv_fle": 1.9808799151341927,
+        "d_irrad": -0.1582822322759636,
+        "d_gamma": -0.13244308022716256,
+        "d_diag1": 0.013628366940887648,
+        "d_diag2": -0.02583915204880105
+      },
+      {
+        "sid": 11066,
+        "gamma_res": -0.0031,
+        "gamma_tier": "cec_manufacturer",
+        "om_ciw": 0.6687510032081456,
+        "om_res": 4.339339546948661,
+        "pv_res": 4.226128267493479,
+        "om_fle": 4.16068438760111,
+        "pv_fle": 4.863419172763905,
+        "d_irrad": 0.11321127945518228,
+        "d_gamma": 0.17865515934755116,
+        "d_diag1": -0.5240796258152436,
+        "d_diag2": -0.06544387989236888
+      },
+      {
+        "sid": 12308,
+        "gamma_res": -0.004779,
+        "gamma_tier": "cec_module",
+        "om_ciw": 0.7858197697681146,
+        "om_res": 2.1829643256996656,
+        "pv_res": 1.900268931694904,
+        "om_fle": 2.2066026915104953,
+        "pv_fle": 1.9552995347028368,
+        "d_irrad": 0.2826953940047616,
+        "d_gamma": -0.023638365810829676,
+        "d_diag1": 0.2276647909968288,
+        "d_diag2": 0.3063337598155913
+      }
+    ]
+  }
+}

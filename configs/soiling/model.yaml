@@ -1,0 +1,37 @@
+# XGBoost hyperparameters + spatial CV config for the soiling risk model.
+#
+# target_mode: `regression` trains on the continuous IWSR (reg:squarederror);
+#   predictions are ranked and converted back to binary via iwsr_risk_threshold
+#   for reporting AUC alongside a rank-correlation metric. `binary` keeps the
+#   original classifier head for ablation.
+target_mode: binary                   # regression | binary
+
+xgboost:
+  # Objective is overridden by target_mode; the rest applies to both heads.
+  # Regularized 2026-07-05: 40 features on ~900 rows overfit at depth=5. Shallower
+  # trees + L2 lift spatial-CV ~0.739→0.747 and holdout-2022 ~0.678→0.690 (mean over
+  # 7 seeds; run_regularized2022). Narrows the holdout gate gap ~half; not yet cleared.
+  n_estimators: 200
+  max_depth: 4
+  learning_rate: 0.05
+  subsample: 0.8
+  colsample_bytree: 0.8
+  reg_lambda: 5.0
+  random_state: 42
+
+spatial_cv:
+  n_folds: 5
+  cluster_km: 10.0
+  random_state: 42
+
+# Weight training rows by inverse IWSR-CI width; stations with tighter NREL
+# bounds pull the model harder than noisier ones.
+sample_weights:
+  mode: uniform                       # iwsr_ci_width | uniform — kimber_proxy has no CI bounds; use uniform
+  clip_percentiles: [5, 95]
+  feedback_weight_multiplier: 3.0     # partner clean-event rows weighted this many × NREL proxy rows
+  summary_weight_factor: 0.5          # summary-only NREL rows (no annual breakdown) weighted at half panel rows
+
+# Minimum spatial CV AUC to consider the model shippable.
+acceptance:
+  min_mean_auc: 0.70

@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3)",
+      "Read(//home/cameron/repos/solar-soiling-ml-public/**)"
+    ],
+    "additionalDirectories": [
+      "/home/cameron/repos/solar-soiling-ml-public/scripts",
+      "/home/cameron/repos/solar-soiling-ml-public"
+    ]
+  }
+}

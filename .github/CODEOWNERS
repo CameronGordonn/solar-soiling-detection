@@ -1,0 +1,30 @@
+# CODEOWNERS — auto-routes PR review to the lane owner and encodes the TEAM.md split.
+# Pairs with branch protection on `main` (require PR + >=1 review). Order matters:
+# the LAST matching pattern wins, so specific lanes are listed after the default.
+#
+# Ownership mirrors docs/TEAM.md. Adjust here whenever lanes move.
+# NOTE: verify @akshitha-nagaraj resolves (github.com/akshitha-nagaraj) before first merge.
+
+# --- Default: everything falls to Cameron unless a lane below claims it ---
+*                           @CameronGordonn
+
+# --- Stage 1 (detection) + Stage 2 (risk): Cameron's lanes ---
+/scripts/detect/            @CameronGordonn
+/scripts/data/              @CameronGordonn
+/scripts/labeling/          @CameronGordonn
+/scripts/predict/           @CameronGordonn
+/scripts/analyze/           @CameronGordonn
+/src/risk/                  @CameronGordonn
+/src/utils/                 @CameronGordonn
+
+# --- Product surface: Akshitha's lane (API, CLI, outreach funnel) ---
+/src/solarsoiled/           @akshitha-nagaraj
+/scripts/outreach/          @akshitha-nagaraj
+
+# --- Permissive-stack migration (RF-DETR + SAM port): Akshitha's lane ---
+# The port directory doesn't exist yet. Uncomment/adjust the path when it lands
+# (see docs/PERMISSIVE_STACK_MIGRATION.md, docs/HANDOFF_imagery_ingestion.md).
+# /src/detect_permissive/   @akshitha-nagaraj
+
+# --- Canonical status doc: Cameron owns the merge (shared-edit collision point) ---
+/docs/Q2_PLAN.md            @CameronGordonn

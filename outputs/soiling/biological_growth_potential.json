@@ -1,0 +1,58 @@
+[
+  {
+    "site": "Guangzhou CN (mineral bands, humid)",
+    "tow_iso": 4232,
+    "dew_h": 2471,
+    "wet_h": 4232,
+    "wet_pct": 48.3,
+    "growth_tow": 5698
+  },
+  {
+    "site": "Sao Paulo BR (Shirakawa, 11% loss @18mo)",
+    "tow_iso": 5308,
+    "dew_h": 3905,
+    "wet_h": 5308,
+    "wet_pct": 60.6,
+    "growth_tow": 4519
+  },
+  {
+    "site": "Berkeley CA (microbial study, biofilm CONFIRMED)",
+    "tow_iso": 4580,
+    "dew_h": 3312,
+    "wet_h": 4580,
+    "wet_pct": 52.3,
+    "growth_tow": 2468
+  },
+  {
+    "site": "Santa Cruz CA (AOI)",
+    "tow_iso": 4198,
+    "dew_h": 2851,
+    "wet_h": 4198,
+    "wet_pct": 47.9,
+    "growth_tow": 2444
+  },
+  {
+    "site": "Xi'an CN (mineral bands)",
+    "tow_iso": 2089,
+    "dew_h": 1344,
+    "wet_h": 2216,
+    "wet_pct": 25.3,
+    "growth_tow": 1501
+  },
+  {
+    "site": "Arbuckle CA (PVDAQ 2107, NO standing layer)",
+    "tow_iso": 1620,
+    "dew_h": 980,
+    "wet_h": 1623,
+    "wet_pct": 18.5,
+    "growth_tow": 720
+  },
+  {
+    "site": "Phoenix AZ (desert reference)",
+    "tow_iso": 581,
+    "dew_h": 274,
+    "wet_h": 583,
+    "wet_pct": 6.6,
+    "growth_tow": 336
+  }
+]

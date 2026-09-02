@@ -1,0 +1,24 @@
+{
+  "n_labels": 821,
+  "n_systems_attempted": 1357,
+  "koppen_classes": 12,
+  "pct_west_of_-114": 70.0,
+  "pct_east_of_-100": 23.5,
+  "loss_pct": {
+    "p10": 0.63,
+    "p50": 2.03,
+    "p90": 4.54
+  },
+  "gamma_tier_counts": {
+    "cec_module": 394,
+    "cec_manufacturer": 343,
+    "fleet_default": 70,
+    "cec_technology": 14
+  },
+  "reference_nrel": {
+    "n": 1002,
+    "pct_west_of_-114": 81.0,
+    "pct_east_of_-100": 5.2
+  },
+  "eastern_representation_vs_nrel": 4.5
+}

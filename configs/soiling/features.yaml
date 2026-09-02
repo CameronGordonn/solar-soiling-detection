@@ -1,0 +1,49 @@
+rolling_windows_days:
+- 7
+- 30
+- 90
+weather_variables:
+- precipitation_sum
+- wind_speed_10m_max
+- relative_humidity_2m_mean
+- temperature_2m_max
+- temperature_2m_min
+- shortwave_radiation_sum
+air_quality_variables:
+- pm2_5
+- pm10
+geometric_features:
+- area_m2
+- orientation_deg
+- compactness
+- neighbor_count_100m
+- distance_to_nearest_array_m
+static_features:
+- elevation_m
+- nlcd_class
+- distance_to_highway_m
+- distance_to_agriculture_m
+- worldcover_cropland
+- worldcover_built_up
+- worldcover_bare
+- worldcover_tree
+- worldcover_grass
+nrel_covariates:
+  numeric:
+  - tilt_deg
+  - months_in_data_set
+  categorical: []
+feature_quality:
+  min_non_null_fraction: 0.2
+kimber:
+  use_kimber_feature: true
+  deposition_per_pm25: 0.0006
+  rain_clean_mm: 1.0
+somosclean:
+  use_somosclean_feature: true
+  sl_sat: 0.08
+  k: 15.0
+  heavy_rain_mm: 10.0
+  rain_min_mm: 1.0
+  pm10_dust_threshold: 50.0
+  pm10_dust_scale: 0.02

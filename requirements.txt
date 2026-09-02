@@ -1,0 +1,63 @@
+# requirements.txt is a MIRROR of pyproject.toml's `dependencies`, kept for tooling
+# that cannot read PEP 621. The install path everyone should use is:
+#
+#     pip install -e ".[dev,api]"          # core + tests
+#     pip install -e ".[dev,api,detect]"   # + RF-DETR/SAM2 for the Stage-1 lane
+#
+# Two things this file got wrong until 2026-08-26, both found by a cold-clone audit:
+#   * it pinned `ultralytics>=11.0`, which DOES NOT EXIST. The package tops out at
+#     8.4.x and YOLO11 ships inside 8.3+. `pip install -r requirements.txt` therefore
+#     failed to resolve, for everyone, always. The "v11" in this repo names the model
+#     family (yolo11s-seg), never the package version.
+#   * it hard-required geoai-py, which is optional, is not installed in the working
+#     env, and drags a heavy stack in. It is an extra now.
+
+# Core numerical and data handling
+numpy>=1.23
+pandas>=1.5
+pyarrow>=12.0
+scipy>=1.10
+
+# Geospatial stack
+rasterio>=1.3
+geopandas>=0.13
+shapely>=2.0
+pyproj>=3.5
+geojson>=3.0
+laspy>=2.5
+planetary-computer>=1.0
+pystac-client>=0.7
+
+# Image handling
+Pillow>=9.4
+scikit-image>=0.20
+
+# Machine learning / modeling
+torch>=2.0
+ultralytics>=8.3          # AGPL. Legacy 60cm eval path only -- ships nothing.
+scikit-learn>=1.2
+xgboost>=1.7
+
+# Dataset management / labeling
+roboflow>=1.0
+
+# Small-object inference boost (legacy 60cm path)
+sahi>=0.11
+
+# Stage 2 — soiling risk model
+requests-cache>=1.1
+PyYAML>=6.0
+
+# Product surface — CLI, maps, reports
+typer>=0.9
+folium>=0.15
+matplotlib>=3.7
+reportlab>=4.0
+qrcode[pil]>=7.4
+
+# Not here on purpose (install via extras, see pyproject.toml):
+#   [detect]   rfdetr, sam2          -- the active Stage-1 stack
+#   [outreach] lob-python, pypdf, pdfplumber
+#   [api]      fastapi, uvicorn
+#   [geoai]    geoai-py
+#   [soiling-validation] rdtools, pvlib

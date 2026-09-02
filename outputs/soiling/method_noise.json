@@ -1,0 +1,757 @@
+{
+  "results": [
+    {
+      "meta": {
+        "system_id": 10109,
+        "lat": 37.057575,
+        "lon": -122.01507,
+        "elev_m": 229.5130768,
+        "capacity_kw": 5.88,
+        "tilt": 34.0,
+        "azimuth": 180.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csb",
+        "years": 8.0739,
+        "channels": 2.0,
+        "location": "ZIP: 95066"
+      },
+      "sources": {
+        "openmeteo": {
+          "loss_pct": 1.796086275163955,
+          "ci95": [
+            0.978483119778678,
+            0.9852860920299408
+          ],
+          "n_valid_intervals": 16,
+          "degenerate": false,
+          "pi_median": 0.823439433140329
+        },
+        "pvgis": {
+          "loss_pct": 1.8481178925487507,
+          "ci95": [
+            0.9780819099067701,
+            0.9852445463334558
+          ],
+          "n_valid_intervals": 17,
+          "degenerate": false,
+          "pi_median": 0.7705995691273071
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 10112,
+        "lat": 37.198875,
+        "lon": -121.84287,
+        "elev_m": 111.6747589,
+        "capacity_kw": 6.0,
+        "tilt": 26.0,
+        "azimuth": 135.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csb",
+        "years": 8.0493,
+        "channels": 2.0,
+        "location": "ZIP: 95120"
+      },
+      "sources": {
+        "openmeteo": {
+          "loss_pct": 1.984996069902345,
+          "ci95": [
+            0.976126707779596,
+            0.9841747277414667
+          ],
+          "n_valid_intervals": 28,
+          "degenerate": false,
+          "pi_median": 0.8485810782549711
+        },
+        "pvgis": {
+          "loss_pct": 1.819403357071958,
+          "ci95": [
+            0.9785169064969163,
+            0.9849723452252397
+          ],
+          "n_valid_intervals": 27,
+          "degenerate": false,
+          "pi_median": 0.7634563799672746
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 10251,
+        "lat": 34.119245,
+        "lon": -117.8548,
+        "elev_m": 250.0606995,
+        "capacity_kw": 4.32,
+        "tilt": 1.0,
+        "azimuth": 180.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csb",
+        "years": 5.4739,
+        "channels": 2.0,
+        "location": "ZIP: 91740"
+      },
+      "sources": {
+        "openmeteo": {
+          "loss_pct": 2.6459290103785893,
+          "ci95": [
+            0.9692786000713254,
+            0.9772625983757673
+          ],
+          "n_valid_intervals": 17,
+          "degenerate": false,
+          "pi_median": 0.9833218078977132
+        },
+        "pvgis": {
+          "loss_pct": 2.686070396627338,
+          "ci95": [
+            0.9700797161181457,
+            0.9764282578472985
+          ],
+          "n_valid_intervals": 23,
+          "degenerate": false,
+          "pi_median": 0.940395406810179
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 10477,
+        "lat": 37.444879,
+        "lon": -122.26253,
+        "elev_m": 157.7673645,
+        "capacity_kw": 9.0,
+        "tilt": 18.0,
+        "azimuth": 225.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csb",
+        "years": 9.2958,
+        "channels": 2.0,
+        "location": "ZIP: 94062"
+      },
+      "sources": {
+        "openmeteo": {
+          "loss_pct": 1.5575081609714214,
+          "ci95": [
+            0.9812903132421693,
+            0.9874143398600701
+          ],
+          "n_valid_intervals": 23,
+          "degenerate": false,
+          "pi_median": 0.8169838366496607
+        },
+        "pvgis": {
+          "loss_pct": 2.4824359406399266,
+          "ci95": [
+            0.9717180630421576,
+            0.9784808895284871
+          ],
+          "n_valid_intervals": 26,
+          "degenerate": false,
+          "pi_median": 0.8091159101894626
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 11758,
+        "lat": 37.551586,
+        "lon": -122.32773,
+        "elev_m": 0.0,
+        "capacity_kw": 6.3,
+        "tilt": 28.0,
+        "azimuth": 225.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csb",
+        "years": 8.6657,
+        "channels": 2.0,
+        "location": "ZIP: 94402"
+      },
+      "sources": {
+        "openmeteo": {
+          "loss_pct": 2.6636581831700035,
+          "ci95": [
+            0.9697566942830799,
+            0.9766711494266652
+          ],
+          "n_valid_intervals": 28,
+          "degenerate": false,
+          "pi_median": 0.7979739264616235
+        },
+        "pvgis": {
+          "loss_pct": 2.017079674172151,
+          "ci95": [
+            0.9764035486224395,
+            0.9829850467037482
+          ],
+          "n_valid_intervals": 25,
+          "degenerate": false,
+          "pi_median": 0.8335631779366593
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 11881,
+        "lat": 37.257643,
+        "lon": -121.89072,
+        "elev_m": 0.0,
+        "capacity_kw": 5.5,
+        "tilt": 1.0,
+        "azimuth": 225.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csb",
+        "years": 9.052,
+        "channels": 2.0,
+        "location": "ZIP: 95118"
+      },
+      "sources": {
+        "openmeteo": {
+          "loss_pct": 4.13075534958055,
+          "ci95": [
+            0.9550948361829522,
+            0.9620928126767055
+          ],
+          "n_valid_intervals": 34,
+          "degenerate": false,
+          "pi_median": 0.8801493337164205
+        },
+        "pvgis": {
+          "loss_pct": 2.9297479425324013,
+          "ci95": [
+            0.9672589297029555,
+            0.9741654125769657
+          ],
+          "n_valid_intervals": 29,
+          "degenerate": false,
+          "pi_median": 0.8615976220366516
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 10063,
+        "lat": 37.295092,
+        "lon": -121.89649,
+        "elev_m": 42.72908783,
+        "capacity_kw": 6.902,
+        "tilt": 0.0,
+        "azimuth": 225.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csb",
+        "years": 12.0739,
+        "channels": 2.0,
+        "location": "ZIP: 95125"
+      },
+      "sources": {
+        "openmeteo": {
+          "loss_pct": 4.231447521551013,
+          "ci95": [
+            0.9545750393104832,
+            0.9607517426572474
+          ],
+          "n_valid_intervals": 44,
+          "degenerate": false,
+          "pi_median": 0.8926477640546402
+        },
+        "pvgis": {
+          "loss_pct": 3.4458562584674834,
+          "ci95": [
+            0.9625652103743347,
+            0.9684862992690715
+          ],
+          "n_valid_intervals": 30,
+          "degenerate": false,
+          "pi_median": 0.8591277515691222
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 11539,
+        "lat": 34.478797,
+        "lon": -118.65255,
+        "elev_m": 486.8535767,
+        "capacity_kw": 5.61,
+        "tilt": 20.0,
+        "azimuth": 135.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csb",
+        "years": 6.6904,
+        "channels": 2.0,
+        "location": "ZIP: 91384"
+      },
+      "sources": {
+        "openmeteo": {
+          "loss_pct": 3.1676233432173073,
+          "ci95": [
+            0.965382457211361,
+            0.9710899462330792
+          ],
+          "n_valid_intervals": 23,
+          "degenerate": false,
+          "pi_median": 1.059885000598519
+        },
+        "pvgis": {
+          "loss_pct": 1.6273372852679602,
+          "ci95": [
+            0.9810458636137039,
+            0.986303265697328
+          ],
+          "n_valid_intervals": 17,
+          "degenerate": false,
+          "pi_median": 0.9766449497753504
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 10158,
+        "lat": 34.481172,
+        "lon": -118.42821,
+        "elev_m": 0.0,
+        "capacity_kw": 5.88,
+        "tilt": 22.5,
+        "azimuth": 225.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csb",
+        "years": 11.5452,
+        "channels": 2.0,
+        "location": "ZIP: 91350"
+      },
+      "sources": {
+        "openmeteo": {
+          "loss_pct": 2.49692832602193,
+          "ci95": [
+            0.9725101636397132,
+            0.9773403766442839
+          ],
+          "n_valid_intervals": 54,
+          "degenerate": false,
+          "pi_median": 0.8079879299410424
+        },
+        "pvgis": {
+          "loss_pct": 2.5809385175018296,
+          "ci95": [
+            0.9715847907921422,
+            0.9768425305301043
+          ],
+          "n_valid_intervals": 44,
+          "degenerate": false,
+          "pi_median": 0.8393022645677142
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 12023,
+        "lat": 34.122658,
+        "lon": -118.11296,
+        "elev_m": 0.0,
+        "capacity_kw": 3.91,
+        "tilt": 20.0,
+        "azimuth": 180.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csb",
+        "years": 10.5123,
+        "channels": 2.0,
+        "location": "ZIP: 91108"
+      },
+      "sources": {
+        "openmeteo": {
+          "loss_pct": 2.584549682603099,
+          "ci95": [
+            0.9708816305469709,
+            0.9775924285767345
+          ],
+          "n_valid_intervals": 37,
+          "degenerate": false,
+          "pi_median": 0.8115928687486649
+        },
+        "pvgis": {
+          "loss_pct": 3.073926449780029,
+          "ci95": [
+            0.9664358312141456,
+            0.9720032522646845
+          ],
+          "n_valid_intervals": 35,
+          "degenerate": false,
+          "pi_median": 0.7610604389506876
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 10068,
+        "lat": 37.296355,
+        "lon": -121.917905,
+        "elev_m": 48.4643364,
+        "capacity_kw": 3.675,
+        "tilt": 16.0,
+        "azimuth": 180.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csb",
+        "years": 12.0739,
+        "channels": 2.0,
+        "location": "ZIP: 95125"
+      },
+      "sources": {
+        "openmeteo": {
+          "loss_pct": 2.349947742340297,
+          "ci95": [
+            0.9731354730284396,
+            0.9797916565236081
+          ],
+          "n_valid_intervals": 39,
+          "degenerate": false,
+          "pi_median": 0.7555208646465665
+        },
+        "pvgis": {
+          "error": "ConnectionError: HTTPSConnectionPool(host='re.jrc.ec.europa.eu', port=443): Max retries exceeded with url: /api/seriescalc?lat=37.296355&lon=-121.917905&outputformat=json&angle=16.0&aspect=0.0&pvcalculation=0&pvtechchoice=crystSi&mountingplace=free&trackingtype=0&components=1&usehorizon=1&optimalangles=0&optimalinclination=0&loss=0&startyear=2012&endyear=2023 (Caused by NameResolutionError(\"HTTPSConnection(host='re.jrc.ec.europa.eu', port=443): Failed to resolve 're.jrc.ec.europa.eu' ([Errno -2] Name or service not known)\"))"
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 11964,
+        "lat": 37.295092,
+        "lon": -121.89649,
+        "elev_m": 0.0,
+        "capacity_kw": 3.96,
+        "tilt": 23.0,
+        "azimuth": 180.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csb",
+        "years": 6.315,
+        "channels": 2.0,
+        "location": "ZIP: 95125"
+      },
+      "sources": {
+        "openmeteo": {
+          "loss_pct": 2.4007386896389704,
+          "ci95": [
+            0.9721885067181334,
+            0.9797456602982257
+          ],
+          "n_valid_intervals": 20,
+          "degenerate": false,
+          "pi_median": 0.9202290158306268
+        },
+        "pvgis": {
+          "loss_pct": 1.6997383014662026,
+          "ci95": [
+            0.980129716796488,
+            0.986038773149663
+          ],
+          "n_valid_intervals": 12,
+          "degenerate": false,
+          "pi_median": 0.90169967154121
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 10666,
+        "lat": 37.269343,
+        "lon": -121.84939,
+        "elev_m": 48.01668549,
+        "capacity_kw": 6.71,
+        "tilt": 25.0,
+        "azimuth": 270.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csb",
+        "years": 8.6794,
+        "channels": 2.0,
+        "location": "ZIP: 95136"
+      },
+      "sources": {
+        "openmeteo": {
+          "loss_pct": 6.092271480714495,
+          "ci95": [
+            0.9364294781097953,
+            0.942080282197456
+          ],
+          "n_valid_intervals": 26,
+          "degenerate": false,
+          "pi_median": 0.7843043421848157
+        },
+        "pvgis": {
+          "loss_pct": 4.999949773685053,
+          "ci95": [
+            0.9467175206151787,
+            0.9532232294841907
+          ],
+          "n_valid_intervals": 31,
+          "degenerate": false,
+          "pi_median": 0.8550379874570988
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 11670,
+        "lat": 37.295092,
+        "lon": -121.89649,
+        "elev_m": 0.0,
+        "capacity_kw": 6.72,
+        "tilt": 17.0,
+        "azimuth": 180.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csb",
+        "years": 7.926,
+        "channels": 2.0,
+        "location": "ZIP: 95125"
+      },
+      "sources": {
+        "openmeteo": {
+          "loss_pct": 7.045063848422783,
+          "ci95": [
+            0.9246937268843568,
+            0.9343799712003203
+          ],
+          "n_valid_intervals": 24,
+          "degenerate": false,
+          "pi_median": 0.7418492098214615
+        },
+        "pvgis": {
+          "loss_pct": 6.819096710294659,
+          "ci95": [
+            0.9273887997144823,
+            0.9359206271995981
+          ],
+          "n_valid_intervals": 12,
+          "degenerate": false,
+          "pi_median": 0.7176354936085477
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 10817,
+        "lat": 33.581533,
+        "lon": -117.72474,
+        "elev_m": 127.6264801,
+        "capacity_kw": 6.08,
+        "tilt": 20.0,
+        "azimuth": 270.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csa",
+        "years": 7.1287,
+        "channels": 2.0,
+        "location": "ZIP: 92656"
+      },
+      "sources": {
+        "openmeteo": {
+          "loss_pct": 2.0440120087316327,
+          "ci95": [
+            0.9763659975964963,
+            0.9822873452892048
+          ],
+          "n_valid_intervals": 28,
+          "degenerate": false,
+          "pi_median": 0.9085353890265978
+        },
+        "pvgis": {
+          "loss_pct": 1.4768622300988965,
+          "ci95": [
+            0.9823005722581617,
+            0.9881013891722287
+          ],
+          "n_valid_intervals": 21,
+          "degenerate": false,
+          "pi_median": 0.9455406952919854
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 12028,
+        "lat": 33.581533,
+        "lon": -117.72474,
+        "elev_m": 0.0,
+        "capacity_kw": 5.12,
+        "tilt": 20.0,
+        "azimuth": 135.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csa",
+        "years": 7.8986,
+        "channels": 2.0,
+        "location": "ZIP: 92656"
+      },
+      "sources": {
+        "openmeteo": {
+          "loss_pct": 1.5617523787444076,
+          "ci95": [
+            0.9812226750128555,
+            0.987866632232503
+          ],
+          "n_valid_intervals": 17,
+          "degenerate": false,
+          "pi_median": 0.9485994038630309
+        },
+        "pvgis": {
+          "loss_pct": 2.5467045939452038,
+          "ci95": [
+            0.9703659663752429,
+            0.9785664031381891
+          ],
+          "n_valid_intervals": 16,
+          "degenerate": false,
+          "pi_median": 0.827413810514065
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 10415,
+        "lat": 33.601629,
+        "lon": -117.639943,
+        "elev_m": 208.2307587,
+        "capacity_kw": 5.985,
+        "tilt": 22.0,
+        "azimuth": 180.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csa",
+        "years": 6.1616,
+        "channels": 2.0,
+        "location": "ZIP: 92692"
+      },
+      "sources": {
+        "openmeteo": {
+          "loss_pct": 0.9143943747764505,
+          "ci95": [
+            0.9885054202877149,
+            0.9931873962040758
+          ],
+          "n_valid_intervals": 15,
+          "degenerate": false,
+          "pi_median": 0.8657988593772511
+        },
+        "pvgis": {
+          "loss_pct": 1.4615865306040088,
+          "ci95": [
+            0.9813344343594054,
+            0.9892775852591803
+          ],
+          "n_valid_intervals": 19,
+          "degenerate": false,
+          "pi_median": 0.8344736774986145
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 10349,
+        "lat": 33.628273,
+        "lon": -117.631338,
+        "elev_m": 277.8401794,
+        "capacity_kw": 10.464,
+        "tilt": 18.5,
+        "azimuth": 180.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csa",
+        "years": 9.9945,
+        "channels": 2.0,
+        "location": "ZIP: 92692"
+      },
+      "sources": {
+        "openmeteo": {
+          "loss_pct": 2.126951362302243,
+          "ci95": [
+            0.9758186220222501,
+            0.981672873519978
+          ],
+          "n_valid_intervals": 27,
+          "degenerate": false,
+          "pi_median": 0.8927395788264952
+        },
+        "pvgis": {
+          "loss_pct": 1.9808799151341927,
+          "ci95": [
+            0.9775216703959091,
+            0.9830442369325806
+          ],
+          "n_valid_intervals": 26,
+          "degenerate": false,
+          "pi_median": 0.8275777579868451
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 11066,
+        "lat": 34.125147,
+        "lon": -117.45818,
+        "elev_m": 0.0,
+        "capacity_kw": 7.59,
+        "tilt": 25.0,
+        "azimuth": 180.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Csa",
+        "years": 6.5205,
+        "channels": 2.0,
+        "location": "ZIP: 92336"
+      },
+      "sources": {
+        "openmeteo": {
+          "loss_pct": 4.16068438760111,
+          "ci95": [
+            0.9554096057184872,
+            0.9611696192725424
+          ],
+          "n_valid_intervals": 20,
+          "degenerate": false,
+          "pi_median": 0.8330091080659694
+        },
+        "pvgis": {
+          "loss_pct": 4.863419172763905,
+          "ci95": [
+            0.9474155684248213,
+            0.9554742190730682
+          ],
+          "n_valid_intervals": 16,
+          "degenerate": false,
+          "pi_median": 0.7641972009943307
+        }
+      }
+    },
+    {
+      "meta": {
+        "system_id": 12308,
+        "lat": 32.719601,
+        "lon": -117.16246,
+        "elev_m": 22.42172241,
+        "capacity_kw": 4.95,
+        "tilt": 1.0,
+        "azimuth": 180.0,
+        "tz": "America/Los_Angeles",
+        "climate": "Bsk",
+        "years": 8.178,
+        "channels": 2.0,
+        "location": "ZIP: 92101"
+      },
+      "sources": {
+        "openmeteo": {
+          "loss_pct": 2.2066026915104953,
+          "ci95": [
+            0.9739513110951556,
+            0.9820378852944719
+          ],
+          "n_valid_intervals": 20,
+          "degenerate": false,
+          "pi_median": 0.8426217353970145
+        },
+        "pvgis": {
+          "loss_pct": 1.9552995347028368,
+          "ci95": [
+            0.9775255818905978,
+            0.9835478483466821
+          ],
+          "n_valid_intervals": 15,
+          "degenerate": false,
+          "pi_median": 0.7656090274292449
+        }
+      }
+    }
+  ]
+}

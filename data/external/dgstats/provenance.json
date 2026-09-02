@@ -1,0 +1,52 @@
+{
+  "generated": "2026-08-30",
+  "source_url": "https://www.californiadgstats.ca.gov/download/interconnection_rule21_projects/",
+  "source_files": [
+    "PGE_Interconnected_Project_Sites_Historical-Jan2020.csv",
+    "PGE_Interconnected_Project_Sites_Jan2020-May2026.csv"
+  ],
+  "county": "SANTA CRUZ",
+  "filter": {
+    "service_county_contains": "SANTA CRUZ",
+    "technology_type_contains": "Photovoltaic",
+    "customer_sector": "Residential",
+    "tilt": "> 0 (0.0 is the 'not reported' convention, see module docstring)",
+    "mounting_method": "not filtered (null on ~30% of rows); reported as robustness",
+    "date_range": "not filtered",
+    "dedup_key": "Application Id"
+  },
+  "counts": {
+    "county_rows": 15224,
+    "pv_residential": 13120,
+    "tilt_reported": 12400,
+    "tilt_zero_not_reported": 3827,
+    "anchor_sample": 8573
+  },
+  "app_approved_date_range": [
+    "1998-09-29",
+    "2026-05-29"
+  ],
+  "dgstats_tilt_deg": {
+    "n": 8573,
+    "p10": 14.0,
+    "p25": 18.0,
+    "p50": 19.0,
+    "p75": 23.0,
+    "p90": 27.0
+  },
+  "lidar_tilt_deg_fit_ok": {
+    "n": 3068,
+    "p10": 6.37,
+    "p25": 14.23,
+    "p50": 19.03,
+    "p75": 24.13,
+    "p90": 30.79
+  },
+  "low_tilt_share_pct": {
+    "note": "DGStats low tail is biased high because tilt==0 is dropped as 'not reported'; the lidar low tail is unbiased.",
+    "dgstats_below_5deg": 0.78,
+    "dgstats_below_10deg": 3.38,
+    "lidar_below_5deg": 8.38,
+    "lidar_below_10deg": 14.67
+  }
+}
