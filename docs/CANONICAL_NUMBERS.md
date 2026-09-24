@@ -308,7 +308,7 @@ These get conflated. They are unrelated.
 
 | Quantity | Value | Command |
 |---|---|---|
-| `make test-fast` | **557 passed, 3 skipped, 2 deselected** (2026-09-24); ~3m30s cold in CI, <1m warm locally | `make test-fast` |
+| `make test-fast` | **558 passed, 3 skipped, 2 deselected** (2026-09-24); ~3m30s cold in CI, <1m warm locally | `make test-fast` |
 
 Measured 2026-08-31, after `tests/test_canonical_numbers.py` added 38 cases (it was 432 before).
 Supersedes "248 tests" and "246 passed, 5 skipped". The suite grows; an older count is not a sign

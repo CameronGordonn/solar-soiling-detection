@@ -59,7 +59,7 @@ scripts/labeling/  — label QA: disagreement overlays, vintage audit, bucket re
 scripts/research/  — exploratory (pseudo-labels, SAM masks; not in active pipeline)
 ```
 
-**New here?** [docs/ONBOARDING.md](docs/ONBOARDING.md) §1 is a runnable setup path: `bash setup/setup_conda.sh` -> `make bootstrap` -> `make test-fast` (**557 passed, 3 skipped, 2 deselected** as of 2026-09-24; ~3m30s in CI, well under a minute on a warm dev box; needs no data). Data custody and the `gh release download` pull are in [DATA.md](DATA.md).
+**New here?** [docs/ONBOARDING.md](docs/ONBOARDING.md) §1 is a runnable setup path: `bash setup/setup_conda.sh` -> `make bootstrap` -> `make test-fast` (**558 passed, 3 skipped, 2 deselected** as of 2026-09-24; ~3m30s in CI, well under a minute on a warm dev box; needs no data). Data custody and the `gh release download` pull are in [DATA.md](DATA.md).
 
 **How to work here (read first):** [@.claude/rules/working-agreement.md](.claude/rules/working-agreement.md) — use the connected tools instead of handing back manual steps; proceed without asking on routine reversible work; name real blockers precisely.
 
