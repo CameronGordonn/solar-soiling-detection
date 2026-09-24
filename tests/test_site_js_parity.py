@@ -23,7 +23,9 @@ import pytest
 
 from src.risk import economics as E
 
-SITE = pathlib.Path(__file__).resolve().parents[2] / "BBF-Website/public/tools/breakeven.html"
+TOOLS = pathlib.Path(__file__).resolve().parents[2] / "BBF-Website/public/tools"
+SITE = TOOLS / "breakeven.html"
+DASHBOARD = TOOLS / "dashboard.js"
 
 
 @pytest.fixture(scope="module")
@@ -89,3 +91,37 @@ def test_cleaning_efficacies_match(html):
     rinse = _number(html, r"lightpro:\s*\{[^}]*?removes:\s*([0-9.]+)")
     assert pro == pytest.approx(E.PROFESSIONAL_CLEAN_EFFICACY, abs=1e-6)
     assert rinse == pytest.approx(E.RINSE_CLEAN_EFFICACY, abs=1e-6)
+
+
+# ---------- the second JS copy ------------------------------------------------------
+#
+# `dashboard.js` carries its OWN recovery constants, independent of breakeven.html. Two
+# reimplementations of one model is bad enough; three is how a number quietly diverges in
+# one place and not the others. Both are asserted here.
+
+
+@pytest.fixture(scope="module")
+def dashboard_js() -> str:
+    if not DASHBOARD.exists():
+        pytest.skip(f"site repo not checked out beside this one: {DASHBOARD}")
+    return DASHBOARD.read_text()
+
+
+def test_dashboard_js_recovery_matches(dashboard_js):
+    pro = _number(dashboard_js, r"const RECOVERY_PRO\s*=\s*([0-9.]+)")
+    basic = _number(dashboard_js, r"const RECOVERY_BASIC\s*=\s*([0-9.]+)")
+    assert pro == pytest.approx(E.DEFAULT_RECOVERY_PRO, abs=1e-6), (
+        f"dashboard.js ships RECOVERY_PRO {pro} but economics.DEFAULT_RECOVERY_PRO is "
+        f"{E.DEFAULT_RECOVERY_PRO}."
+    )
+    assert basic == pytest.approx(E.DEFAULT_RECOVERY_RINSE, abs=1e-6)
+
+
+def test_the_two_js_copies_agree_with_each_other(html, dashboard_js):
+    """Even if both drifted from Python together, they must not disagree between themselves."""
+    assert _number(html, r"professional:\s*\{[^}]*?recovery:\s*([0-9.]+)") == pytest.approx(
+        _number(dashboard_js, r"const RECOVERY_PRO\s*=\s*([0-9.]+)"), abs=1e-6
+    )
+    assert _number(html, r"lightpro:\s*\{[^}]*?recovery:\s*([0-9.]+)") == pytest.approx(
+        _number(dashboard_js, r"const RECOVERY_BASIC\s*=\s*([0-9.]+)"), abs=1e-6
+    )

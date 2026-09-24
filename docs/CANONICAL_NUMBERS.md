@@ -148,7 +148,7 @@ this repo right now**, and they are both in shipping code paths.
 | Value | Where | What it is |
 |---|---|---|
 | **0.045** pro / **0.032** rinse | `BBF-Website/public/tools/breakeven.html` (`CLEAN`), [ECONOMICS_GROUNDING](ECONOMICS_GROUNDING_20260809.md), and the API default (`recovery_basis="measured"`) | **Measured.** Small because rain already resets the array ~27 times a year here |
-| **0.445** pro / **0.346** rinse | `src/risk/economics.py` `DEFAULT_SCENARIOS`, used by `scripts/analyze/rebuild_aoi_economics.py` | **Modelled.** `REGULAR_SOILING_FULL_RESET_RECOVERY = 0.4944` × efficacy: an April–September planning scenario assuming a perfect early-July reset |
+| ~~0.445 pro / 0.346 rinse~~ | ~~`economics.py` `DEFAULT_SCENARIOS`~~ — **reverted 2026-09-24** | **Modelled**, and a regression while it was the default. Survives as `DRY_SEASON_RESET_RECOVERY = 0.4944` (× efficacy), named for its denominator and reachable via the API's `recovery_basis="seasonal_planning"` |
 
 The paper corroborates the measured pair independently: **0.0634** median (half-norm basis)
 across **505 observed cleaning events** on **149 metered** California systems
@@ -172,15 +172,20 @@ headline — but supply a **measured** per-roof loss into that path and the verd
 0.63 points of annual output. **Quote the dollars, not the fraction** — $28.10 per wash at retail,
 $10.14 at export, against a $150 service.
 
-⚠️ **Corrected 2026-09-24: the modelled value is a REGRESSION, not a standing choice.** Commit
-`187161f` (2026-09-04, on `origin/main`) replaced the measured `DEFAULT_RECOVERY_PRO = 0.045` with
-the modelled `0.4944 × 0.90 = 0.445` in a commit with an empty body. The published AOI run
-(2026-08-30) predates it and records `recovery_frac_professional: 0.045`, so **the dashboard is
-right and the code is wrong**. Re-running the AOI on today's code would report **80 of 1,865**
-sites worth cleaning (398 at the p90 loss) instead of zero — it reverses the headline finding.
-`tests/test_economics.py` currently asserts the modelled derivation, so the suite is defending the
-regression. Plan and evidence: [RECOVERY_RECONCILIATION_PLAN.md](RECOVERY_RECONCILIATION_PLAN.md).
-The API (`src/solarsoiled/decision.py`) already defaults to the measured pair and is unaffected.
+✅ **Resolved 2026-09-24: the measured 0.045 / 0.032 is the default again.** Commit `187161f`
+(2026-09-04) had replaced it with the modelled `0.4944 × 0.90 = 0.445` in a commit with an empty
+body — a dry-season share used as an annual one. That was live for twenty days and produced the
+now-retired "91 of 1,865" figure. The AOI has been re-run at the restored constant and reproduces
+the published result: **0 of 1,865**, all 3,362 `array_id`s preserved.
+
+Both JS copies on the live site (`dashboard.js` `RECOVERY_PRO`, `breakeven.html` `CLEAN`) shipped
+0.045 throughout and were never wrong. `tests/test_site_js_parity.py` now asserts them against
+Python so the two implementations cannot drift again, and `tests/test_economics.py` pins the
+constant with its full history. Full account:
+[RECOVERY_RECONCILIATION_PLAN.md](RECOVERY_RECONCILIATION_PLAN.md).
+
+⚠️ **The regression is still on BBF `origin/main`** (`187161f`). This fix lives on
+`paper/draft-and-aq-ablation` and the public mirror only.
 
 ### Label set
 
@@ -274,9 +279,10 @@ Source of truth: `outputs/aoi/santa-cruz-w2-21cm/` and
 |---|---|---|
 | detected polygons in the AOI | **3,362** | `arrays.geojson`, and what the dashboard renders |
 | **sites** after parcel clustering | **1,865** | economics runs per site, ~1.80 polygons/site at 21cm |
-| sites with positive Regular Soiling planning net | **91 of 1,865 (4.879%)** | `econ_summary.json`, 2026-09-04; April-September dry-season scenario, July clean |
-| Regular Soiling recovery, professional / basic | **0.44496 / 0.34608** | disclosed July planning scenario; a perfect July reset protects 0.4944 of annual Regular Soiling value |
-| weather-trajectory recovery sensitivity | **0.045** | historical SOMOSclean best-date result; retained for comparison, not the public planning default |
+| **sites worth cleaning** | **0 of 1,865 (0.000%)** | `econ_summary.json`, re-run 2026-09-24 at the restored measured recovery; max P(net>0) = 0.0000 |
+| ~~sites with positive Regular Soiling planning net~~ | ~~91 of 1,865 (4.879%)~~ | ⚠️ **RETIRED.** A 2026-09-04 run under the modelled dry-season recovery (0.445), which was a regression — a dry-season share used as an annual one. Do not quote it. See [RECOVERY_RECONCILIATION_PLAN.md](RECOVERY_RECONCILIATION_PLAN.md) |
+| **cleaning recovery, professional / basic** | **0.045 / 0.032** | **MEASURED**, real-weather SOMOSclean trajectory; the share of a *year's* loss one wash recovers. What `economics.py`, `dashboard.js` and `breakeven.html` all ship. Corroborated by the paper at 0.0634 median over 505 observed cleans |
+| dry-season planning figure | 0.4944 (× efficacy) | `DRY_SEASON_RESET_RECOVERY` — modelled share of *dry-season* cost avoided by a perfect July reset. **A different denominator; not interchangeable with the row above** |
 | model importance on AOI-constant features | **58.1%** | measured 2026-08-12; **supersedes 21.8%**, which counted only absent features and missed all-NaN and low-variance ones |
 | within-AOI loss spread (p10–p90) | 0.76 pts | valid for level, **not** for ranking homes |
 | model_version on the shipped run | `rfdetr-w2-20260807` | `detect/manifest.json` |
@@ -301,7 +307,7 @@ These get conflated. They are unrelated.
 
 | Quantity | Value | Command |
 |---|---|---|
-| `make test-fast` | **548 passed, 3 skipped, 2 deselected** (2026-09-24); ~3m30s cold in CI, <1m warm locally | `make test-fast` |
+| `make test-fast` | **557 passed, 3 skipped, 2 deselected** (2026-09-24); ~3m30s cold in CI, <1m warm locally | `make test-fast` |
 
 Measured 2026-08-31, after `tests/test_canonical_numbers.py` added 38 cases (it was 432 before).
 Supersedes "248 tests" and "246 passed, 5 skipped". The suite grows; an older count is not a sign

@@ -31,7 +31,7 @@ conda activate solar-soiling
 make bootstrap                     # pip install -e ".[dev,api]"
 
 make test-fast                     # ── TIER 1 ──
-# expect: 548 passed, 3 skipped, 2 deselected   (2026-09-24)
+# expect: 557 passed, 3 skipped, 2 deselected   (2026-09-24)
 #   ~3m30s cold in CI; under a minute on a warm dev box. Both are normal.
 ```
 

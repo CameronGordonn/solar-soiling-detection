@@ -59,12 +59,12 @@ ACTION_SCENARIOS = ("rinse_service", "professional")
 #                       paper, which measures 0.0634 (median, half-norm basis) from 505
 #                       observed cleaning events on 149 metered California systems.
 #
-#   seasonal_planning   professional 0.445, rinse 0.346. risk.economics' DEFAULT_SCENARIOS:
-#                       a MODELLED April-September planning scenario assuming a perfect
-#                       early-July reset. It is ~10x the measured pair and is the
-#                       optimistic one. Available because the AOI pipeline and the public
-#                       "Regular Soiling" recommendation are built on it, so results have
-#                       to be reproducible - NOT because it is the better default.
+#   seasonal_planning   professional 0.445, rinse 0.346, from DRY_SEASON_RESET_RECOVERY:
+#                       a MODELLED April-September scenario assuming a perfect early-July
+#                       reset. It is the share of DRY-SEASON cost avoided, ~10x the
+#                       measured pair, and the optimistic one. It was the library default
+#                       from 2026-09-04 to 2026-09-24 and that was a regression; it is
+#                       kept only so work done in that window stays reproducible.
 #
 # Measured on the paper's own median metered system (5.72 kW, 9.53% annual loss, retail
 # rate), seasonal_planning returns "clean it, +$47.80" where the paper's measured basis
@@ -391,9 +391,11 @@ def decide(inp: DecisionInputs, *, n_samples: int = 2000, seed: int = 42) -> dic
             "already resets the array ~27 times a year here."
             if inp.recovery_basis == "measured" else
             "seasonal_planning: 0.445 professional / 0.346 rinse, a MODELLED "
-            "April-September scenario assuming a perfect early-July reset. ~10x the "
-            "measured pair and the optimistic one; it can return 'clean it' where the "
-            "measured basis does not. Kept for reproducing the AOI pipeline only."
+            "April-September scenario assuming a perfect early-July reset. This is the "
+            "share of DRY-SEASON cost avoided, not of annual cost, so pairing it with an "
+            "annual loss overstates recovery ~10x; it can return 'clean it' where the "
+            "measured basis does not. Kept only to reproduce work done while it was "
+            "wrongly the library default (2026-09-04 to 2026-09-24)."
         ),
         "recovery_band": mc.get("recovery_band"),
         "unsourced_constants": ["PACKING_FACTOR", "MIN_PRO_SERVICE", "per-panel rate schedule"],

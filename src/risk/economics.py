@@ -22,12 +22,18 @@ marked ``UNSOURCED``. The headline corrections:
                      solar home is most likely exporting, so the blended value for a
                      post-2023 no-battery customer is ~$0.165 — BELOW the old constant.
 
-  ``recovery_frac``  0.90 of annual loss from one clean  ->  a scheduled seasonal
-                     recovery of about 0.445 for a professional clean and 0.346 for a
-                     basic rinse. The planning model assumes a six-month April-September
-                     dry season, winter rain that resets ordinary dust, and an early-July clean
-                     that avoids the final three dry-season months. It is a disclosed
-                     scenario, not a measurement of a particular roof.
+  ``recovery_frac``  0.90 of annual loss from one clean  ->  a MEASURED 0.045 for a
+                     professional clean and 0.032 for a basic rinse: the share of a
+                     YEAR's soiling loss one wash recovers on the real-weather SOMOSclean
+                     trajectory for coastal Santa Cruz. Small because rain already resets
+                     the array ~25 times a year here.
+
+                     A modelled alternative, ``DRY_SEASON_RESET_RECOVERY`` (0.4944 x
+                     efficacy = 0.445 / 0.346), assumes a six-month April-September dry
+                     season with no rain reset and an early-July clean. It is the share of
+                     DRY-SEASON cost avoided, NOT of annual cost, and it was briefly and
+                     wrongly the default (2026-09-04 to 2026-09-24). Do not pair it with an
+                     annual loss. See docs/RECOVERY_RECONCILIATION_PLAN.md.
 
   ``M2_PER_KW``      5.67 (implying 176 W/m2, no stated packing factor)  ->  derived
                      from a sourced module power density and an EXPLICIT packing factor.

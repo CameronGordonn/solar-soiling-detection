@@ -33,7 +33,7 @@ diagnosis, the evidence, and a sequence for fixing it.
 |---|---|---|---|
 | **0.045** pro / **0.032** rinse | `BBF-Website/public/tools/breakeven.html` (`CLEAN`); [`ECONOMICS_GROUNDING_20260809.md`](ECONOMICS_GROUNDING_20260809.md); the published AOI run's `econ_summary.json` | **measured**, real-weather SOMOSclean trajectory | the paper, the live site, the published dashboard |
 | **0.0634** (median, half-norm basis) | `paper/paper.tex`, from `outputs/soiling/audit/value_per_clean.json` | **measured**, 505 observed cleaning events on 149 metered systems | the above |
-| **0.445** pro / **0.346** rinse | `src/risk/economics.py` `DEFAULT_SCENARIOS` — **current code** | **modelled** planning scenario | nothing else |
+| **0.445** pro / **0.346** rinse | `economics.py` `DEFAULT_SCENARIOS` — *the code from 2026-09-04 to 2026-09-24; reverted* | **modelled** planning scenario | nothing else |
 | **~1.0** | `src/risk/band_soiling.py` `bio_recovery_fraction` | **a different channel**, and correct | n/a — see §5 |
 | 0.90 / 0.70 | `economics.py` `LEGACY_*`, A/B only | retired 2026-08-09 | n/a |
 
@@ -56,8 +56,12 @@ is the outlier, and it is what the code currently ships.**
                      -> the grounding fix is reverted. No re-run, no note, now on main.
 ```
 
-The AOI has not been rebuilt since, which is the only reason the published result is still
-correct. **The dashboard is right and the code is wrong**, not the other way round.
+**Correction, 2026-09-24.** An earlier draft of this document said the AOI "has not been rebuilt
+since". It had: `CANONICAL_NUMBERS.md` recorded a **2026-09-04** run reporting **91 of 1,865** sites
+with a positive net, produced under the modelled recovery. That figure is now retired. The artifact
+left on disk was the 2026-08-30 one, which is what made the regression look unshipped. Both JS
+copies on the live site kept 0.045 throughout, so **the site was never wrong** — only the library
+and the docs were.
 
 ## 3. Why the modelled number is not simply "a mistake"
 

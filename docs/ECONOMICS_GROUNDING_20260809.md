@@ -25,12 +25,18 @@ Every constant in the dollar chain (`detected area → system_kw → annual_loss
 clean/no-clean`) was audited, sourced, or explicitly marked unsourced.
 
 > **Public product update, 2026-09-04.** This audit records the historical
-> SOMOSclean weather-trajectory sensitivity of `recovery_frac = 0.045`. The live
-> dashboard now presents a separate, disclosed April-September seasonal-planning
-> scenario: a July clean protects the remaining three dry-season months, using
-> recovery fractions 0.44496 (professional) and 0.34608 (basic). It also keeps
-> Persistent Soiling in a separate inspection screen. Do not copy this
-> document's retired blanket no-clean verdict into public product copy.
+> SOMOSclean weather-trajectory sensitivity of `recovery_frac = 0.045`.
+>
+> ⚠️ **Corrected 2026-09-24.** The sentences that used to follow here claimed the live
+> dashboard presents an April-September seasonal-planning scenario using 0.44496 /
+> 0.34608. **That was never true of the shipped site**: `dashboard.js` has always
+> shipped `RECOVERY_PRO = 0.045` / `RECOVERY_BASIC = 0.032`, and `breakeven.html` the
+> same. The modelled pair was the Python default from 2026-09-04 to 2026-09-24 and has
+> been reverted; it survives as `DRY_SEASON_RESET_RECOVERY`, a *dry-season* share that is
+> not interchangeable with the annual one. This document's 0.045 and its no-clean verdict
+> stand, and the AOI re-run of 2026-09-24 reproduces them (0 of 1,865). Persistent
+> Soiling remains a separate inspection screen. See
+> [RECOVERY_RECONCILIATION_PLAN.md](RECOVERY_RECONCILIATION_PLAN.md).
 
 **Headline: the product is uneconomic in coastal Santa Cruz, and the margin is not
 close.** Zero of 1,865 sites produce a positive expected net, at any electricity rate up

@@ -263,7 +263,7 @@ that differ tenfold.** Both claim to be "the share of a year's soiling loss one 
 | basis | professional | source |
 |---|---|---|
 | **`measured`** (default) | **0.045** | [`docs/ECONOMICS_GROUNDING_20260809.md`](docs/ECONOMICS_GROUNDING_20260809.md), and what the live BBF calculator ships. The paper independently measures **0.0634** (median of 505 observed cleans on 149 metered systems) |
-| `seasonal_planning` | 0.445 | `risk.economics` `DEFAULT_SCENARIOS` — a **modelled** April–September scenario assuming a perfect early-July reset |
+| `seasonal_planning` | 0.445 | `DRY_SEASON_RESET_RECOVERY` × efficacy — a **modelled** April–September scenario assuming a perfect early-July reset. It is the share of *dry-season* cost avoided, not annual, so the two are not interchangeable. It was wrongly the library default for twenty days in September 2026 |
 
 This is not academic. Fed the paper's own median metered system (5.72 kW, 9.53% annual loss, NEM 2.0
 retail), `seasonal_planning` returns **"clean it, +$47.80"** while the paper reports that system
