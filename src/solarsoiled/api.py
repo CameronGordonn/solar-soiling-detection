@@ -24,18 +24,20 @@ from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel
 
-from solarsoiled.aoi import parse_aoi, write_aoi_geojson
 from solarsoiled.decision import DecisionError, decide, resolve_inputs
 from solarsoiled.jobs import JobRecord, create_job, get_job, submit
 from solarsoiled.paths import AoiPaths, REPO_ROOT
-from solarsoiled.recommend import (
-    recommend_cleaning,
-    recommend_per_array,
-    write_array_recommendations,
-    write_recommendation,
-)
 from solarsoiled.registry import RegistryError, resolve as resolve_weights, resolve_soiling
-from solarsoiled.viz import build_risk_map
+
+# `solarsoiled.aoi` and `solarsoiled.recommend` are imported lazily, inside the handlers
+# that need them, because they pull shapely/numpy and geopandas/pandas/pyproj respectively.
+# Nothing on the /decision path touches either: that path is arithmetic over stdlib, and
+# keeping it that way is what lets the decision endpoints stay available (and cheap to
+# deploy) when the geospatial stack is absent. Measured: importing this module without
+# them pulls no heavy dependency at all.
+#
+# `solarsoiled.viz` is imported lazily for the same reason -- folium is only needed to
+# render a risk map.
 
 # Ensure repo root is on sys.path so stage-local script imports resolve.
 if str(REPO_ROOT) not in sys.path:
@@ -175,6 +177,9 @@ class DecisionRequest(BaseModel):
     elec_rate: float | None = None
     regime: str | None = None
     install_date: str | None = None
+    # "measured" (default) or "seasonal_planning". The two differ tenfold and this is
+    # the field most able to move the verdict, so it is explicit rather than implied.
+    recovery_basis: str = "measured"
     n_samples: int = 2000
     seed: int = 42
 
@@ -196,6 +201,8 @@ class RunRequest(BaseModel):
 # ---------- pipeline runner (runs in thread pool) ----------
 
 def _run_pipeline(record: JobRecord, *, req: RunRequest) -> dict:
+    from solarsoiled.aoi import parse_aoi, write_aoi_geojson
+
     aoi_obj = parse_aoi(req.aoi, partner_id=req.partner_id)
     paths = AoiPaths(aoi_obj.aoi_id)
     paths.ensure_root()
@@ -280,6 +287,13 @@ def _run_pipeline(record: JobRecord, *, req: RunRequest) -> dict:
             raise RuntimeError(f"risk.geojson missing — run with skip_score=false")
         emit("recommend", "computing cleaning recommendations")
         centroid = aoi_obj.polygon.centroid
+        from solarsoiled.recommend import (
+            recommend_cleaning,
+            recommend_per_array,
+            write_array_recommendations,
+            write_recommendation,
+        )
+
         payload = recommend_cleaning(
             risk_geojson=paths.risk_geojson,
             last_cleaned=date.fromisoformat(req.last_cleaned),
@@ -296,6 +310,8 @@ def _run_pipeline(record: JobRecord, *, req: RunRequest) -> dict:
         write_array_recommendations(paths.array_recommendations_json, array_rows)
 
     emit("viz", "rendering map")
+    from solarsoiled.viz import build_risk_map
+
     build_risk_map(
         paths.risk_geojson,
         paths.root / "risk_map.html",
@@ -516,6 +532,7 @@ async def get_decision(
     elec_rate: float | None = None,
     regime: str | None = None,
     install_date: str | None = None,
+    recovery_basis: str = "measured",
     n_samples: int = 2000,
     seed: int = 42,
 ):
@@ -523,7 +540,7 @@ async def get_decision(
     return _decide_or_422(
         system_kw=system_kw, area_m2=area_m2, loss_pct=loss_pct, sun_hours=sun_hours,
         elec_rate=elec_rate, regime=regime, install_date=install_date,
-        n_samples=n_samples, seed=seed,
+        recovery_basis=recovery_basis, n_samples=n_samples, seed=seed,
     )
 
 
@@ -536,6 +553,7 @@ async def get_breakeven(
     elec_rate: float | None = None,
     regime: str | None = None,
     install_date: str | None = None,
+    recovery_basis: str = "measured",
 ):
     """What would have to be true for cleaning to pay.
 
@@ -545,7 +563,8 @@ async def get_breakeven(
     """
     out = _decide_or_422(
         system_kw=system_kw, area_m2=area_m2, loss_pct=loss_pct, sun_hours=sun_hours,
-        elec_rate=elec_rate, regime=regime, install_date=install_date, n_samples=1,
+        elec_rate=elec_rate, regime=regime, install_date=install_date,
+        recovery_basis=recovery_basis, n_samples=1,
     )
     return {
         "verdict": out["verdict"],
@@ -598,6 +617,8 @@ async def recommend_quick(
     from shapely.geometry import shape as _shape
     geom = _shape(target_feature["geometry"])
     centroid = geom.centroid
+
+    from solarsoiled.recommend import recommend_cleaning, recommend_per_array
 
     aoi_rec = recommend_cleaning(
         risk_geojson=paths.risk_geojson,

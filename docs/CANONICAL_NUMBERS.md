@@ -140,6 +140,43 @@ holds out the year but not the station. The honest replacement is the joint stat
 **0.622**, 95% CI [0.571, 0.670], P(AUC ≥ 0.70) = **0.001**. Do not quote 0.710 as a passing gate.
 The calibration rows in the table remain valid — calibration was never the leaking quantity.
 
+### Recovery fraction — two live values, ten times apart (found 2026-09-24)
+
+"The share of a year's soiling loss that one wash recovers" has **two different values in
+this repo right now**, and they are both in shipping code paths.
+
+| Value | Where | What it is |
+|---|---|---|
+| **0.045** pro / **0.032** rinse | `BBF-Website/public/tools/breakeven.html` (`CLEAN`), [ECONOMICS_GROUNDING](ECONOMICS_GROUNDING_20260809.md), and the API default (`recovery_basis="measured"`) | **Measured.** Small because rain already resets the array ~27 times a year here |
+| **0.445** pro / **0.346** rinse | `src/risk/economics.py` `DEFAULT_SCENARIOS`, used by `scripts/analyze/rebuild_aoi_economics.py` | **Modelled.** `REGULAR_SOILING_FULL_RESET_RECOVERY = 0.4944` × efficacy: an April–September planning scenario assuming a perfect early-July reset |
+
+The paper corroborates the measured pair independently: **0.0634** median (half-norm basis)
+across **505 observed cleaning events** on **149 metered** California systems
+(`outputs/soiling/audit/value_per_clean.json`).
+
+**Why this is not merely cosmetic.** `scenario_net` multiplies *annual* loss by this fraction,
+and the comment on `REGULAR_SOILING_FULL_RESET_RECOVERY` states it is also an annual share — so
+the denominators match and the two values genuinely disagree about the same quantity. Fed the
+paper's own median metered system (5.72 kW, 9.53% annual loss, NEM 2.0 retail), the modelled pair
+returns **"clean it, +$47.80"** where the measured pair returns **no_clean** and the paper reports
+a **$2.44/kWh** break-even with none of the 149 clearing.
+
+**Why the published AOI result is nevertheless safe.** `rebuild_aoi_economics.py` pairs the
+*optimistic* recovery with the *conservative* `BASE_SOILING_PCT = 2.8`, so "zero of 1,865" still
+holds. The two errors point in opposite directions. It is the pairing that is unsound, not the
+headline — but supply a **measured** per-roof loss into that path and the verdict can flip.
+
+**The invariance that makes the dollars trustworthy.** `value_per_clean.json` records
+`recovery_frac × denominator` as constant to machine precision
+(`invariance_max_abs_deviation_usd = 4.3e-14`): 0.2169 × 2.97 ≈ 0.0634 × 9.61 ≈ 0.0308 × 20.58 ≈
+0.63 points of annual output. **Quote the dollars, not the fraction** — $28.10 per wash at retail,
+$10.14 at export, against a $150 service.
+
+**Open decision, not resolved here.** Aligning `economics.py` on the measured pair would change
+published dashboard figures, so it is deliberately left to a product call. The API defaults to
+`measured` and names the basis in every response; `seasonal_planning` remains available to
+reproduce the AOI pipeline.
+
 ### Label set
 
 Source of truth: `outputs/soiling/training_matrix.parquet`.
@@ -259,7 +296,7 @@ These get conflated. They are unrelated.
 
 | Quantity | Value | Command |
 |---|---|---|
-| `make test-fast` | **538 passed, 3 skipped, 2 deselected** (2026-09-24); ~3m30s cold in CI, <1m warm locally | `make test-fast` |
+| `make test-fast` | **546 passed, 3 skipped, 2 deselected** (2026-09-24); ~3m30s cold in CI, <1m warm locally | `make test-fast` |
 
 Measured 2026-08-31, after `tests/test_canonical_numbers.py` added 38 cases (it was 432 before).
 Supersedes "248 tests" and "246 passed, 5 skipped". The suite grows; an older count is not a sign

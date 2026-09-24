@@ -46,6 +46,45 @@ from src.risk import rates as R
 #: Scenario keys that represent actually doing something, in escalating cost order.
 ACTION_SCENARIOS = ("rinse_service", "professional")
 
+# ── which recovery fraction to pair with the caller's loss ───────────────────────────
+#
+# THIS IS THE FIELD THAT DECIDES THE ANSWER, and the repo carries two values for it that
+# differ by a factor of ten. Both describe "the share of a year's soiling loss that one
+# wash gets back", so pairing the wrong one with a loss percentage silently moves the
+# verdict.
+#
+#   measured (default)  professional 0.045, rinse 0.032. The empirically grounded pair:
+#                       docs/ECONOMICS_GROUNDING_20260809.md, and what the live BBF
+#                       breakeven calculator ships. Corroborated independently by the
+#                       paper, which measures 0.0634 (median, half-norm basis) from 505
+#                       observed cleaning events on 149 metered California systems.
+#
+#   seasonal_planning   professional 0.445, rinse 0.346. risk.economics' DEFAULT_SCENARIOS:
+#                       a MODELLED April-September planning scenario assuming a perfect
+#                       early-July reset. It is ~10x the measured pair and is the
+#                       optimistic one. Available because the AOI pipeline and the public
+#                       "Regular Soiling" recommendation are built on it, so results have
+#                       to be reproducible - NOT because it is the better default.
+#
+# Measured on the paper's own median metered system (5.72 kW, 9.53% annual loss, retail
+# rate), seasonal_planning returns "clean it, +$47.80" where the paper's measured basis
+# returns a break-even tariff of $2.44/kWh and no action that pays. The default is
+# therefore the measured pair: an API must not contradict the project's own measurement.
+MEASURED_RECOVERY = {"professional": 0.045, "rinse_service": 0.032}
+RECOVERY_BASES = ("measured", "seasonal_planning")
+
+
+def scenarios_for(basis: str) -> dict[str, dict]:
+    """Scenario table for a recovery basis, leaving cost functions untouched."""
+    if basis not in RECOVERY_BASES:
+        raise DecisionError(f"Unknown recovery_basis {basis!r}. Known: {list(RECOVERY_BASES)}")
+    if basis == "seasonal_planning":
+        return E.DEFAULT_SCENARIOS
+    return {
+        key: {**scen, "recovery_frac": MEASURED_RECOVERY.get(key, scen["recovery_frac"])}
+        for key, scen in E.DEFAULT_SCENARIOS.items()
+    }
+
 #: Returned on every response. These are the limits a caller has to know to use the
 #: number responsibly, and they travel with the payload rather than living in a doc.
 STANDING_LIMITATIONS = (
@@ -80,6 +119,7 @@ class DecisionInputs:
     regime: str | None
     loss_pct_p10: float | None = None
     loss_pct_p90: float | None = None
+    recovery_basis: str = "measured"
     provenance: dict[str, str] = field(default_factory=dict)
 
 
@@ -94,6 +134,7 @@ def resolve_inputs(
     elec_rate: float | None = None,
     regime: str | None = None,
     install_date: str | None = None,
+    recovery_basis: str = "measured",
 ) -> DecisionInputs:
     """Normalise the several ways a caller can describe a roof into one input set.
 
@@ -173,6 +214,16 @@ def resolve_inputs(
     else:
         prov["sun_hours"] = "caller"
 
+    if recovery_basis not in RECOVERY_BASES:
+        raise DecisionError(
+            f"Unknown recovery_basis {recovery_basis!r}. Known: {list(RECOVERY_BASES)}"
+        )
+    prov["recovery_basis"] = (
+        "measured (ECONOMICS_GROUNDING; corroborated by the paper at 0.0634 median over "
+        "505 observed cleans)" if recovery_basis == "measured"
+        else "seasonal_planning — MODELLED, ~10x the measured pair and the optimistic one"
+    )
+
     return DecisionInputs(
         system_kw=float(system_kw),
         loss_pct=float(loss_pct),
@@ -181,6 +232,7 @@ def resolve_inputs(
         regime=resolved_regime,
         loss_pct_p10=loss_pct_p10,
         loss_pct_p90=loss_pct_p90,
+        recovery_basis=recovery_basis,
         provenance=prov,
     )
 
@@ -193,7 +245,7 @@ def breakeven_tariff_usd_per_kwh(inp: DecisionInputs, scenario: str) -> float | 
     ``rate * cost / recovered``. Returns ``None`` when nothing is recovered (no loss, or
     a zero-recovery scenario), because then no finite price makes it pay.
     """
-    scen = E.DEFAULT_SCENARIOS[scenario]
+    scen = scenarios_for(inp.recovery_basis)[scenario]
     loss = E.annual_loss_usd(
         inp.system_kw, inp.sun_hours, inp.loss_pct / 100.0, inp.elec_rate
     )
@@ -212,7 +264,7 @@ def _thresholds(inp: DecisionInputs) -> dict[str, Any]:
     """
     out: dict[str, Any] = {}
     for key in ACTION_SCENARIOS:
-        scen = E.DEFAULT_SCENARIOS[key]
+        scen = scenarios_for(inp.recovery_basis)[key]
         out[key] = {
             "breakeven_tariff_usd_per_kwh": breakeven_tariff_usd_per_kwh(inp, key),
             "breakeven_system_kw": E.breakeven_system_kw(
@@ -233,17 +285,23 @@ def decide(inp: DecisionInputs, *, n_samples: int = 2000, seed: int = 42) -> dic
     that matters most: it says the verdict held across the draws, not merely at the point
     estimate.
     """
+    scens = scenarios_for(inp.recovery_basis)
     unc = E.Uncertainty(
         loss_pct_p10=inp.loss_pct_p10,
         loss_pct_p90=inp.loss_pct_p90,
         rate_lo=None,
         rate_hi=None,
+        # The MC's own recovery band must come from the SAME basis as the scenarios,
+        # or the point estimate and the interval describe different worlds.
+        recovery_lo_frac=scens["rinse_service"]["recovery_frac"],
+        recovery_hi_frac=scens["professional"]["recovery_frac"],
     )
     mc = E.array_recommendation_mc(
         loss_pct=inp.loss_pct,
         system_kw=inp.system_kw,
         sun_hours=inp.sun_hours,
         elec_rate=inp.elec_rate,
+        scenarios=scens,
         unc=unc,
         n_samples=n_samples,
         seed=seed,
@@ -284,14 +342,20 @@ def decide(inp: DecisionInputs, *, n_samples: int = 2000, seed: int = 42) -> dic
             "sun_hours": inp.sun_hours,
             "elec_rate_usd_per_kwh": round(inp.elec_rate, 4),
             "regime": inp.regime,
+            "recovery_basis": inp.recovery_basis,
         },
         "provenance": inp.provenance,
-        # Named so nobody reads this band as the paper's ANNUAL recovery bracket
-        # (0.031-0.217). Different denominator, not comparable.
+        # The single field most able to move the verdict, so it is stated, not implied.
         "recovery_basis": (
-            "dry-season planning scenario: a mid-season clean against a 180-day dry "
-            "season, with professional/rinse efficacy applied. NOT the annual recovery "
-            "fraction, which is denominator-dependent and spans 0.031-0.217."
+            "measured: 0.045 professional / 0.032 rinse, the share of a YEAR's soiling "
+            "loss one wash recovers (ECONOMICS_GROUNDING; the paper measures 0.0634 "
+            "median over 505 observed cleans and corroborates it). Small because rain "
+            "already resets the array ~27 times a year here."
+            if inp.recovery_basis == "measured" else
+            "seasonal_planning: 0.445 professional / 0.346 rinse, a MODELLED "
+            "April-September scenario assuming a perfect early-July reset. ~10x the "
+            "measured pair and the optimistic one; it can return 'clean it' where the "
+            "measured basis does not. Kept for reproducing the AOI pipeline only."
         ),
         "recovery_band": mc.get("recovery_band"),
         "unsourced_constants": ["PACKING_FACTOR", "MIN_PRO_SERVICE", "per-panel rate schedule"],

@@ -241,20 +241,34 @@ curl -s "https://solarsoiled-api.onrender.com/decision?system_kw=6&install_date=
 
 ```jsonc
 { "verdict": "no_clean", "annual_loss_usd": 129.56,
-  "best_action": "rinse_service", "best_action_net_usd": -45.16,
-  "thresholds": { "professional": { "breakeven_tariff_usd_per_kwh": 1.1899,
-                                    "breakeven_system_kw": 46.0,
-                                    "breakeven_soiling_pct": 7.3 } },
-  "uncertainty": { "prob_net_positive": 0.0755, "decision_robust": true },
+  "best_action": "rinse_service", "best_action_net_usd": -85.85,
+  "thresholds": { "professional": { "breakeven_tariff_usd_per_kwh": 11.77,
+                                    "breakeven_system_kw": null,      // no size pays
+                                    "breakeven_soiling_pct": null } },
+  "uncertainty": { "prob_net_positive": 0.0, "decision_robust": true },
+  "inputs": { "recovery_basis": "measured" },
   "provenance": { "loss_pct": "BASE_SOILING_PCT default (2.8%) - NOT a measurement of this roof" },
   "limitations": [ "Estimates soiling LEVEL, not a ranking between roofs...", "..." ] }
 ```
 
 Three things it does on purpose. **`provenance`** names how every input was obtained, because the
 most dangerous field here is a default the caller did not realise they accepted. **`thresholds`**
-says what would have to be true — a bare "no" is not actionable, "no, and you would need $1.19/kWh
-or a 46 kW array" is. **There is no `risk_score` input**: the risk-score → loss-percent mapping was
-removed as unsound and is deliberately not reconstructed.
+says what would have to be true — a bare "no" is not actionable, and `null` here means *no system
+size pays at any price*. **There is no `risk_score` input**: the risk-score → loss-percent mapping
+was removed as unsound and is deliberately not reconstructed.
+
+**`recovery_basis` is the field that decides the answer, and the repo carries two values for it
+that differ tenfold.** Both claim to be "the share of a year's soiling loss one wash recovers":
+
+| basis | professional | source |
+|---|---|---|
+| **`measured`** (default) | **0.045** | [`docs/ECONOMICS_GROUNDING_20260809.md`](docs/ECONOMICS_GROUNDING_20260809.md), and what the live BBF calculator ships. The paper independently measures **0.0634** (median of 505 observed cleans on 149 metered systems) |
+| `seasonal_planning` | 0.445 | `risk.economics` `DEFAULT_SCENARIOS` — a **modelled** April–September scenario assuming a perfect early-July reset |
+
+This is not academic. Fed the paper's own median metered system (5.72 kW, 9.53% annual loss, NEM 2.0
+retail), `seasonal_planning` returns **"clean it, +$47.80"** while the paper reports that system
+needs **$2.44/kWh** and that none of the 149 clear. The measured basis is therefore the default, the
+basis is named in every response, and a regression test pins the agreement.
 
 | Endpoint | Description |
 |---|---|

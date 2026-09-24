@@ -11,7 +11,12 @@ import pytest
 from fastapi.testclient import TestClient
 
 from src.risk import economics as E
-from solarsoiled.decision import DecisionError, decide, resolve_inputs
+from solarsoiled.decision import (
+    DecisionError,
+    decide,
+    resolve_inputs,
+    scenarios_for,
+)
 
 try:
     import solarsoiled.api as api_mod
@@ -57,10 +62,32 @@ def test_no_risk_score_input_is_accepted(client):
     assert body["provenance"]["loss_pct"].startswith("BASE_SOILING_PCT")
 
 
-def test_recovery_band_names_its_denominator(client):
-    """The annual bracket (0.031-0.217) and this seasonal band are different quantities."""
+def test_recovery_basis_defaults_to_the_measured_pair(client):
+    """The optimistic modelled pair must never be the silent default.
+
+    This is the field most able to move the verdict, and the repo carries two values for
+    it that differ tenfold. Defaulting to the modelled one would make the API contradict
+    the project's own measurement.
+    """
     body = client.post("/decision", json={"system_kw": 6.0}).json()
-    assert "NOT the annual recovery fraction" in body["recovery_basis"]
+    assert body["inputs"]["recovery_basis"] == "measured"
+    assert body["recovery_basis"].startswith("measured:")
+    assert scenarios_for("measured")["professional"]["recovery_frac"] == 0.045
+
+
+def test_seasonal_basis_is_labelled_as_optimistic(client):
+    body = client.post(
+        "/decision", json={"system_kw": 6.0, "recovery_basis": "seasonal_planning"}
+    ).json()
+    assert "MODELLED" in body["recovery_basis"]
+    assert "10x" in body["recovery_basis"]
+    assert "MODELLED" in body["provenance"]["recovery_basis"]
+
+
+def test_the_two_bases_differ_about_tenfold():
+    m = scenarios_for("measured")["professional"]["recovery_frac"]
+    s = scenarios_for("seasonal_planning")["professional"]["recovery_frac"]
+    assert 8.0 < (s / m) < 12.0
 
 
 # ---------- arithmetic identities ---------------------------------------------------
@@ -85,19 +112,35 @@ def test_at_the_breakeven_tariff_the_net_is_about_zero():
     inp = resolve_inputs(system_kw=30.0, loss_pct=8.0, elec_rate=0.30)
     rate = decide(inp, n_samples=1)["thresholds"]["professional"]["breakeven_tariff_usd_per_kwh"]
     at = resolve_inputs(system_kw=30.0, loss_pct=8.0, elec_rate=rate)
-    scen = E.DEFAULT_SCENARIOS["professional"]
+    scen = scenarios_for(at.recovery_basis)["professional"]
     loss = E.annual_loss_usd(at.system_kw, at.sun_hours, at.loss_pct / 100.0, at.elec_rate)
     _, _, net = E.scenario_net(loss, scen, at.system_kw)
     assert net == pytest.approx(0.0, abs=0.5)
 
 
-def test_bigger_system_never_has_a_worse_verdict():
-    """Monotonicity: cost grows sublinearly in kW against a linear benefit."""
-    nets = []
-    for kw in (3.0, 6.0, 12.0, 25.0, 50.0):
-        out = decide(resolve_inputs(system_kw=kw, regime="nem2_legacy"), n_samples=1)
-        nets.append(out["best_action_net_usd"])
-    assert nets == sorted(nets)
+def _net(kw, **kw2):
+    return decide(resolve_inputs(system_kw=kw, regime="nem2_legacy", **kw2),
+                  n_samples=1)["best_action_net_usd"]
+
+
+def test_net_improves_only_while_the_service_floor_binds():
+    """The real shape, which is not monotone and was asserted to be.
+
+    Below roughly 12 kW the bill is pinned at the $90/$150 one-truck-roll floor, so a
+    bigger array recovers more for the same price and the net improves. Above it the
+    per-panel schedule takes over and cost grows faster than a 4.5% recovery can, so the
+    net degrades again. An earlier version of this test asserted monotonicity, which held
+    only under the optimistic modelled recovery.
+    """
+    rising = [_net(kw) for kw in (2.0, 4.0, 8.0, 12.0)]
+    assert rising == sorted(rising)
+    falling = [_net(kw) for kw in (15.0, 20.0, 30.0, 50.0)]
+    assert falling == sorted(falling, reverse=True)
+
+
+def test_under_the_measured_basis_cleaning_never_pays_at_any_size():
+    """The project's finding, pinned. Even at the most favourable tariff regime."""
+    assert all(_net(kw) < 0 for kw in (2.0, 6.0, 12.0, 20.0, 50.0, 100.0))
 
 
 def test_area_and_kw_routes_agree():
@@ -189,3 +232,40 @@ def test_breakeven_returns_only_thresholds(client):
             "breakeven_system_kw",
             "breakeven_soiling_pct",
         }
+
+
+# ---------- agreement with the paper ------------------------------------------------
+
+def test_the_api_agrees_with_the_paper_on_the_papers_own_median_system():
+    """The regression this module was rewritten to prevent.
+
+    `paper/paper.tex` reports that on 149 metered California rooftops the median system
+    needs $2.44/kWh to break even and that no action pays. Its median system is 5.72 kW
+    at 9.53% annual loss and 5.21 peak sun hours, valued at the NEM 2.0 retail rate.
+
+    Fed that system, the default (measured) basis returns no_clean and a break-even
+    tariff far above any real tariff, which is the paper's conclusion. The
+    seasonal_planning basis returns "clean it" on the same inputs, because its recovery
+    fraction is ten times larger. That disagreement is the reason `measured` is the
+    default and the reason the basis is named in every response.
+    """
+    paper = dict(system_kw=5.72, loss_pct=9.5285, sun_hours=5.2106, elec_rate=0.4573)
+
+    measured = decide(resolve_inputs(**paper), n_samples=1)
+    assert measured["verdict"] == "no_clean"
+    assert measured["best_action_net_usd"] < 0
+    assert measured["thresholds"]["professional"]["breakeven_tariff_usd_per_kwh"] > 2.0
+
+    optimistic = decide(
+        resolve_inputs(**paper, recovery_basis="seasonal_planning"), n_samples=1
+    )
+    assert optimistic["verdict"] != "no_clean"  # documents the hazard, not an endorsement
+
+
+def test_measured_recovery_matches_the_live_site_calculator():
+    """BBF-Website/public/tools/breakeven.html ships CLEAN.professional.recovery = 0.045
+    and CLEAN.lightpro.recovery = 0.032. A reimplementation that silently drifts from the
+    library is a bug class this project has already hit, so pin the pair here."""
+    scens = scenarios_for("measured")
+    assert scens["professional"]["recovery_frac"] == 0.045
+    assert scens["rinse_service"]["recovery_frac"] == 0.032
