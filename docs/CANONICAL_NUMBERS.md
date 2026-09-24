@@ -162,8 +162,9 @@ Source of truth: `outputs/aoi/santa-cruz-w2-21cm/` and
 |---|---|---|
 | detected polygons in the AOI | **3,362** | `arrays.geojson`, and what the dashboard renders |
 | **sites** after parcel clustering | **1,865** | economics runs per site, ~1.80 polygons/site at 21cm |
-| sites with positive expected net | **0 of 1,865** | on **recoverable** soiling only |
-| `recovery_frac`, measured | **0.045** | was assumed 0.90, a 20× overstatement |
+| sites with positive Regular Soiling planning net | **91 of 1,865 (4.879%)** | `econ_summary.json`, 2026-09-04; April-September dry-season scenario, July clean |
+| Regular Soiling recovery, professional / basic | **0.44496 / 0.34608** | disclosed July planning scenario; a perfect July reset protects 0.4944 of annual Regular Soiling value |
+| weather-trajectory recovery sensitivity | **0.045** | historical SOMOSclean best-date result; retained for comparison, not the public planning default |
 | model importance on AOI-constant features | **58.1%** | measured 2026-08-12; **supersedes 21.8%**, which counted only absent features and missed all-NaN and low-variance ones |
 | within-AOI loss spread (p10–p90) | 0.76 pts | valid for level, **not** for ranking homes |
 | model_version on the shipped run | `rfdetr-w2-20260807` | `detect/manifest.json` |
@@ -188,7 +189,7 @@ These get conflated. They are unrelated.
 
 | Quantity | Value | Command |
 |---|---|---|
-| `make test-fast` | **470 passed, 1 skipped, 2 deselected**, ~3m | `make test-fast` |
+| `make test-fast` | **492 passed, 3 skipped, 2 deselected** (2026-09-24); ~3m30s cold in CI, <1m warm locally | `make test-fast` |
 
 Measured 2026-08-31, after `tests/test_canonical_numbers.py` added 38 cases (it was 432 before).
 Supersedes "248 tests" and "246 passed, 5 skipped". The suite grows; an older count is not a sign

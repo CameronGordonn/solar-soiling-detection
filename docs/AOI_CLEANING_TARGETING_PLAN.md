@@ -1,5 +1,12 @@
 # Which Santa Cruz homes would actually benefit from a panel cleaning
 
+> **Public-product update, 2026-09-04.** The historical 0.045 recovery arithmetic
+> below remains useful as a SOMOSclean sensitivity analysis. The live dashboard uses
+> a separate April-September Regular Soiling planning scenario with a July cleaning
+> window, and adds a Persistent Soiling inspection screen. Use
+> `docs/CANONICAL_NUMBERS.md` and `docs/PERSISTENT_SOILING_SCREEN.md` for the
+> current public model before quoting a conclusion from this planning document.
+
 **Living document.** Rewritten and sharpened each iteration; the decision log at the end is
 append-only. Branch: `soiling/aoi-cleaning-targeting`.
 

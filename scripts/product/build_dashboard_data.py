@@ -40,6 +40,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import os
 import re
 import secrets
@@ -64,6 +65,45 @@ APN_SHAPE = re.compile(r"\b\d{3}-\d{3}-\d{2}(?!\d)")
 # both lists are short and change rarely.
 SCHEMA_KEYS = ("situs_raw", "situs_addr", "owner_name", "mail_addr", "mailing_addr",
                '"apn"', "'apn'", "parcel_number")
+
+# Every public Persistent Soiling field is deliberately named and passed through separately. The
+# screen is an uncalibrated inspection prioritisation layer, so publishing only a
+# combined score would make it impossible to audit the policy choices behind it.
+PERSISTENT_DASHBOARD_FIELDS = (
+    ("persistent_soiling_status", "persistent_soiling_status"),
+    ("persistent_soiling_inspection_action", "persistent_soiling_inspection_action"),
+    ("persistent_soiling_score", "persistent_soiling_score"),
+    ("persistent_soiling_rank", "persistent_soiling_rank"),
+    ("persistent_soiling_top_decile", "persistent_soiling_top_decile"),
+    ("low_tilt_score", "low_tilt_score"),
+    ("canopy_exposure_score", "canopy_exposure_score"),
+    ("canopy_frac", "canopy_frac"),
+    ("nearest_canopy_m", "nearest_canopy_m"),
+    ("persistent_soiling_tilt_weight", "persistent_soiling_tilt_weight"),
+    ("persistent_soiling_canopy_weight", "persistent_soiling_canopy_weight"),
+    ("persistent_soiling_canopy_radius_m", "persistent_soiling_canopy_radius_m"),
+    ("persistent_soiling_top_fraction", "persistent_soiling_top_fraction"),
+    ("persistent_soiling_loss_threshold_pct", "persistent_soiling_loss_threshold_pct"),
+    ("persistent_soiling_value_usd_per_kwh", "persistent_soiling_value_usd_per_kwh"),
+    ("persistent_soiling_group_kw", "persistent_soiling_group_kw"),
+    ("persistent_soiling_dollars_at_risk", "persistent_soiling_dollars_at_risk"),
+    ("persistent_soiling_two_year_loss_threshold_pct", "persistent_soiling_two_year_loss_threshold_pct"),
+    ("persistent_soiling_two_year_horizon_years", "persistent_soiling_two_year_horizon_years"),
+    ("persistent_soiling_two_year_dollars_at_risk", "persistent_soiling_two_year_dollars_at_risk"),
+)
+
+# Fields that are intentionally conditional on a confirmed persistent-loss scenario.
+# The LIDAR screen itself can be published before an operator has supplied the Regular Soiling
+# recommendation inputs, so do not make the visible inspection score depend on them.
+PERSISTENT_ECONOMIC_FIELDS = (
+    "persistent_soiling_loss_threshold_pct",
+    "persistent_soiling_value_usd_per_kwh",
+    "persistent_soiling_group_kw",
+    "persistent_soiling_dollars_at_risk",
+    "persistent_soiling_two_year_loss_threshold_pct",
+    "persistent_soiling_two_year_horizon_years",
+    "persistent_soiling_two_year_dollars_at_risk",
+)
 
 
 def _digits(v) -> str:
@@ -91,6 +131,13 @@ def _load_salt() -> str:
 
 def _site_key(site_id, salt: str) -> str | None:
     """APN (or any parcel identifier) -> opaque, stable, non-invertible site key."""
+    # A public grouping map lets economics rebuilds preserve household membership
+    # even when the private parcel file is unavailable. It contains an already
+    # public opaque key, never a parcel identifier, so it must pass through rather
+    # than be re-hashed as though it were an APN.
+    if isinstance(site_id, str) and site_id.startswith("public:s:"):
+        key = site_id.removeprefix("public:")
+        return key if re.fullmatch(r"s:[0-9a-f]{10}", key) else None
     raw = _digits(str(site_id).replace("apn:", ""))
     if not raw:
         return None
@@ -115,6 +162,131 @@ def _round_geom(geom: dict, nd: int) -> dict:
     return {"type": geom["type"], "coordinates": _r(geom["coordinates"])}
 
 
+def _persistent_dashboard_properties(recommendation: dict) -> dict:
+    """Return the explainable, public Persistent Soiling fields for one array payload."""
+    return {
+        dst: recommendation[src]
+        for src, dst in PERSISTENT_DASHBOARD_FIELDS
+        if recommendation.get(src) is not None
+    }
+
+
+def _finite_number(value):
+    """Return a JSON-safe finite number, or ``None`` for blank CSV cells."""
+    if value is None or isinstance(value, bool):
+        return None
+    try:
+        numeric = float(value)
+    except (TypeError, ValueError):
+        return None
+    return numeric if math.isfinite(numeric) else None
+
+
+def _as_bool(value) -> bool:
+    """Normalise pandas/CSV booleans without treating a missing value as true."""
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return value.strip().lower() in {"1", "true", "t", "yes"}
+    numeric = _finite_number(value)
+    return bool(numeric) if numeric is not None else False
+
+
+def _persistent_screen_dashboard_properties(screen_row: dict | None) -> dict:
+    """Map raw LIDAR-screen CSV output into the public Persistent Soiling payload contract.
+
+    This keeps inspection evidence available as soon as ``screen-persistent``
+    completes.  It deliberately does not invent a dollar figure or a cleaning
+    action; those require a separate, date-aware Regular Soiling recommendation run.
+    """
+    if not screen_row:
+        return {}
+
+    candidate = _as_bool(screen_row.get("persistent_soiling_top_decile"))
+    props = {
+        "persistent_soiling_status": "inspection_candidate" if candidate else "not_flagged",
+        "persistent_soiling_inspection_action": "inspect" if candidate else "none",
+        "persistent_soiling_top_decile": candidate,
+    }
+    field_map = (
+        ("persistent_soiling_score", "persistent_soiling_score"),
+        ("persistent_soiling_rank", "persistent_soiling_rank"),
+        ("low_tilt_score", "low_tilt_score"),
+        ("canopy_exposure_score", "canopy_exposure_score"),
+        ("canopy_frac", "canopy_frac"),
+        ("nearest_canopy_m", "nearest_canopy_m"),
+        ("tilt_weight", "persistent_soiling_tilt_weight"),
+        ("canopy_weight", "persistent_soiling_canopy_weight"),
+        ("canopy_radius_m", "persistent_soiling_canopy_radius_m"),
+        ("inspection_fraction", "persistent_soiling_top_fraction"),
+    )
+    for source, destination in field_map:
+        value = _finite_number(screen_row.get(source))
+        if value is not None:
+            props[destination] = int(value) if source == "persistent_soiling_rank" else round(value, 4)
+    return props
+
+
+def _conditional_persistent_economic_properties(row, screen_row: dict | None) -> dict:
+    """Price a confirmed Persistent Soiling scenario for the selected panel group.
+
+    The Persistent Soiling screen is available before an AOI-level cleaning recommendation run.
+    Deriving this conditional scenario here keeps the dashboard complete without
+    turning Persistent Soiling into a Regular Soiling loss prediction. The capacity comes from the selected
+    polygon's traced area, never the summed capacity of its entire property.
+    """
+    if not screen_row or not _as_bool(screen_row.get("persistent_soiling_top_decile")):
+        return {}
+
+    from risk.economics import (
+        BASE_SUN,
+        PERSISTENT_SOILING_INTERVENTION_PCT,
+        PERSISTENT_SOILING_TWO_YEAR_HORIZON_YEARS,
+        PERSISTENT_SOILING_TWO_YEAR_INTERVENTION_PCT,
+        PERSISTENT_SOILING_VALUE_USD_PER_KWH,
+        persistent_soiling_dollars_at_risk,
+        system_kw_from_area,
+    )
+
+    group_kw = system_kw_from_area(_finite_number(row.get("area_m2")))
+    if group_kw is None:
+        return {}
+    sun_hours = _finite_number(row.get("sun_hours")) or BASE_SUN
+    elec_rate = _finite_number(row.get("usd_per_kwh")) or PERSISTENT_SOILING_VALUE_USD_PER_KWH
+    annual_dollars_at_risk = round(
+        persistent_soiling_dollars_at_risk(group_kw, sun_hours, elec_rate),
+        2,
+    )
+    return {
+        "persistent_soiling_loss_threshold_pct": PERSISTENT_SOILING_INTERVENTION_PCT,
+        "persistent_soiling_value_usd_per_kwh": round(elec_rate, 4),
+        "persistent_soiling_group_kw": round(group_kw, 2),
+        "persistent_soiling_dollars_at_risk": annual_dollars_at_risk,
+        "persistent_soiling_two_year_loss_threshold_pct": PERSISTENT_SOILING_TWO_YEAR_INTERVENTION_PCT,
+        "persistent_soiling_two_year_horizon_years": PERSISTENT_SOILING_TWO_YEAR_HORIZON_YEARS,
+        "persistent_soiling_two_year_dollars_at_risk": round(
+            annual_dollars_at_risk * PERSISTENT_SOILING_TWO_YEAR_HORIZON_YEARS,
+            2,
+        ),
+    }
+
+
+def _module_orientation_dashboard_properties(row: dict | None) -> dict:
+    """Publish panel-layout evidence without manufacturing a layout for unresolved rows."""
+    if not row:
+        return {}
+
+    props = {}
+    orientation = row.get("orientation")
+    if isinstance(orientation, str) and orientation.lower() in {"portrait", "landscape"}:
+        props["module_orientation"] = orientation.lower()
+
+    method = row.get("orientation_method")
+    if isinstance(method, str) and method:
+        props["module_orientation_method"] = method
+    return props
+
+
 def main(argv=None) -> int:
     import geopandas as gpd
     import pandas as pd
@@ -128,6 +300,10 @@ def main(argv=None) -> int:
                     help="per-array lidar tilt/azimuth/POA, relative to the AOI dir")
     ap.add_argument("--module-orientation", default="module_orientation.csv",
                     help="per-array portrait/landscape from 6.3cm imagery, if measured")
+    ap.add_argument("--array-recommendations", default="array_recommendations.json",
+                    help="recommendation output carrying optional Persistent Soiling inspection fields")
+    ap.add_argument("--persistent-screen", default="persistent_soiling_screen.csv",
+                    help="raw Persistent Soiling LIDAR-screen output, relative to the AOI dir")
     ap.add_argument("--out-dir", type=Path, default=DEFAULT_OUT)
     ap.add_argument("--precision", type=int, default=6,
                     help="coordinate decimal places (6 ~ 0.1 m; keeps the file small)")
@@ -136,6 +312,39 @@ def main(argv=None) -> int:
     aoi_dir = REPO / "outputs/aoi" / args.aoi
     gdf = gpd.read_file(aoi_dir / args.risk_file).to_crs("EPSG:4326")
     print(f"[in] {args.aoi}/{args.risk_file}: {len(gdf)} arrays")
+
+    # Persistent Soiling can publish as soon as the LIDAR screen is complete; it is not a loss field
+    # in risk.geojson and does not need a last-cleaned date.  Recommendation output,
+    # when available, only enriches it with the conditional value-at-risk scenario.
+    persistent_screen_by_array: dict[int, dict] = {}
+    screen_path = aoi_dir / args.persistent_screen
+    if screen_path.is_file():
+        screen_rows = pd.read_csv(screen_path).to_dict(orient="records")
+        persistent_screen_by_array = {
+            int(row["array_id"]): row for row in screen_rows
+            if row.get("array_id") is not None and _finite_number(row.get("array_id")) is not None
+        }
+        n_candidates = sum(
+            _as_bool(row.get("persistent_soiling_top_decile"))
+            for row in persistent_screen_by_array.values()
+        )
+        print(f"[in] {args.persistent_screen}: {n_candidates}/{len(persistent_screen_by_array)} "
+              "persistent-soiling inspection candidates")
+    else:
+        print(f"[warn] no {args.persistent_screen} — persistent soiling marked not assessed")
+
+    recommendation_by_array: dict[int, dict] = {}
+    recommendations_path = aoi_dir / args.array_recommendations
+    if recommendations_path.is_file():
+        recommendation_rows = json.loads(recommendations_path.read_text(encoding="utf-8"))
+        recommendation_by_array = {
+            int(row["array_id"]): row for row in recommendation_rows
+            if row.get("array_id") is not None
+        }
+        print(f"[in] {args.array_recommendations}: site economics and any Persistent Soiling scenario value")
+    else:
+        print(f"[in] no {args.array_recommendations} — derive conditional Persistent Soiling scenarios "
+              "from each selected panel group's traced area")
 
     # ── alternative-model scores ──────────────────────────────────────────────
     # These backed a 3-tab model switcher that the dashboard no longer renders, and the
@@ -183,9 +392,9 @@ def main(argv=None) -> int:
     # ── measured module orientation ───────────────────────────────────────────
     # Portrait or landscape, read off 6.35 cm imagery by directional autocorrelation
     # (scripts/analyze/module_orientation.py). This is a DIFFERENT quantity from the
-    # roof tilt above and has nothing like its coverage: the run behind this file
-    # classified the largest tilted arrays only, and refused 56% of even those rather
-    # than guess. So it is emitted where it exists and simply absent everywhere else.
+    # roof tilt above and has nothing like its coverage: the sidecar may contain a
+    # pilot or a full-AOI run. It carries an explicit unresolved status when an image
+    # cannot establish layout, and never guesses from roof tilt or polygon shape.
     #
     # Never median-fill it and never infer it from tilt. It is emitted at all because
     # it is the one field on this payload measured from the panels themselves rather
@@ -195,10 +404,17 @@ def main(argv=None) -> int:
     mo_path = aoi_dir / args.module_orientation
     if mo_path.is_file():
         mo = pd.read_csv(mo_path)
-        mo = mo[mo["orientation"].isin(("portrait", "landscape"))]
-        orient = {int(i): str(o) for i, o in zip(mo["id"], mo["orientation"])}
-        print(f"[in] {args.module_orientation}: {len(orient)} classified "
-              f"({100*len(orient)/max(len(gdf),1):.1f}% of arrays; the rest refused, not guessed)")
+        orient = {
+            int(row["id"]): row
+            for row in mo.to_dict(orient="records")
+            if _finite_number(row.get("id")) is not None
+        }
+        n_oriented = sum(
+            str(row.get("orientation", "")).lower() in {"portrait", "landscape"}
+            for row in orient.values()
+        )
+        print(f"[in] {args.module_orientation}: {n_oriented} classified across "
+              f"{len(orient)} evaluated arrays; unresolved layouts are retained as statuses")
 
     med_s = pd.Series(list(somos.values())).median() if somos else None
     med_k = pd.Series(list(kimber.values())).median() if kimber else None
@@ -242,8 +458,27 @@ def main(argv=None) -> int:
             props["azimuth_deg"] = round(float(tap[1]), 1)
             props["poa_rel"] = round(float(tap[2]), 3)
         ori = orient.get(int(r["array_id"]))
-        if ori is not None:
-            props["module_orientation"] = ori
+        props.update(_module_orientation_dashboard_properties(ori))
+        recommendation = recommendation_by_array.get(int(r["array_id"]), {})
+        # The raw screen is authoritative for its evidence and rank.  A recommendation
+        # run can add only its conditional dollar scenario, never replace fresh LIDAR
+        # measurements with a stale "not assessed" status.
+        props.update(_persistent_dashboard_properties(recommendation))
+        screen_props = _persistent_screen_dashboard_properties(
+            persistent_screen_by_array.get(int(r["array_id"]))
+        )
+        if screen_props:
+            props.update(screen_props)
+            scenario_props = _conditional_persistent_economic_properties(
+                r, persistent_screen_by_array.get(int(r["array_id"]))
+            )
+            # Recommendation output can add a newer scenario, while the raw
+            # screen keeps its fresh inspection evidence authoritative.
+            scenario_props.update({
+                key: value for key, value in _persistent_dashboard_properties(recommendation).items()
+                if key in PERSISTENT_ECONOMIC_FIELDS
+            })
+            props.update(scenario_props)
         # Grounded economics, so the map and the sidebar cannot drift apart again.
         # `usd_per_kwh` and `sun_hours` added 2026-08-28, and they are not decoration:
         # they are the two inputs that make the dashboard's own arithmetic reproduce
@@ -263,10 +498,13 @@ def main(argv=None) -> int:
                          ("annual_loss_usd", "site_annual_loss_usd"),
                          ("usd_per_kwh", "site_usd_per_kwh"),
                          ("sun_hours", "site_sun_hours"),
+                         ("annual_yield_kwh_per_kwdc", "site_annual_yield_kwh_per_kwdc"),
                          ("expected_net_usd", "site_expected_net_usd"),
                          ("economic_action", "site_economic_action"),
                          ("prob_net_positive", "site_prob_net_positive")):
-            v = r.get(src)
+            # Recommendations are regenerated after a cached PVWatts reference is
+            # added, so prefer their site economics over an older risk_econ.geojson.
+            v = recommendation.get(src, r.get(src))
             if v is not None and not (isinstance(v, float) and pd.isna(v)):
                 props[dst] = round(float(v), 4) if isinstance(v, (int, float)) else str(v)
 
@@ -300,6 +538,27 @@ def main(argv=None) -> int:
         print(f"[alt] dropped near-constant column(s): {', '.join(dropped_alt)}")
 
     fc = {"type": "FeatureCollection", "features": feats}
+
+    # Keep the current anonymous household membership beside the AOI artifacts.
+    # Rebuilds use this when the private parcel sidecar is absent, which prevents a
+    # proximity fallback from silently changing the public 1,865-system grouping.
+    group_map_path = aoi_dir / "public_site_group_map.csv"
+    group_rows = [
+        {"array_id": f["properties"]["array_id"], "site_key": f["properties"].get("site_key")}
+        for f in feats
+    ]
+    if all(row["site_key"] for row in group_rows):
+        group_map = pd.DataFrame(group_rows).sort_values("array_id")
+        if group_map_path.is_file():
+            existing = pd.read_csv(group_map_path).sort_values("array_id")
+            if not group_map.reset_index(drop=True).equals(existing.reset_index(drop=True)):
+                raise ValueError(
+                    f"{group_map_path} differs from the current site grouping. "
+                    "Refusing to overwrite an established public household map."
+                )
+        else:
+            group_map.to_csv(group_map_path, index=False)
+            print(f"[sites] wrote anonymous grouping map {group_map_path.name}")
 
     # ── QR alias table + the invariant ────────────────────────────────────────
     pub = pd.read_csv(CONTRACT)

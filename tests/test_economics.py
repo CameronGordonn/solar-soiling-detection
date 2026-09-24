@@ -27,6 +27,8 @@ from risk.economics import (  # noqa: E402
     LEGACY_SCENARIOS,
     M2_PER_KW,
     PACKING_FACTOR,
+    PERSISTENT_SOILING_INTERVENTION_PCT,
+    PERSISTENT_SOILING_TWO_YEAR_INTERVENTION_PCT,
     Uncertainty,
     annual_loss_usd,
     array_recommendation,
@@ -34,6 +36,8 @@ from risk.economics import (  # noqa: E402
     breakeven_soiling_pct,
     breakeven_system_kw,
     professional_cost,
+    persistent_soiling_dollars_at_risk,
+    persistent_soiling_two_year_dollars_at_risk,
     rinse_cost,
     scenario_net,
     system_kw_from_area,
@@ -49,6 +53,21 @@ def test_annual_loss_formula():
     # derate=1.0 reproduces the pre-fix number exactly, so the size of the
     # correction stays visible rather than being absorbed into a new constant.
     assert round(annual_loss_usd(6, 5.5, 0.03, 0.25, derate=1.0), 2) == 90.34
+
+
+def test_persistent_dollars_at_risk_prices_the_disclosed_threshold_only():
+    """Persistent-Soiling dollars use the same AC-energy arithmetic, not an expected loss."""
+    assert PERSISTENT_SOILING_INTERVENTION_PCT == 3.0
+    assert persistent_soiling_dollars_at_risk(6, 5.5) == pytest.approx(130.02, abs=0.02)
+    assert round(
+        persistent_soiling_dollars_at_risk(6, 5.5, persistent_loss_pct=1.5), 2
+    ) == 65.01
+    assert PERSISTENT_SOILING_TWO_YEAR_INTERVENTION_PCT == 3.0
+    assert persistent_soiling_two_year_dollars_at_risk(6, 5.5) == pytest.approx(260.04, abs=0.02)
+    with pytest.raises(ValueError, match="non-negative"):
+        persistent_soiling_dollars_at_risk(6, 5.5, persistent_loss_pct=-1)
+    with pytest.raises(ValueError, match="positive"):
+        persistent_soiling_two_year_dollars_at_risk(6, 5.5, horizon_years=0)
 
 
 def test_derate_excludes_soiling_to_avoid_double_counting():
@@ -125,7 +144,7 @@ def test_legacy_lightpro_won_for_high_soiling_residential():
     assert rec["expected_net_usd"] > 0
 
 
-# ── GROUNDED behaviour: what the measured constants actually imply ────────────
+# ── Seasonal-planning behaviour ───────────────────────────────────────────────
 def test_small_coastal_residential_not_worth_cleaning():
     rec = array_recommendation(loss_pct=BASE_SOILING_PCT, system_kw=6)
     assert rec["worth_cleaning"] is False
@@ -135,30 +154,53 @@ def test_small_coastal_residential_not_worth_cleaning():
     assert rec["per_scenario"]["professional"]["net_usd"] < 0
 
 
-def test_measured_recovery_is_an_order_of_magnitude_below_legacy():
-    """The single largest correction in the grounding pass — guard it explicitly."""
-    assert DEFAULT_RECOVERY_PRO == pytest.approx(0.045, abs=0.005)
-    assert LEGACY_SCENARIOS["professional"]["recovery_frac"] / DEFAULT_RECOVERY_PRO > 15
+def test_midseason_recovery_matches_the_disclosed_dry_season_model():
+    """An early-July clean protects the final three output-weighted dry-season months."""
+    import pandas as pd
+
+    from risk.recovery import clearsky_daily_weight
+    from risk.economics import (
+        PROFESSIONAL_CLEAN_EFFICACY,
+        REGULAR_SOILING_DRY_SEASON_DAYS,
+        REGULAR_SOILING_FULL_RESET_RECOVERY,
+        REGULAR_SOILING_MIDSEASON_CLEAN_DAY,
+        RINSE_CLEAN_EFFICACY,
+    )
+
+    assert REGULAR_SOILING_DRY_SEASON_DAYS == 180
+    assert REGULAR_SOILING_MIDSEASON_CLEAN_DAY == 91
+    dry_days = pd.date_range("2026-04-01", periods=REGULAR_SOILING_DRY_SEASON_DAYS, freq="D")
+    output_weight = clearsky_daily_weight(dry_days)
+    accumulated_loss = sum((day + 1) * weight for day, weight in enumerate(output_weight))
+    remaining_output = sum(output_weight.iloc[REGULAR_SOILING_MIDSEASON_CLEAN_DAY:])
+    expected_full_reset = (
+        REGULAR_SOILING_MIDSEASON_CLEAN_DAY * remaining_output / accumulated_loss
+    )
+
+    assert expected_full_reset == pytest.approx(0.4944, abs=0.0001)
+    assert REGULAR_SOILING_FULL_RESET_RECOVERY == pytest.approx(expected_full_reset, abs=0.0001)
+    assert DEFAULT_RECOVERY_PRO == pytest.approx(
+        REGULAR_SOILING_FULL_RESET_RECOVERY * PROFESSIONAL_CLEAN_EFFICACY,
+        abs=0.0001,
+    )
+    assert DEFAULT_SCENARIOS["rinse_service"]["recovery_frac"] == pytest.approx(
+        REGULAR_SOILING_FULL_RESET_RECOVERY * RINSE_CLEAN_EFFICACY,
+        abs=0.0001,
+    )
 
 
-def test_no_system_size_rescues_the_economics_at_measured_recovery():
-    """Size cancels: per-panel cost and recovered value both scale linearly in kW.
-
-    This is the C1 kill-risk result. At the measured recovery fraction there is no
-    system size at which a single annual professional clean pays for itself, at the
-    measured coastal-CA soiling level and any of the sourced rates.
-    """
-    for rate in (0.1646, 0.3737, 0.4573):   # NBT no-battery / NBT+battery / NEM 2.0
-        assert breakeven_system_kw(
-            DEFAULT_SCENARIOS["professional"], 5.5, BASE_SOILING_PCT / 100.0, rate
-        ) is None
+def test_average_regular_soiling_still_does_not_clear_a_small_residential_visit():
+    """The update preserves the intended policy: average dust is a baseline, not a blanket clean."""
+    rec = array_recommendation(BASE_SOILING_PCT, 6.0, sun_hours=5.5, elec_rate=0.4284)
+    assert rec["worth_cleaning"] is False
+    assert rec["per_scenario"]["rinse_service"]["net_usd"] < 0
 
 
-def test_breakeven_soiling_exceeds_anything_ever_measured():
-    """Required soiling to break even is far above the NREL maximum of 22.9%."""
+def test_heavy_regular_soiling_can_clear_a_basic_cleaning_visit():
+    """The model must retain the high-seasonal-soiling tail it was built to flag."""
     be = breakeven_soiling_pct(DEFAULT_SCENARIOS["professional"], 20, 5.5, 0.4573,
-                               pct_max=100.0)
-    assert be is not None and be > 22.9
+                               pct_max=30.0)
+    assert be is not None and be < 22.9
 
 
 # ── sourced constants ─────────────────────────────────────────────────────────

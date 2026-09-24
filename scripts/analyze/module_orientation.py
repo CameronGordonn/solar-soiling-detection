@@ -35,7 +35,7 @@ the physics, it does not reopen the product.
 
 Usage:
     PYTHONPATH=. conda run -n solar-soiling python scripts/analyze/module_orientation.py \
-        --limit 40 --out-csv outputs/aoi/santa-cruz-w2-21cm/module_orientation.csv
+        --all --resume --out-csv outputs/aoi/santa-cruz-w2-21cm/module_orientation.csv
 """
 
 from __future__ import annotations
@@ -44,6 +44,7 @@ import argparse
 import io
 import json
 import math
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 import geopandas as gpd
@@ -71,9 +72,11 @@ PITCH_TOL = 0.30
 
 #: Lag range to search, px. 12 px = 0.76 m, 40 px = 2.54 m at 6.35 cm.
 LAG_MIN, LAG_MAX = 10, 42
-#: Below this the array has no legible module grid and is reported as such.
 MIN_PEAK_AC = 0.15
-MIN_MASK_PX = 4000
+#: Roughly six standard modules at 6.35 cm. This leaves enough overlapping pixels
+#: after a one-module shift to see a repeated edge, while not treating a two- or
+#: three-module patch as a reliable grid.
+MIN_MASK_PX = 2500
 #: Below this tilt the roof's azimuth does not define a usable slope direction, so
 #: "up-slope" is arbitrary and portrait/landscape cannot be assigned. This matters
 #: more than it sounds: the LARGEST arrays in the AOI are flat commercial roofs
@@ -187,7 +190,12 @@ def classify(m: dict, tilt_deg: float, azimuth_deg: float) -> dict:
     that direction is foreshortened, by cos(tilt). Both pitches are therefore
     corrected by how much of each direction lies up-slope.
     """
-    out = {"orientation": "unknown", "reason": "", "tilt_deg": tilt_deg}
+    out = {
+        "orientation": "unknown",
+        "orientation_method": "unresolved",
+        "reason": "",
+        "tilt_deg": tilt_deg,
+    }
     if not np.isfinite(m["pitch1_px"]) or not np.isfinite(m["pitch2_px"]):
         out["reason"] = "no periodic peak in one or both directions"
         return out
@@ -220,27 +228,100 @@ def classify(m: dict, tilt_deg: float, azimuth_deg: float) -> dict:
         return abs(p - target) / target <= PITCH_TOL
 
     long_dir = None
+    long_method = None
     if plausible(p1_m, MODULE_LONG_M) and not plausible(p2_m, MODULE_LONG_M):
-        long_dir, long_f = m["theta1_deg"], f1
+        long_dir, long_f, long_method = m["theta1_deg"], f1, "long_axis_measured"
     elif plausible(p2_m, MODULE_LONG_M) and not plausible(p1_m, MODULE_LONG_M):
-        long_dir, long_f = m["theta2_deg"], f2
+        long_dir, long_f, long_method = m["theta2_deg"], f2, "long_axis_measured"
     elif plausible(p1_m, MODULE_LONG_M) and plausible(p2_m, MODULE_LONG_M):
         out["reason"] = "both pitches match a module long axis; ambiguous"
         return out
     else:
-        # Neither pitch is a module dimension. On tilted rows the dominant period is
-        # usually ROW spacing (2.2-2.5 m here), which says nothing about orientation.
-        out["reason"] = (f"no pitch within {PITCH_TOL:.0%} of {MODULE_LONG_M} m or "
-                         f"{MODULE_SHORT_M} m; likely row pitch, not module pitch")
-        return out
+        # The short module edge (about 0.99 m) is often visible while the long edge is
+        # replaced by row spacing. That still fixes the long axis: it is perpendicular
+        # to the measured short edge. Accept this only when exactly one direction is a
+        # short-edge-only match; a pitch in the tolerance overlap is deliberately not
+        # enough to call either axis.
+        short1 = plausible(p1_m, MODULE_SHORT_M) and not plausible(p1_m, MODULE_LONG_M)
+        short2 = plausible(p2_m, MODULE_SHORT_M) and not plausible(p2_m, MODULE_LONG_M)
+        if short1 ^ short2:
+            short_theta = m["theta1_deg"] if short1 else m["theta2_deg"]
+            long_dir = (short_theta + 90.0) % 180.0
+            long_f = abs(math.cos(math.radians(long_dir - up_slope)))
+            long_method = "short_axis_inferred"
+        elif short1 and short2:
+            out["reason"] = "both pitches match a module short axis; ambiguous"
+            return out
+        else:
+            # Neither pitch is a module dimension. On tilted rows the dominant period
+            # is usually ROW spacing (2.2-2.5 m here), which says nothing about layout.
+            out["reason"] = (f"no pitch within {PITCH_TOL:.0%} of {MODULE_LONG_M} m or "
+                             f"{MODULE_SHORT_M} m; likely row pitch, not module pitch")
+            return out
     if long_dir is None:
         out["reason"] = out["reason"] or "pitches indistinguishable"
         return out
 
     # Portrait = long axis up the slope.
     out["orientation"] = "portrait" if long_f >= 0.5 else "landscape"
+    out["orientation_method"] = long_method
     out["long_axis_upslope_frac"] = round(long_f, 3)
     return out
+
+
+def _unresolved_row(row, reason: str, method: str) -> dict:
+    """Record an evaluated array without pretending its layout is known."""
+    tilt = row.get("tilt_deg")
+    return {
+        "id": int(row.id),
+        "mask_px": 0,
+        "orientation": "unknown",
+        "orientation_method": method,
+        "reason": reason,
+        "tilt_deg": float(tilt) if pd.notna(tilt) else np.nan,
+    }
+
+
+def _write_rows(rows: list[dict], out_csv: Path) -> None:
+    """Checkpoint a deterministic table so a county-image run can resume."""
+    out_csv.parent.mkdir(parents=True, exist_ok=True)
+    pd.DataFrame(rows).drop_duplicates("id", keep="last").sort_values("id").to_csv(
+        out_csv, index=False
+    )
+
+
+def _measure_row(row, min_tilt: float, angle_step: int, min_mask_px: int) -> dict:
+    """Measure one array, returning an explicit unresolved result on expected limits."""
+    fit_ok = bool(row.fit_ok) if pd.notna(row.fit_ok) else False
+    tilt = float(row.tilt_deg) if pd.notna(row.tilt_deg) else np.nan
+    if not fit_ok:
+        return _unresolved_row(row, "no usable lidar plane fit", "no_plane_fit")
+    if not np.isfinite(tilt) or tilt < min_tilt:
+        return _unresolved_row(
+            row,
+            f"tilt {tilt:.1f} deg < {min_tilt:g}: no defined slope direction",
+            "flat_or_low_tilt",
+        )
+
+    try:
+        img, bnds = fetch_chip(row.geometry.bounds, array_id=int(row.id))
+    except (requests.RequestException, OSError) as exc:
+        return _unresolved_row(row, f"county imagery fetch failed: {exc}", "fetch_failed")
+    if img is None:
+        return _unresolved_row(row, "chip exceeds imagery service limits", "chip_unavailable")
+
+    h, w = img.shape
+    mask = geometry_mask([row.geometry], out_shape=(h, w),
+                         transform=from_bounds(*bnds, w, h), invert=True)
+    if mask.sum() < min_mask_px:
+        return _unresolved_row(
+            row,
+            f"only {int(mask.sum())} image pixels; need {min_mask_px} for a reliable grid",
+            "insufficient_pixels",
+        )
+    m = measure(img, mask, angle_step)
+    c = classify(m, float(row.tilt_deg or 0.0), float(row.azimuth_deg or 180.0))
+    return {"id": int(row.id), "mask_px": int(mask.sum()), **m, **c}
 
 
 def main() -> None:
@@ -251,12 +332,36 @@ def main() -> None:
                     default=Path("outputs/aoi/santa-cruz-w2-21cm/roof_planes.csv"))
     ap.add_argument("--limit", type=int, default=40,
                     help="largest N arrays passing --min-tilt; the grid needs area to read")
+    ap.add_argument("--all", action="store_true",
+                    help="evaluate every detected array; requires --out-csv and can resume")
     ap.add_argument("--min-tilt", type=float, default=MIN_TILT_FOR_SLOPE_DEG,
                     help="skip roofs flatter than this; below it 'up-slope' is undefined "
                          "and portrait/landscape has no meaning")
     ap.add_argument("--angle-step", type=int, default=10)
     ap.add_argument("--out-csv", type=Path, default=None)
+    ap.add_argument("--resume", action="store_true",
+                    help="reuse completed rows in --out-csv and retry only failed fetches")
+    ap.add_argument("--checkpoint-every", type=int, default=25,
+                    help="write a resumable --out-csv after this many evaluated arrays")
+    ap.add_argument("--workers", type=int, default=1,
+                    help="concurrent county-imagery requests; use a small value such as 4")
+    ap.add_argument("--min-mask-px", type=int, default=MIN_MASK_PX,
+                    help="minimum 6.35 cm panel pixels required for a layout call")
+    ap.add_argument("--retry-insufficient-pixels", action="store_true",
+                    help="with --resume, re-evaluate only rows previously below --min-mask-px")
     args = ap.parse_args()
+    if args.all and args.out_csv is None:
+        ap.error("--all requires --out-csv so the long image run is resumable")
+    if args.resume and args.out_csv is None:
+        ap.error("--resume requires --out-csv")
+    if args.limit < 1:
+        ap.error("--limit must be at least 1; use --all for the full AOI")
+    if args.checkpoint_every < 1:
+        ap.error("--checkpoint-every must be at least 1")
+    if args.workers < 1:
+        ap.error("--workers must be at least 1")
+    if args.min_mask_px < 1:
+        ap.error("--min-mask-px must be at least 1")
 
     g = gpd.read_file(args.arrays).to_crs(3857)
     g["area_3857"] = g.area
@@ -264,30 +369,72 @@ def main() -> None:
     g = g.merge(planes[["index", "tilt_deg", "azimuth_deg", "fit_ok"]],
                 left_on="id", right_on="index", how="left")
     n_all = len(g)
-    g = g[g.fit_ok.fillna(False) & (g.tilt_deg >= args.min_tilt)]
-    print(f"{len(g)} of {n_all} arrays have a good lidar plane fit at tilt >= "
+    eligible = g[g.fit_ok.fillna(False) & (g.tilt_deg >= args.min_tilt)]
+    print(f"{len(eligible)} of {n_all} arrays have a good lidar plane fit at tilt >= "
           f"{args.min_tilt:g} deg; the rest cannot be oriented at all")
-    sel = g.sort_values("area_3857", ascending=False).head(args.limit)
+    sel = (g if args.all else eligible).sort_values("area_3857", ascending=False)
+    if not args.all:
+        sel = sel.head(args.limit)
+
+    previous: dict[int, dict] = {}
+    if args.resume and args.out_csv.is_file():
+        prior = pd.read_csv(args.out_csv)
+        if "id" not in prior.columns:
+            raise ValueError(f"{args.out_csv} is missing required id column")
+        previous = {int(row["id"]): row.dropna().to_dict() for _, row in prior.iterrows()}
+        print(f"resuming {len(previous)} previously evaluated arrays")
 
     rows = []
+    pending = []
     for _, r in sel.iterrows():
-        img, bnds = fetch_chip(r.geometry.bounds, array_id=int(r.id))
-        if img is None:
+        prior = previous.get(int(r.id))
+        retryable = {"fetch_failed"}
+        if args.retry_insufficient_pixels:
+            retryable.add("insufficient_pixels")
+        if prior and prior.get("orientation_method") not in retryable:
+            rows.append(prior)
             continue
-        h, w = img.shape
-        mask = geometry_mask([r.geometry], out_shape=(h, w),
-                             transform=from_bounds(*bnds, w, h), invert=True)
-        if mask.sum() < MIN_MASK_PX:
-            continue
-        m = measure(img, mask, args.angle_step)
-        c = classify(m, float(r.tilt_deg or 0.0), float(r.azimuth_deg or 180.0))
-        row = {"id": int(r.id), "mask_px": int(mask.sum()), **m, **c}
+        pending.append(r)
+
+    print(f"measuring {len(pending)} arrays with {args.workers} worker(s)")
+    completed = 0
+
+    def record(row: dict) -> None:
+        nonlocal completed
         rows.append(row)
-        print(f"{row['id']:>6}  {row['orientation']:<9} "
-              f"pitch {row.get('pitch1_m', float('nan')):.2f}/"
-              f"{row.get('pitch2_m', float('nan')):.2f} m  "
-              f"ac {m['ac1']:.2f}/{m['ac2']:.2f}  tilt {c['tilt_deg']:.1f}  "
-              f"{row.get('reason', '')}", flush=True)
+        completed += 1
+        if not args.all or completed % args.checkpoint_every == 0:
+            if "theta1_deg" in row:
+                print(f"{int(row['id']):>6}  {row['orientation']:<9} "
+                      f"pitch {row.get('pitch1_m', float('nan')):.2f}/"
+                      f"{row.get('pitch2_m', float('nan')):.2f} m  "
+                      f"ac {row.get('ac1', float('nan')):.2f}/"
+                      f"{row.get('ac2', float('nan')):.2f}  tilt {row['tilt_deg']:.1f}  "
+                      f"{row.get('reason', '')}", flush=True)
+            else:
+                print(f"completed {completed}/{len(pending)}; latest id {int(row['id'])}: "
+                      f"{row['orientation_method']}", flush=True)
+        if args.out_csv and completed % args.checkpoint_every == 0:
+            _write_rows(rows, args.out_csv)
+            print(f"checkpointed {len(rows)} arrays to {args.out_csv}", flush=True)
+
+    if args.workers == 1:
+        for r in pending:
+            record(_measure_row(r, args.min_tilt, args.angle_step, args.min_mask_px))
+    else:
+        with ThreadPoolExecutor(max_workers=args.workers) as pool:
+            futures = {
+                pool.submit(_measure_row, r, args.min_tilt, args.angle_step, args.min_mask_px): r
+                for r in pending
+            }
+            for future in as_completed(futures):
+                source_row = futures[future]
+                try:
+                    record(future.result())
+                except Exception as exc:
+                    record(_unresolved_row(
+                        source_row, f"layout processing failed: {exc}", "processing_failed"
+                    ))
 
     d = pd.DataFrame(rows)
     print("\n" + "=" * 70)
@@ -296,14 +443,15 @@ def main() -> None:
         return
     print(d.orientation.value_counts().to_string())
     ok = d[d.orientation != "unknown"]
-    print(f"\nclassified {len(ok)}/{len(d)}  "
+    print(f"\nclassified {len(ok)}/{len(d)} evaluated arrays  "
           f"({100 * len(ok) / len(d):.0f}%)")
+    if "orientation_method" in ok:
+        print(ok.orientation_method.value_counts().to_string())
     if not ok.empty:
         print(f"median peak AC on classified arrays: "
               f"{ok[['ac1', 'ac2']].max(axis=1).median():.2f}")
     if args.out_csv:
-        args.out_csv.parent.mkdir(parents=True, exist_ok=True)
-        d.to_csv(args.out_csv, index=False)
+        _write_rows(rows, args.out_csv)
         print(f"\nwrote {args.out_csv}")
 
 

@@ -36,16 +36,9 @@ from solarsoiled.recommend import (
 from solarsoiled.registry import RegistryError, resolve as resolve_weights, resolve_soiling
 from solarsoiled.viz import build_risk_map
 
-# Ensure repo root is on sys.path so scripts.* and src.* imports resolve.
+# Ensure repo root is on sys.path so stage-local script imports resolve.
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
-
-from scripts.data.tile_naip_image import main as _tile_main  # noqa: E402
-from scripts.detect.infer import main as _infer_main  # noqa: E402
-from scripts.detect.export_polygons_geojson import export_polygons as _export_polygons  # noqa: E402
-from scripts.analyze.extract_array_features import extract_features as _extract_features  # noqa: E402
-from scripts.analyze.build_risk_features import main as _build_features_main  # noqa: E402
-from scripts.predict.predict_risk import main as _predict_risk_main  # noqa: E402
 
 
 app = FastAPI(
@@ -186,14 +179,19 @@ def _run_pipeline(record: JobRecord, *, req: RunRequest) -> dict:
         record._events.put({"event": "stage", "data": {"stage": stage, "message": msg}})
 
     if not req.skip_tile:
+        from scripts.data.tile_naip_image import main as tile_main
+
         emit("tile", "tiling NAIP imagery")
-        _tile_main(
+        tile_main(
             download_aoi=None,
             out_tiles_dir=paths.tiles_dir,
             out_tile_index=paths.tile_index,
         )
 
     if not req.skip_detect:
+        from scripts.detect.export_polygons_geojson import export_polygons
+        from scripts.detect.infer import main as infer_main
+
         if not paths.tile_index.is_file():
             raise RuntimeError(f"tile_index missing — run with skip_tile=false")
         emit("detect", "running YOLOv11 detection")
@@ -201,7 +199,7 @@ def _run_pipeline(record: JobRecord, *, req: RunRequest) -> dict:
             resolved = resolve_weights(req.weights)
         except RegistryError as exc:
             raise RuntimeError(str(exc)) from exc
-        _infer_main([
+        infer_main([
             "--weights", str(resolved.path),
             "--source", str(paths.tiles_dir),
             "--project", str(paths.root),
@@ -210,13 +208,17 @@ def _run_pipeline(record: JobRecord, *, req: RunRequest) -> dict:
             "--iou", "0.50",
             "--sahi",
         ])
-        _export_polygons(
+        export_polygons(
             labels_dir=paths.detect_labels_dir,
             tile_index_path=paths.tile_index,
             output_geojson=paths.arrays_geojson,
         )
 
     if not req.skip_score:
+        from scripts.analyze.build_risk_features import main as build_features_main
+        from scripts.analyze.extract_array_features import extract_features
+        from scripts.predict.predict_risk import main as predict_risk_main
+
         if not paths.arrays_geojson.is_file():
             raise RuntimeError(f"arrays.geojson missing — run with skip_detect=false")
         emit("score", "scoring soiling risk")
@@ -225,7 +227,7 @@ def _run_pipeline(record: JobRecord, *, req: RunRequest) -> dict:
             resolved_soiling = resolve_soiling(req.soiling_model)
         except RegistryError as exc:
             raise RuntimeError(str(exc)) from exc
-        _extract_features(
+        extract_features(
             input_geojson=paths.arrays_geojson,
             out_table=paths.array_features_parquet,
             out_geo=paths.array_features_geo_parquet,
@@ -238,8 +240,8 @@ def _run_pipeline(record: JobRecord, *, req: RunRequest) -> dict:
         ]
         if req.as_of:
             build_argv += ["--as-of", req.as_of]
-        _build_features_main(build_argv)
-        _predict_risk_main([
+        build_features_main(build_argv)
+        predict_risk_main([
             "--model", str(resolved_soiling.path),
             "--features", str(paths.inference_matrix),
             "--arrays", str(paths.array_features_geo_parquet),
@@ -262,6 +264,7 @@ def _run_pipeline(record: JobRecord, *, req: RunRequest) -> dict:
             paths.risk_geojson,
             payload,
             risk_threshold=req.risk_threshold,
+            persistent_screen_csv=paths.persistent_soiling_screen_csv,
         )
         write_array_recommendations(paths.array_recommendations_json, array_rows)
 
@@ -464,7 +467,12 @@ async def recommend_quick(
         risk_threshold=risk_threshold,
     )
 
-    array_rows = recommend_per_array(paths.risk_geojson, aoi_rec, risk_threshold=risk_threshold)
+    array_rows = recommend_per_array(
+        paths.risk_geojson,
+        aoi_rec,
+        risk_threshold=risk_threshold,
+        persistent_screen_csv=paths.persistent_soiling_screen_csv,
+    )
     array_rec = next((r for r in array_rows if r.get("array_id") == array_id), None)
 
     return {

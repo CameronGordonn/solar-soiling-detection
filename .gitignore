@@ -342,12 +342,7 @@ docs/**/*_email_*.txt
 # Editor workspace settings (machine-local interpreter paths)
 .vscode/
 
-# ── Excluded from the public snapshot ────────────────────────────────────────
-# The outreach lane ships neither its data nor the guard that tests it. The CSV
-# carries identifiable property data; test_qr_compat.py asserts that CSV is
-# checked in, which is a correct guard in the private repo and an automatic
-# failure in a distribution that deliberately omits it.
-configs/outreach/published_qr_ids.csv                 # 97 street addresses + APNs
-outputs/aoi/santa-cruz-w2-21cm/array_install_era.csv  # 3,362 parcel numbers
-docs/outreach/                                        # vendor call sheet + CPRA templates
-tests/test_qr_compat.py                               # guards the CSV above
+# Generated paper figures (regenerate with paper/figures/*.py)
+paper/build/
+
+# Paper asset crops are generated from the site repo; the source PNG is not ours to vendor

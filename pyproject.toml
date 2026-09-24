@@ -43,7 +43,9 @@ classifiers = [
 ]
 
 dependencies = [
-    "numpy>=1.23",
+    # PyTorch 2.2 wheels used by the supported Python 3.10 environment were
+    # built against NumPy 1.x; NumPy 2 prevents Torch from initialising.
+    "numpy>=1.23,<2",
     "pandas>=1.5",
     "pyarrow>=12.0",
     "rasterio>=1.3",
@@ -74,7 +76,7 @@ dependencies = [
     # Declared 2026-08-26 after a cold-clone audit: every package below is imported
     # from src/ or a Makefile target and was reaching the working env only because
     # it had been pip-installed by hand. A fresh `pip install -e .` did not get them.
-    "laspy>=2.5",            # src/risk/roof_geometry.py -- 3DEP EPT over HTTP, deliberately not PDAL
+    "laspy[lazrs]>=2.5",     # 3DEP EPT is LAZ-compressed; lazrs decodes it without PDAL
     "planetary-computer>=1.0",  # src/risk/location_features.py -- WorldCover STAC signing
     "pystac-client>=0.7",       # src/risk/location_features.py
     "folium>=0.15",             # src/solarsoiled/viz.py -- the risk map

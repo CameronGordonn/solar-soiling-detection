@@ -82,6 +82,20 @@ class AoiPaths:
         return self.root / "array_recommendations.json"
 
     @property
+    def persistent_soiling_screen_csv(self) -> Path:
+        """Optional, lidar-derived Persistent Soiling inspection screen for this AOI."""
+        return self.root / "persistent_soiling_screen.csv"
+
+    @property
+    def roof_planes_csv(self) -> Path:
+        return self.root / "roof_planes.csv"
+
+    @property
+    def pvwatts_reference_json(self) -> Path:
+        """Cached annual no-soiling PVWatts reference for the AOI."""
+        return self.root / "pvwatts_reference.json"
+
+    @property
     def feedback_json(self) -> Path:
         return self.root / "feedback.json"
 

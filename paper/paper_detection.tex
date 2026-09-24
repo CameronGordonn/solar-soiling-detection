@@ -1,0 +1,325 @@
+% paper.tex — Flagging soiled rooftop PV from public data alone.
+% Build: see README.md. Figures must be generated before compiling.
+\documentclass[10pt,twocolumn]{article}
+
+\usepackage[letterpaper,margin=0.85in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{times}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{siunitx}
+\usepackage{url}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{xcolor}
+\usepackage{microtype}
+\usepackage[colorlinks=true,allcolors=blue!55!black]{hyperref}
+
+\sisetup{detect-all,group-separator={,}}
+\captionsetup{font=small,labelfont=bf}
+\graphicspath{{build/}}
+
+\newcommand{\artifact}[1]{{\small\texttt{#1}}}
+
+% A heading that wraps is justified by default, which stretches its interword
+% space across the whole column. Run-in \paragraph titles are the worst affected
+% because they are the longest. Ragged right on all three levels.
+\makeatletter
+\renewcommand\section{\@startsection{section}{1}{\z@}%
+  {-3.5ex \@plus -1ex \@minus -.2ex}{2.3ex \@plus.2ex}%
+  {\normalfont\Large\bfseries\raggedright}}
+\renewcommand\subsection{\@startsection{subsection}{2}{\z@}%
+  {-3.25ex\@plus -1ex \@minus -.2ex}{1.5ex \@plus .2ex}%
+  {\normalfont\large\bfseries\raggedright}}
+% The negative afterskip in article's default makes \paragraph a RUN-IN heading:
+% the title joins the body paragraph and is justified with it, so a title that
+% nearly fills a line gets its interword space stretched across the column and
+% \raggedright in the style above cannot reach it. These titles are sentences,
+% not labels, so give them their own line (positive afterskip) instead.
+\renewcommand\paragraph{\@startsection{paragraph}{4}{\z@}%
+  {2.4ex \@plus1ex \@minus.2ex}{0.5ex \@plus .1ex}%
+  {\normalfont\normalsize\bfseries\raggedright}}
+\makeatother
+
+\title{\bf Permissively Licensed Rooftop Array Detection at \SI{21}{\centi\metre},
+with an Executable Gate\\
+\large and Per-Array Roof Geometry from Public Lidar}
+
+\author{
+  Cameron Gordon \quad Joshua Ramirez \quad Akshitha Nagaraj \quad Craig Fellers\\[2pt]
+  {\normalsize Better Behavior Foundation}\\[2pt]
+  {\small\texttt{betterbehaviorfoundation@gmail.com} \quad
+   \url{https://betterbehaviorfoundation.com}}
+}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent
+\textbf{Draft, not a submission.} This is the detection and roof-geometry half of a
+paper split because it was three papers in fifteen pages. The material below is moved
+from that draft and has not been rewritten to stand alone: it still refers forward to a
+soiling model that now lives in the other paper, and the introduction, related work and
+discussion are not written. It is released in this state so that the claims the companion
+paper cites can be checked, not as a finished document. Author list matches the companion
+because it is the same work by the same people. See \texttt{SPLIT\_PLAN.md}.
+
+The contribution here is a detection gate stated as an executable definition rather
+than a number, a mask stage whose failure mode is a prompt-box problem rather than a
+mask problem, an independent recall probe against county building permits the
+detector never saw, and a projection trap in lidar-derived tilt that biases the angle
+by 18.9\% on web-Mercator point clouds.
+\end{abstract}
+
+\section{Methods}
+\subsection{Array detection}
+\label{sec:detection}
+
+\paragraph{Imagery.}
+Santa Cruz County publishes 2025 aerial orthoimagery as a free map service. We tile a
+pilot area of interest over the Live Oak and Pleasure Point side of the city into 249
+tiles covering \SI{14.93}{\kilo\metre\squared} of \emph{actually imaged} ground; the
+enclosing bounding box is \SI{23.71}{\kilo\metre\squared}, and the distinction matters for
+any recall denominator. True ground GSD is \SI{0.204}{\metre}. Tiles are stored in
+EPSG:3857, where the nominal pixel size reads \SI{0.256}{\metre}, inflated by
+$1/\cos(\SI{37}{\degree})$. Each tile records its CRS and affine transform, so any
+pixel-space detection projects back to geographic coordinates unambiguously. The county
+service natively serves \SI{6.3}{\centi\metre} and we under-requested by $3.3\times$
+linear, so the ceiling on this method sits above what we report.
+
+\paragraph{Labels and splits.}
+Arrays are annotated as polygons, because array extent feeds the area-to-dollar chain and
+a box overstates it on non-rectangular roofs. The dataset comprises 976 chips
+(680 train / 100 validation / 196 test) and 3{,}894 chip-level polygons, rebuilt from 244
+of the 249 tiles. \textbf{Two ground-truth counts exist and are not interchangeable}:
+chip-level (validation 385, test 636) double-counts arrays that the $\sim$80-pixel chip
+overlap repeats and splits those the seams divide, whereas tile-level (validation 340,
+test 585) does not. The gate scores tile-level; a tile-level $F_1$ quoted against 636 is
+wrong by construction.
+
+\paragraph{Model and inference path.}
+RF-DETR at 728-pixel input, single class. Production inference decomposes each full tile
+into a $2\times2$ grid of 640-pixel chips, runs one forward pass per chip, and merges
+across seams by non-maximum suppression at IoU 0.55.
+
+\paragraph{The gate, stated as an executable definition.}
+Our shipping criterion is \emph{whatever \artifact{scripts/detect/eval\_tile\_f1.py}
+prints}: tile-level detection $F_1$ at box-IoU $\geq 0.50$, micro-averaged over the split,
+measured through the production path above. Three protocol choices define it.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{Confidence is tuned on validation and frozen; test is the reported number.}
+Tuning confidence on test spends the held-out split. The cost of not doing so is
+measured rather than assumed: test's own best $F_1$ is 0.8431 against 0.8260 at the
+validation-frozen threshold (Figure~\ref{fig:sweep}).
+\item \textbf{Matching is on boxes, not masks}, so the gate is invariant to the presence of
+the mask stage. SAM2 changes area accuracy, not what was detected; conflate the two and
+a regression cannot be traced to its stage.
+\item \textbf{The 95\% interval bootstraps over tiles, not objects.} Arrays within a tile
+are correlated, and resampling objects yields an interval that is too narrow.
+\end{enumerate}
+
+Passing requires all three of: $F_1 \geq 0.75$; $F_1$ 95\% CI lower bound $\geq 0.70$; and
+recall $\geq 0.70$. Recall carries its own condition because a missed array is an
+unrecoverable missed lead, while the permit join filters false positives downstream.
+
+\paragraph{Mask stage and prompt-box sensitivity.}
+SAM2 is in the product path not because the detector needs it, since the gate is
+box-based, but because \emph{area is the product}. Prompted with the unmodified detector
+box, SAM2 returns whole-roof masks at a high rate. We treat the prompt box as the design
+variable and sweep it (\S\ref{sec:results-mask}).
+
+\subsection{Independent recall probe}
+\label{sec:permits}
+
+Recall measured against held-out labels overstates recall against the real install base,
+because labels and model see the same imagery. We therefore cross-check detections against
+Santa Cruz County building-permit records, which the detector never trained on. Matching
+is by parcel APN rather than geocoded point. The Census batch geocoder interpolates each
+address onto the street segment, so points land a median \SI{22}{\metre} from the nearest
+detected array and zero of 126 point matches fall inside a polygon. The point method
+measures geocode quality, not detection.
+
+\subsection{Roof geometry from public lidar}
+\label{sec:geometry}
+
+We fit a plane to USGS 3DEP~\cite{usgs3dep} lidar returns inside each detected polygon,
+recovering per-array tilt and downslope azimuth over plain HTTP against the Entwine
+octree. The headline 3DEP product is a bare-earth DEM and is useless here by construction,
+since roofs are removed from it; the point cloud is not.
+
+\paragraph{A projection trap.}
+Entwine $X$/$Y$ are EPSG:3857 metres while $Z$ is true metres. At this latitude the
+Mercator scale factor is $1/\cos(\SI{36.97}{\degree}) = 1.2515$, so a plane fitted on raw
+coordinates reports tilt \textbf{18.9\% too shallow, silently, on every roof, producing an
+entirely plausible distribution}. We de-inflate $X$/$Y$ by $\cos(\text{lat})$ and pin the
+magnitude in a unit test, so the correction cannot be removed unnoticed. Anyone
+reproducing this on web-Mercator lidar will hit it.
+
+\paragraph{Failed fits are reported as null.} Arrays without a usable fit keep a flagged
+flat default and are never median-filled---precisely the failure mode
+\S\ref{sec:ranking} is about.
+
+
+\section{Results}
+\subsection{Detection}
+\label{sec:results-detection}
+
+Table~\ref{tab:gate} reports the gate. The shipping checkpoint passes all three
+conditions. Figure~\ref{fig:sweep} shows the full operating curve on both splits and the
+size of the tuning penalty.
+
+\begin{table}[t]
+\centering\small
+\caption{Tile-level detection gate, box-IoU $\geq0.50$, micro-averaged over the test
+split through the production chip-grid path. Confidence $c^*$ tuned on validation and
+frozen. Intervals bootstrap over tiles ($n_{\text{tiles}}=49$,
+$n_{\text{gt}}=585$).}
+\label{tab:gate}
+\begin{tabular}{lcc}
+\toprule
+ & \textbf{W2 (shipped)} & W1 (anchor) \\
+\midrule
+$c^*$ (val-frozen)      & 0.50 & 0.40 \\
+Precision               & 0.8499 & 0.8533 \\
+Recall                  & \textbf{0.8034} & 0.7556 \\
+$F_1$                   & \textbf{0.8260} & 0.8015 \\
+95\% CI                 & [0.798, 0.853] & [0.773, 0.830] \\
+Test-tuned best $F_1$   & 0.8431 & 0.8044 \\
+Gate verdict            & \textbf{PASS} & PASS \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=0.98\textwidth]{fig_threshold_sweep.pdf}
+  \caption{Operating curves on both splits. The frozen threshold $c^*=0.50$ was chosen on
+  validation alone; the test-tuned optimum sits 0.017 $F_1$ higher, which is the measured
+  price of not spending the held-out split.}
+  \label{fig:sweep}
+\end{figure*}
+
+\paragraph{Paired comparison, not overlapping intervals.}
+Doubling the training set moved $F_1$ from 0.8015 to 0.8260. The two marginal intervals
+overlap heavily and each point estimate lies inside the other's interval, so the naive
+comparison reads ``within noise.'' That is the wrong test: both models were scored on the
+same 49 tiles, so the comparison is paired. Bootstrapping the per-tile difference gives
+$\Delta F_1 = +0.0246$, 95\% CI $[+0.0051, +0.0441]$, $P(\text{W2}>\text{W1}) = 0.993$,
+concentrated in recall ($+0.0479$, CI $[+0.0202, +0.0753]$, $P=0.999$). The marginal
+comparison would have discarded a real gain.
+
+\paragraph{Two caveats on the shipped checkpoint.}
+The tuning penalty grew relative to the anchor (0.017 against 0.003), so validation and
+test disagree more about where the operating point sits; and the chip-to-tile gap widened
+(0.029 against 0.008). Both are tracked and neither is yet explained.
+
+\paragraph{Independent recall.}
+Against 434 geocoded permit points inside the imaged footprint, APN-matched recall is
+\textbf{55.3\%} (240/434) across all years and \textbf{73.6\%} (156/212) restricted to
+pre-cutoff installs that the imagery could contain. The point method reads 29.0\%
+(Wilson CI 25.0--33.5\%) for the geocoding reason given in \S\ref{sec:permits}. Three
+caveats travel with the number. Part of the gain could in principle come from spurious
+detections, since APN recall counts a parcel as found if any detected polygon's interior
+point falls inside it; gate precision of 0.850 bounds but does not eliminate this.
+Permits are a valid recall probe and an \emph{invalid} precision denominator: 85\% of
+hand-labelled arrays sit on parcels with no permit on file, because the registry begins in
+2016 and the residential boom preceded it. And 1{,}310 of 1{,}865 sites fall in city APN
+books with 0.0\% county-permit coverage, because the City of Santa Cruz is a separate
+permitting authority. Any study joining detections to permits must check jurisdiction
+before reporting coverage.
+
+\subsection{Mask quality is a prompt-box problem}
+\label{sec:results-mask}
+
+Figure~\ref{fig:sam} sweeps the prompt box over 60 validation arrays. Prompting with the
+raw detector box yields median IoU 0.509, median mask area $1.97\times$ ground truth, and
+a 43.3\% rate of whole-roof grabs. Shrinking the box 15\% yields median IoU \textbf{0.844},
+median area ratio \textbf{1.01}, and \textbf{0.0\%} roof-grab. Area is therefore
+essentially unbiased, which is exactly what the area-to-kW-to-dollar chain needs.
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=0.98\textwidth]{fig_sam_promptbox.pdf}
+  \caption{SAM2 prompt-box sensitivity. The whole-roof failure mode is created by an
+  oversized prompt, not by the mask model, and disappears at the production default.}
+  \label{fig:sam}
+\end{figure*}
+
+\paragraph{Two principled alternatives, both measured, both rejected.}
+Background negative-point prompts behave exactly as theory predicts: they help when the
+box is bad (roof-grab 38.3\%$\rightarrow$26.7\% at dilate-50\%) and hurt when it is good
+(0.844$\rightarrow$0.820, introducing 1.7\% roof-grab where there was none), because with
+an already-shrunk box the ring sits near the true panel edge and clips real pixels.
+Multimask candidates clipped to the detector box with area-fit selection were worse
+everywhere (0.824$\rightarrow$0.673 on exact boxes; roof-grab 1.7\%$\rightarrow$71.7\% at
+dilate-25\%), because picking the candidate whose area matches the detector box amplifies
+box error in exactly the regime the change targeted.
+
+\paragraph{A ceiling we cannot locate.}
+We never measured inter-annotator agreement, because our annotation platform deduplicates
+and one tile cannot go to two labellers. If two humans agree to only $\sim$0.85 IoU
+on a 26-pixel array, then 0.844 is the label-noise floor and further mask work is
+unmeasurable. We do not know which side of that line we are on.
+
+\subsection{Roof geometry}
+\label{sec:results-geometry}
+
+Plane fits succeed for 3{,}068 of 3{,}362 arrays (91.3\%), with median RMS residual
+\SI{0.040}{\metre} over $\sim$270 points per array; synthetic planes are recovered to
+$<\SI{0.2}{\degree}$ tilt and $<\SI{1}{\degree}$ azimuth. Figure~\ref{fig:tilt} compares
+the recovered distribution against installer-reported tilt from 8{,}573 utility
+interconnection filings for the same county---a different instrument, a different decade,
+and no shared failure mode. \textbf{Both medians are \SI{19.0}{\degree}}. The low tails
+differ for a documented reason: the filings encode ``not reported'' as \SI{0}{\degree} and
+we drop those rows, so the filings understate the shallow tail (0.78\% below
+\SI{5}{\degree}) while the lidar tail stays unbiased (8.38\%). That 8.38\% is directly
+relevant to \citet{mejia2013}'s finding on sub-five-degree arrays.
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=0.98\textwidth]{fig_tilt_validation.pdf}
+  \caption{Per-array tilt from public lidar against installer-reported tilt from utility
+  interconnection filings. The medians agree to \SI{0.03}{\degree}; the distributions do
+  not, and the reason is reporting granularity rather than measurement error.}
+  \label{fig:tilt}
+\end{figure*}
+
+\paragraph{What this comparison can and cannot establish.}
+It is distributional, not paired, and that is a property of the source rather than a
+choice: the DGStats interconnection extract carries a service city and nothing finer---no
+parcel number, address or coordinate---so no lidar array can be matched to the filing that
+describes it. 3D-PV-Locator~\cite{mayer2022pvlocator} validates per system and is the
+stronger design where such a key exists.
+
+We also decline to read agreement from the medians alone. A two-sample
+Kolmogorov--Smirnov test rejects decisively ($D=0.214$, $p<10^{-90}$, $n=3{,}068$ against
+$8{,}573$): the lidar distribution has much heavier tails, with a 10th percentile of
+\SI{6.4}{\degree} against \SI{14}{\degree} reported and a 90th of \SI{30.8}{\degree}
+against \SI{27}{\degree}. The mechanism is visible in the reported values. Every one is an
+integer, five values account for 57.6\% of filings, and \textbf{27\% are exactly
+\SI{18}{\degree}}---the 4:12 roof pitch. Installers file a nominal pitch from a small
+menu; the lidar fit measures a continuous angle on whatever roof is actually there. That
+the two medians land \SI{0.03}{\degree} apart across such different generating processes
+is the real result, and it is a statement about central tendency only. Per-array evidence,
+where we have it, comes instead from the standoff natural experiment below.
+
+A natural experiment supports the interpretation: the lidar flight predates some
+installations and postdates others, and permit dates split the population on a variable
+unrelated to lidar. The panel standoff step appears exactly where physics says it should: pre-flight median
+$+\SI{0.145}{\metre}$ against post-flight $+\SI{0.013}{\metre}$, difference
+$+\SI{0.132}{\metre}$, bootstrap 95\% CI $[+0.084, +0.208]$, $p<0.0001$. The fit therefore
+reports true racking angle where the array predates the flight and roof pitch where it
+does not. The groups are small ($n=37$ and $54$) and only 15.9\% of arrays yield a usable
+standoff.
+
+
+\bibliographystyle{plainnat}
+\bibliography{refs}
+\end{document}

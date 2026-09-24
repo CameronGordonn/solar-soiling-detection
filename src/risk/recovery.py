@@ -1,6 +1,6 @@
-"""How much of a year's soiling loss does ONE cleaning actually recover?
+"""Weather-trajectory sensitivity for one cleaning's recovery share.
 
-``economics.DEFAULT_SCENARIOS`` used ``recovery_frac = 0.90`` for a professional clean —
+Earlier ``economics.DEFAULT_SCENARIOS`` used ``recovery_frac = 0.90`` for a professional clean —
 "one visit recovers 90% of the annual loss". That is not physical, and it is generous in
 a coastal climate specifically:
 
@@ -28,9 +28,12 @@ computes exactly rather than approximating.
 An imperfect clean is handled by ``clean_efficacy``: a light rinse leaves some residue,
 modelled as resetting eqD to ``(1 - efficacy) * eqD`` rather than to 0.
 
-**This lowers recovery a lot in a rain-reset climate, and that is the honest answer.**
-Measured on Santa Cruz weather, the best possible single-clean recovery is well under
-the 0.90 the old constant assumed — see ``scripts/analyze/recovery_calendar.py``.
+This remains an important physical sensitivity: measured on Santa Cruz weather, the best
+single-clean recovery in this SOMOSclean trajectory is well under the former 0.90 default.
+The public product currently uses a separate, disclosed April-September seasonal-planning
+scenario from ``risk.economics`` (a July reset and output weighting) to communicate the
+value of a scheduled dry-season clean. Keep the two results distinct; neither estimates
+Persistent Soiling.
 """
 
 from __future__ import annotations

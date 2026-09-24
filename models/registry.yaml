@@ -176,11 +176,36 @@ soiling_models:
     cv_auc: 0.728
     holdout_auc: 0.679
     holdout_year: 2022
-    beta: true
-    notes: nrel_merged national labels (1000 rows, 15 states); lat/lon + month_of_year features; 10 km spatial CV; isotonic calibrated. Spatial-CV gate cleared (≥0.70). Holdout gate pending MERRA-2 AQ data.
+    # GA as of 2026-09-02 (Cameron's call, on the way out). Q2_PLAN had recorded Stage 2
+    # as "GA-ready, ships beta until the registry is flipped" since 2026-07-05, when all
+    # three Phase-2 gates cleared; the flag was the last thing waiting on a person rather
+    # than on evidence. Flipping it does NOT retire the regional limit below, which is the
+    # reason a caller still has to check `known_limitations` before quoting a number
+    # outside the training geography.
+    beta: false
+    # `cv_auc` and `holdout_auc` above are this run's own stored metrics.json figures
+    # and are correct as that — neither is the number to quote today. Spatial-CV
+    # re-measured under the current model.yaml is 0.712 (`abl_full40`, 2026-08-06);
+    # 0.728 does not reproduce. `holdout_auc` names the RETIRED single-year-2022 gate;
+    # the live temporal gate is the pooled leave-one-year-out AUC 0.710, 95% CI
+    # [0.676, 0.742], at runs/soiling/run_optionb/holdout_ci.json. Numbers of record:
+    # docs/CANONICAL_NUMBERS.md.
+    notes: >-
+      nrel_merged national labels (1,002 rows, 257 stations, 15 states); lat/lon +
+      month_of_year features; 10 km spatial CV; isotonic calibrated. All three Phase-2
+      gates cleared 2026-07-05 — spatial-CV 0.712 (re-measured) >= 0.70, pooled
+      out-of-year AUC 0.710 >= 0.70, calibration retained out-of-year (Brier 0.218 vs
+      base-rate 0.250, ECE 0.046). Stays beta pending a deliberate registry flip.
     known_limitations:
-      - Holdout AUC 0.679 — below 0.70 GA bar (2.1 pts short)
-      - AQ features only populated for 2022 + 2026; MERRA-2 prefetch in progress for 2008-2021
+      - >-
+        Does not generalise to an unseen region. Pooled out-of-region AUC 0.677 and the
+        largest region (n=677) scores 0.548, against ~0.73 for a random split (measured
+        2026-08-30, outputs/soiling/regional_holdout.json). 81% of NREL rows sit west of
+        -114 degrees. Never claim it works "in any region"; adding features does not fix it.
+      - Margin over the 0.70 spatial-CV gate is ~1 point, not 3 — the model is AT its gate.
+      - >-
+        MERRA-2 AQ was tried (`run_merged_merra2`) and hurt performance (0.716 CV /
+        0.666 holdout). Do not retry; the 1.3 GB cache is exhausted, not pending.
       - Coordinate memorization risk partially mitigated by 10 km spatial CV
 
   # ── loss REGRESSION head (not a classifier) ────────────────────────────────

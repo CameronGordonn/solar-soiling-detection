@@ -1,0 +1,1311 @@
+% paper.tex — Flagging soiled rooftop PV from public data alone.
+% Build: see README.md. Figures must be generated before compiling.
+\documentclass[10pt,twocolumn]{article}
+
+\usepackage[letterpaper,margin=0.85in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{times}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{siunitx}
+\usepackage{url}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{xcolor}
+\usepackage{microtype}
+\usepackage[colorlinks=true,allcolors=blue!55!black]{hyperref}
+
+\sisetup{detect-all,group-separator={,}}
+\captionsetup{font=small,labelfont=bf}
+\graphicspath{{build/}}
+
+\newcommand{\artifact}[1]{{\small\texttt{#1}}}
+
+% A heading that wraps is justified by default, which stretches its interword
+% space across the whole column. Run-in \paragraph titles are the worst affected
+% because they are the longest. Ragged right on all three levels.
+\makeatletter
+\renewcommand\section{\@startsection{section}{1}{\z@}%
+  {-3.5ex \@plus -1ex \@minus -.2ex}{2.3ex \@plus.2ex}%
+  {\normalfont\Large\bfseries\raggedright}}
+\renewcommand\subsection{\@startsection{subsection}{2}{\z@}%
+  {-3.25ex\@plus -1ex \@minus -.2ex}{1.5ex \@plus .2ex}%
+  {\normalfont\large\bfseries\raggedright}}
+% The negative afterskip in article's default makes \paragraph a RUN-IN heading:
+% the title joins the body paragraph and is justified with it, so a title that
+% nearly fills a line gets its interword space stretched across the column and
+% \raggedright in the style above cannot reach it. These titles are sentences,
+% not labels, so give them their own line (positive afterskip) instead.
+\renewcommand\paragraph{\@startsection{paragraph}{4}{\z@}%
+  {2.4ex \@plus1ex \@minus.2ex}{0.5ex \@plus .1ex}%
+  {\normalfont\normalsize\bfseries\raggedright}}
+\makeatother
+
+\title{\bf Station Labels Cannot Rank Roofs:\\
+Why Public-Data Soiling Models Do Not Transfer,\\
+and What Cleaning Is Actually Worth}
+
+\author{
+  Cameron Gordon \quad Joshua Ramirez \quad Akshitha Nagaraj \quad Craig Fellers\\[2pt]
+  {\normalsize Better Behavior Foundation}\\[2pt]
+  {\small\texttt{betterbehaviorfoundation@gmail.com} \quad
+   \url{https://betterbehaviorfoundation.com}}
+}
+\date{}
+
+% Added when the abstract sat inline in column one, where twocolumn's default
+% \flushbottom stretched the glue under it into a two-inch gap. The standalone title page
+% removed that case, and the document is now byte-identical either way (13 pages, same 49
+% badness warnings). Kept as a guard: the gap returns the moment any page runs short.
+\raggedbottom
+
+% Default float parameters are too tight for seven full-width floats; without this
+% relaxation figures drift several pages past the text that references them.
+\setcounter{topnumber}{2}
+\setcounter{bottomnumber}{1}
+\setcounter{totalnumber}{3}
+\renewcommand{\topfraction}{0.92}
+\renewcommand{\bottomfraction}{0.55}
+\renewcommand{\textfraction}{0.08}
+\renewcommand{\floatpagefraction}{0.75}
+\renewcommand{\dbltopfraction}{0.92}
+\renewcommand{\dblfloatpagefraction}{0.70}
+\setcounter{dbltopnumber}{2}
+
+\begin{document}
+
+% Title, authors, and abstract stand alone on page 1 at full width; the body starts
+% two-column on page 2. Switching column count only at a \clearpage keeps the float
+% and footnote machinery from straddling the boundary.
+\onecolumn
+\maketitle
+\thispagestyle{empty}
+
+\begin{center}
+\begin{minipage}{0.84\textwidth}
+\begin{abstract}
+\noindent
+Whether a rooftop solar array is dirty enough to be worth cleaning is measurable only from
+production telemetry, which vendors hold and homeowners, municipalities and service
+providers cannot get. We ask how far a soiling-targeting system gets on public data alone,
+and report where it fails and why.
+
+Locating arrays is solved: tile-level box-$F_1$ \textbf{0.826} (95\% CI [0.798, 0.853]),
+\SI{73.6}{\percent} recall against permits the detector never saw. Ranking them is not, and
+our own validation hid that. Folds that hold out either \emph{site} or \emph{year} but not
+both flatter the model: ours leaves the held-out year's sites in training for
+\textbf{88.7}\% of rows. Closing the leak moves pooled AUC from 0.710 to \textbf{0.622}
+(95\% CI [0.571, 0.670]); a size-matched control puts \SI{83}{\percent} of that fall on
+leakage (95\% CI [52, 99]). Latitude and longitude alone score 0.644, and an unfitted 2006
+empirical model scores 0.610.
+
+The limit is the label unit. Public labels are measured at \emph{stations}, so every roof
+in a catchment inherits one. On per-system telemetry, per-array features rank systems
+sharing weather at \textbf{0.573} against the \textbf{0.5} a station-label model cannot
+exceed by construction---but three standard cleaning assumptions put those systems' median
+annual loss at 2.72, 9.80 and \SI{20.93}{\percent} and rank them at $\rho$ 0.24 to 0.89.
+Per-system labels are necessary and not yet sufficient.
+
+A third result reorders the first two, and is immune to the second. On 149 metered
+rooftops one wash recovers a median \textbf{\$28.10} of electricity against a \$150
+service; the median roof needs \textbf{\$2.44}/kWh to break even. Annual loss cancels
+between the value of a clean and the recovery fraction's denominator, so the dollar figure
+is identical under all three assumptions while the fraction spans 0.031 to 0.217. What
+generalises is the fold geometry, the label-unit diagnosis and the arithmetic.
+\end{abstract}
+\end{minipage}
+\end{center}
+
+\vfill
+\clearpage
+\twocolumn
+
+% ---------------------------------------------------------------------------
+\section{Introduction}
+\label{sec:intro}
+
+Global photovoltaic capacity reached roughly \SI{2383}{\giga\watt} by the end of 2025
+after a record \SI{510}{\giga\watt} single-year addition \cite{irena2026}, and solar now
+supplies more than 8\% of world electricity \cite{iea2026}. US small-scale systems were
+projected to generate about 83\,TWh in 2024 \cite{eia2023}, and the
+country passed six million individual installations in early 2026 \cite{seia2026}.
+Extracting output from arrays already installed is now worth as much as installing more.
+
+\paragraph{Soiling, and why averages mislead.}
+Soiling is the accumulation of dust, pollen, and biological film on module glass.
+Averaged over fleets the effect is modest: \citet{mejia2013} measured roughly
+0.051\%/day across California sites, about 7.4\% by the end of a 145-day dry summer, and
+concluded that cleaning a typical residential system does not pay. The distribution
+matters more than the mean. In the same study about a quarter of sites soiled at more
+than twice the average, and arrays tilted below five degrees soiled roughly five times
+faster. Those are the systems a cleaning programme is for, and finding them is a
+targeting problem.
+
+\paragraph{The data that would answer it is not available.}
+Whether a specific array is soiled is observable from its production history, which
+monitored inverters record and vendors retain. A production dip is not yet a cleaning
+decision: it does not attribute the loss to dirt, price it over a year, or weigh it
+against the cost of a wash. Homes without monitoring have less. Anyone outside the
+household, a researcher, a municipality, a cleaning service, has nothing. Today no
+residential array is flagged for soiling, clean or filthy.
+
+\paragraph{What we found, stated before the evidence.}
+We built the system and it locates arrays well. It cannot rank them, and we initially
+believed it could, because our own validation leaked: the fold that produced our reported
+out-of-year AUC of 0.710 leaves the held-out year's sites in training through their other
+years for 88.7\% of rows. Closing that leak takes the number to 0.622, and latitude and
+longitude on their own score 0.644---as well as all forty features. The cause is not the
+model. Soiling labels of the kind that exist publicly are measured at monitoring
+\emph{stations}, so every rooftop in a station's catchment inherits one label, and no
+per-roof feature has anything to fit against.
+
+The obvious repair is per-system labels, and we test it: on telemetry from 735 individual
+systems, per-array features do rank systems that share weather, at 0.573 against the 0.5 a
+station-label model cannot exceed by construction. But three standard ways of computing that label
+put the same systems' median annual loss at 2.72, 9.80 and \SI{20.93}{\percent} and rank
+them at Spearman 0.241 to 0.894, and our 0.573 rests on the variant that is in the
+minority on ranking. The repair is necessary and not yet sufficient.
+
+Then the result that reorders the others. We measured what a cleaning is worth on 149
+metered rooftops, and one wash on the median system recovers \textbf{\$28.10} of
+electricity at the retail offset most of them earn, or \$10.14 at the marginal export
+rate, against a \$150 service. The median roof would need electricity at
+\textbf{\$2.44}/kWh to break even, about five times California retail. That is not a
+targeting failure and no better model repairs it. It is the more useful finding, and we
+put it last only because it takes the most machinery to establish.
+
+\paragraph{Contributions.}
+We ask what a system built \emph{entirely} on public data can and cannot establish.
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{A gated detection stage} (\S\ref{sec:methods-inputs}; full protocol in~\cite{gordon2026detection}) on public county
+orthoimagery at \SI{0.204}{\metre} ground sample distance, using only permissively
+licensed models, with an executable gate definition, confidence frozen on validation,
+tile-level bootstrap intervals, and an independent permit-based recall probe
+(\S\ref{sec:results-inputs}).
+\item \textbf{Per-array roof geometry from public lidar} (\S\ref{sec:methods-inputs}),
+validated against installer-reported tilt from utility interconnection filings, plus a
+projection trap that silently flattens tilt by \SI{18.9}{\percent} on web-Mercator
+point clouds. The
+closest prior system, 3D-PV-Locator~\cite{mayer2022pvlocator}, validates tilt per system
+against ground truth; ours compares distributions, which is the weaker claim and we mark
+it as such.
+\item \textbf{A measured account of why station-trained soiling models do not transfer to
+individual roofs} (\S\ref{sec:ranking}): a leaking-fold disclosure and its correction, a
+variance decomposition, a controlled feature-backfill experiment, a regional holdout, and
+a sign reversal with an identified mechanism---together with a positive control showing
+that the limit is the label unit rather than the model class.
+\item \textbf{A grounded cleaning-economics verdict} (\S\ref{sec:results-econ}): zero of
+1{,}865 sites clear, with the one unsourced constant that had been carrying the opposite
+conclusion identified and replaced by a directly measured quantity: 505 observed cleaning
+events on 149 metered rooftops recover a median \$28.10 of electricity against a \$150
+service. We show the value of a clean is invariant to the cleaning assumption while the
+recovery \emph{fraction} is not, and report the fraction only as a bracket.
+\item \textbf{A reproducibility posture}: every number in this paper names the artifact
+that produced it and the command that regenerates it (\S\ref{sec:repro}), and every
+constant we could not source is listed rather than buried (\S\ref{sec:unsourced}).
+\end{enumerate}
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=0.98\textwidth]{fig_argument.pdf}
+  \caption{The whole paper. Four questions a public-data cleaning product must answer in
+  order, what each returned, and the point at which the answer stops mattering. Question~4
+  is arithmetic and, \emph{in this market}, it settles questions~2 and~3: a perfect ranker
+  cannot create value that is not there. Where the boundary of \S\ref{sec:results-econ}
+  is cleared---drier, pricier, slower-soiling---questions~2 and~3 become live again.}
+  \label{fig:argument}
+\end{figure*}
+
+Figure~\ref{fig:argument} is the argument in one picture, and it is worth stating the shape
+before the evidence. Three of the four answers are negative, but they are not
+interchangeable. Question~2 fails because of a property of the labels, question~3 fails
+because of a property of the measurement, and question~4 fails for a reason that has
+nothing to do with either: the quantity of money involved is smaller than the cost of
+acting on it. A reader who takes only one thing from this paper should take the last one,
+because it is the only one that would not be fixed by a better model.
+
+Figure~\ref{fig:pipeline} shows the pipeline end to end.
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=0.98\textwidth]{fig_pipeline.pdf}
+  \caption{The pipeline. Every input is public and free: county orthoimagery, USGS 3DEP
+  lidar, Open-Meteo weather, ESA WorldCover, OpenStreetMap, county parcel
+  and permit records, utility interconnection filings, and NREL soiling labels. Both
+  vision models are Apache-2.0. Stage boundaries are where the evaluation changes:
+  detection is scored on boxes, masks on area, risk on AUC and calibration, and economics
+  on expected net dollars.}
+  \label{fig:pipeline}
+\end{figure*}
+
+% ---------------------------------------------------------------------------
+\section{Related Work}
+\label{sec:related}
+
+\paragraph{Locating arrays from overhead imagery.}
+Public rooftop-PV detection has an established lineage: the Duke
+dataset~\cite{bradbury2016duke} released \SI{0.3}{\metre} imagery with array annotations,
+and DeepSolar~\cite{yu2018deepsolar} built a national deployment database by
+classification with weak localization. Our detector consumes that lineage rather than
+extending it. It uses RF-DETR~\cite{rfdetr2025}, a real-time DETR
+variant~\cite{carion2020detr}, with an optional SAM2~\cite{ravi2024sam2,kirillov2023sam}
+mask stage, both Apache-2.0; the licence matters because the widely used YOLO
+implementations are AGPL-3.0, which obstructs reuse by exactly the municipalities and
+nonprofits a public-data pipeline is for. Two requirements differ from the prior work and
+are specified in~\cite{gordon2026detection}: downstream stages consume \emph{area}, so we
+need instance polygons rather than image-level labels, and the gate is evaluated at the
+tile level through the production inference path rather than on crops. Detection is an
+input here, not a contribution.
+
+\paragraph{Per-array geometry.}
+3D-PV-Locator~\cite{mayer2022pvlocator} recovers tilt and azimuth per system from 3D
+building data and validates them per system against ground truth. We fit planes to public
+lidar returns inside each array polygon and can only validate distributionally, because the
+interconnection filings that report tilt carry no parcel, address or coordinate. We say so
+where the comparison appears rather than presenting the weaker design as equivalent.
+
+\paragraph{Soiling measurement and modelling.}
+Soiling loss is extracted from yield directly by \citet{deceglie2018}, and NREL publishes a
+station-level US soiling map~\cite{nrel_soiling_map,micheli2021} reporting an
+insolation-weighted soiling ratio (IWSR). Empirical models include
+Kimber~\cite{kimber2006}, which accumulates loss with particulate concentration and resets
+on rain, and SOMOSclean~\cite{micheli2021}, an exponential approach to a saturation
+ceiling with rain-proportional cleaning. We use both as \emph{features} under measured
+IWSR labels, and report in \S\ref{sec:risk} why the converse configuration is a leakage
+trap we fell into and discarded. \citet{porcar2018} confirmed biofilm colonisation on
+panels in Berkeley but measured no power loss; that gap is the open channel of
+\S\ref{sec:openchannel}.
+
+\paragraph{Uncertainty.}
+Our loss intervals are conformalised quantile regression~\cite{romano2019cqr} over
+gradient-boosted trees~\cite{chen2016xgboost}, because the raw quantile heads
+under-covered badly. Degradation and soiling-ratio decomposition use
+RdTools~\cite{rdtools} on PVDAQ~\cite{pvdaq}; cell-level occlusion physics uses the
+Bishop diode model~\cite{bishop1988} via pvlib~\cite{holmgren2018pvlib}.
+
+% ---------------------------------------------------------------------------
+\section{Methods}
+\label{sec:methods}
+
+\subsection{Inputs: array detection and roof geometry}
+\label{sec:methods-inputs}
+
+The pipeline's first two stages supply the units this paper analyses: array
+polygons and their tilt. Both are specified in full in~\cite{gordon2026detection}. Every
+number this paper relies on is stated here, so nothing below depends on reading that
+report; it is cited for protocol detail, not for evidence.
+
+\paragraph{Detection.} RF-DETR at 728-pixel input on \SI{21}{\centi\metre} county
+orthoimagery, with an optional SAM2 mask stage, both permissively licensed. A full
+tile is cut into a $2\times2$ grid of 640-pixel chips, each chip gets one
+model pass, and detections are merged across the seams by NMS at IoU 0.55. The
+acceptance gate is stated as an executable definition rather than a number---the
+script is the specification---and requires tile-level box-$F_1 \geq 0.75$, a
+bootstrap CI lower bound $\geq 0.70$, and recall $\geq 0.70$, with the confidence
+threshold tuned on validation and frozen before test is scored.
+
+\paragraph{Roof geometry.} Per-array tilt and azimuth are fitted to \SI{1}{\metre}
+public 3DEP lidar returns inside each array polygon. One detail is load-bearing and
+easy to get wrong: fitting a plane to point clouds reprojected to web-Mercator
+reports tilt \SI{18.9}{\percent} \emph{too shallow}, because the projection stretches
+horizontal distance against an unstretched vertical axis, shrinking $dz/dx$. Fits are performed in a local metric CRS.
+Arrays without a usable fit keep a flagged null rather than an imputed angle.
+
+\subsection{Soiling risk model}
+\label{sec:risk}
+
+\paragraph{Labels.}
+We train against the NREL PV Soiling Map~\cite{nrel_soiling_map}, whose IWSR is the
+fraction of expected insolation-weighted energy actually delivered, so \emph{lower is
+dirtier}. The annual panel release gives \textbf{891 station-year rows across 146 stations
+spanning 2008--2022}. A further \textbf{111 stations report only a censored summary}
+(IWSR $>0.99$, known-clean without an annual breakdown); we retain these at the censoring
+value at half the weight of a panel row, giving \textbf{1{,}002 rows across 257 stations}.
+Rows are binarized at IWSR $<0.97 \rightarrow$ at-risk, yielding a 49.4\% base rate.
+Panel rows span six states (AZ, CA, GA, MD, NC, OR); the full station set including
+summary rows spans 15. The two counts are not interchangeable.
+
+\paragraph{The central methodological compromise.}
+We train on instrumented ground stations and apply the result to residential rooftops.
+That transfer is unvalidated. It is also the only option available without production
+data, and \S\ref{sec:ranking} measures how badly it binds.
+
+\paragraph{Features.}
+Thirty-four features in three families, from public sources: \emph{weather} from
+Open-Meteo~\cite{openmeteo} over trailing 7/30/90-day windows (precipitation, maximum
+\SI{10}{\metre} wind, mean relative humidity, maximum temperature) plus two rain-timing
+features, consecutive dry-day streak and days since the last \SI{5}{\milli\metre} rain
+event; \emph{location and structure}, latitude, longitude, month, tilt, elevation,
+land-cover class, distance to nearest highway and to nearest agricultural parcel, and five
+ESA WorldCover~\cite{zanaga2022worldcover} fractional covers; and \emph{physics proxies}
+from Kimber~\cite{kimber2006} and SOMOSclean~\cite{micheli2021}, each as an instantaneous
+value plus 7/30/90-day means, with SOMOSclean's saturation and rate re-fit to coastal
+California stations ($s_{\text{sat}}=0.08$, $k=15$).
+
+Air quality was tested and dropped. PM$_{2.5}$ and PM$_{10}$ rolling means covered 21\% of
+label rows (208 of 1{,}002) and received zero splits in the fitted model, so the family
+contributed no gain at any coverage level and is excluded from the feature count above.
+
+\paragraph{A leakage trap.}
+Physics proxies as features under measured IWSR labels are leakage-free. The converse is
+not. Ablations that used SOMOSclean-\emph{derived} labels while retaining the SOMOSclean
+feature returned cross-validated AUC of exactly 1.0: the feature was the label. Those runs
+are discarded.
+
+\paragraph{Model and validation.}
+XGBoost~\cite{chen2016xgboost}: 200 estimators, max depth 4, learning rate 0.05, subsample
+0.8, column subsample 0.8, $L_2$ regularization 5.0. Depth and $L_2$ were tuned against
+overfitting, because this many features on $\sim$900 rows overfit visibly at depth 5. Outputs pass
+through an isotonic calibrator so the surfaced number reads as a probability.
+\emph{Spatial} validation clusters stations within \SI{10}{\kilo\metre} into the same
+fold. \emph{Temporal} validation holds out each of the 15 panel years in turn and pools
+every row's out-of-its-own-year prediction; \S\ref{sec:results-risk} explains why this
+replaced a single-year holdout. \emph{Calibration} is evaluated out-of-year by fitting
+each training year's isotonic map and applying it to the held-out year.
+
+\subsection{Loss magnitude and cleaning economics}
+\label{sec:econ}
+
+\paragraph{From probability to magnitude.}
+Multiplying a calibrated classification probability by a constant to obtain a loss
+percentage is a category error rather than a bad estimate. We instead use
+three XGBoost quantile heads (0.10/0.50/0.90) trained on $(1-\text{IWSR})\times100$ under
+the same spatial CV and conformalised~\cite{romano2019cqr}. No fallback path from risk
+score to loss percentage exists any more, deliberately; callers without a magnitude fall
+back to a flagged base rate.
+
+\paragraph{The decision model.}
+Recovered energy is priced at the site's modelled marginal tariff and its system size, against the cost
+of the chosen cleaning method, over 2{,}000 Monte Carlo draws per site propagating the
+loss prediction interval, an area uncertainty ($1\sigma = 0.26$, the measured
+21\,cm/60\,cm area shift), the rate band, and recovery timing. Economics run \emph{per
+site}, not per detected polygon: \SI{21}{\centi\metre} imagery fragments a roof into 1.80
+polygons per site against 1.30 at \SI{60}{\centi\metre}, and per-polygon costing
+overcharged a four-way-split roof by $2.3\times$.
+
+\paragraph{The constant that decided everything.}
+\texttt{recovery\_frac}, the share of a year's soiling loss that one cleaning recovers,
+had been \emph{assumed} at 0.90 and never estimated. We estimate it by simulating the
+soiling trajectory with and without a wash over the site's actual rain record
+(\S\ref{sec:results-econ}).
+
+\paragraph{Tariffs.}
+The rate had been a flat \$0.25/kWh. We replace it with a
+bill-reconciled PG\&E E-TOU-C plus community-choice stack, validated to
+$\pm$\$0.22/month over 11 consecutive real bills, giving a production-weighted
+retail offset of \$0.4573/kWh and a net-billing export credit of
+\$0.0392/kWh~\cite{cpuc_nbt}. Only 5.5\% of a south-facing array's
+annual output lands in the 4--9\,pm peak, so roughly 94\% of soiling-lost kWh are
+off-peak. Site tariff vintage is joined from public interconnection
+filings~\cite{dgstats}.
+
+% ---------------------------------------------------------------------------
+\section{Results}
+\label{sec:results}
+
+\subsection{Inputs, in brief}
+\label{sec:results-inputs}
+
+The detection and roof-geometry stages are reported in full in the companion
+paper; what matters here is that the inputs to the soiling analysis are gated
+rather than assumed. Detection reaches tile-level box-$F_1$ \textbf{0.826}
+(95\% CI [0.798, 0.853], precision 0.850, recall 0.803, $n_{\text{gt}}=585$) at a
+confidence tuned on validation and frozen before test was scored, using only
+permissively licensed models. Recall measured independently against county
+building permits the detector never saw is \textbf{73.6\%} on the imaged era,
+which is the number that bounds the funnel: a missed array is a missed roof, and
+no downstream model recovers it. The mask stage contributes area rather than
+detection, and its one dangerous failure---segmenting the whole roof instead of
+the array---is a prompt-box problem, eliminated at the production 15\% box shrink
+(median mask IoU 0.844, median area/GT 1.01, roof-grab 0.0\%). Per-array tilt comes
+from public lidar. Its validation is distributional rather than paired---the
+interconnection records that report tilt carry no parcel, address or coordinate,
+so no array can be matched to the filing describing it. The medians agree to
+\SI{0.03}{\degree} ($n=3{,}068$ lidar fits against $8{,}573$ filings) while a
+Kolmogorov--Smirnov test rejects the distributional match at $p<10^{-90}$: every
+reported tilt is an integer, five values cover 57.6\% of filings, and 27\% are
+exactly \SI{18}{\degree}, the 4:12 roof pitch. Installers file a nominal pitch off
+a short menu; lidar measures a continuous angle.
+That limitation is one of three reasons tilt is deliberately excluded from the
+risk model in \S\ref{sec:ranking}.
+
+\subsection{Soiling risk: the gate it cleared was leaking}
+\label{sec:results-risk}
+
+\paragraph{Which model these numbers describe.}
+Two feature sets appear in this work and it matters which is which. The \emph{published}
+configuration carries 40 features including six air-quality columns; the \emph{honest}
+production set is the same 40 minus those six, because they cover 20.8\% of rows and
+contribute nothing measurable. Every corrected result below is reported for both, and they
+are indistinguishable: on the joint fold, 0.6222 for 40 features and 0.6228 for 34. We
+quote the 40-feature figure throughout, so that the comparison against our own published
+numbers is like-for-like, and give the 34-feature value wherever it differs. Where this
+paper says ``40 features'' it means the published configuration, not a recommendation.
+
+\paragraph{Spatial and temporal validation.}
+Spatially cross-validated AUC is \textbf{0.718} ($0.719 \pm 0.003$ over seven seeds) for
+the 34-feature set under the current configuration. The 40-feature set that also carried
+air quality reads 0.712 ($0.721 \pm 0.006$), so dropping that family moves the metric less
+than the seed spread. An earlier stored figure of 0.728 for the 40-feature set no longer
+reproduces and should not be quoted. Against the figure we report, the margin over our
+0.70 acceptance bar is under two points, and against the 40-feature set it is one.
+
+Our initial temporal design held out 2022 as a single test year and returned AUC 0.679 on
+97 rows. That estimate is unusable, and we report it because it is the kind of number
+over-read in both directions: its Hanley--McNeil standard error is 0.061, its 95\% CI is
+[0.557, 0.797], and the 0.70 bar sits 0.32 standard errors away. A 97-row year cannot
+distinguish 0.68 from 0.70. Replacing it with rolling leave-one-year-out pooling over
+$n=891$ (440 at-risk, 451 not) gives \textbf{AUC 0.710}, SE 0.017, bootstrap 95\% CI
+\textbf{[0.676, 0.742]}, $P(\text{AUC}\geq0.70)=0.70$: a $3.5\times$ tighter estimator on
+identical data. \textbf{That estimator is also leaking, and the leak is the finding.}
+Leave-one-year-out holds out a year but keeps the held-out year's sites in training
+through their other years: measured, \textbf{88.7\%} of held-out rows have their own site
+in the training set. The 10\,km spatial fold has the mirror defect, grouping by location
+while mixing years. Neither is a test of a roof we have not seen in a year we have not
+seen. Building that fold---hold out year $y$, then drop from training every row whose
+site appears in $y$---gives \textbf{AUC 0.622}, 95\% CI \textbf{[0.571, 0.670]},
+$P(\text{AUC}\geq0.70)=\textbf{0.001}$, on the same 891-row pooled basis. \emph{The model
+does not clear its temporal gate.} Latitude and longitude alone score 0.644 on that fold,
+at or above the full 40-feature set, which is the identifiability problem appearing
+directly in the metric: station-level labels give every roof in a catchment one label, so
+no per-roof feature has anything to fit.
+
+\paragraph{What the prior literature gets, scored the same way.}
+The natural next question is what a published soiling model achieves on this task. Two are
+already computed over our rows---Kimber~\cite{kimber2006} and
+SOMOSclean~\cite{micheli2021}. Kimber is used exactly as published, with no parameter
+estimated on our data, so it needs no fold: there is nothing fitted to leak. SOMOSclean is
+\emph{not} in that position, and we flag it rather than lean on it---its saturation and
+rate were re-fit to coastal-California stations (\S\ref{sec:risk}), some of which are rows
+scored here, so its 0.544 should be read as an optimistic bound on an unfitted SOMOSclean
+rather than as a clean baseline. Kimber carries the comparison. Scored on the same 891 panel rows,
+Kimber's instantaneous IWSR proxy gives \textbf{AUC 0.610} (95\% CI [0.566, 0.652]) and
+SOMOSclean's gives 0.544. Handing all seven physics columns to the learner under the joint
+fold gives 0.5706.
+
+Set that beside our own numbers on the identical basis---0.622 for forty engineered
+features, 0.644 for latitude and longitude---and the ordering is the result. A 2006
+empirical formula with no fitting is within noise of a gradient-boosted model trained on
+fifteen panel years of weather, air-quality and static features, and two coordinates match
+or beat both. This is
+the same conclusion the feature ablations reach, arrived at from outside: on
+station-level labels there is very little to learn beyond where the station is.
+
+\paragraph{Is the drop the leak, or the smaller training set?}
+Closing the leak also deletes data: holding out year $y$ and then removing every row whose
+site appears in $y$ costs a median \SI{28.8}{\percent} of the leave-one-year-out training
+set, and \SI{74.3}{\percent} in the worst year. Some of the fall could therefore be volume
+rather than leakage, and the control is cheap. For each year we build a third training set
+of the \emph{same size} as the joint fold's that \emph{keeps} the leak: start from the
+leave-one-year-out set and delete an equal number of rows drawn only from sites absent from
+year $y$. Such deletions cannot remove a leaking row, because the leaking rows are exactly
+those from sites present in $y$.
+
+\begin{center}\small
+\begin{tabular}{@{}lr@{}}
+\toprule
+Training set & pooled AUC \\
+\midrule
+leave-one-year-out, leak present, full data & 0.7144 \\
+size-matched control, leak present          & 0.6986 \\
+joint out-of-site and out-of-year           & \textbf{0.6222} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent
+Of the 0.0922 total, \textbf{0.0764 (\SI{83}{\percent}) is attributable to the leak and
+0.0158 (\SI{17}{\percent}) to training size}. Bootstrapping the decomposition over stations
+puts the leak share at 95\% CI \textbf{[52, 99]\%} and the leak's own contribution at
+$[+0.031, +0.121]$, which excludes zero. The split is therefore not precisely resolved at
+this sample size: what the data support is that the \emph{majority} of the fall is
+leakage, not that the share is 83\%. The five-seed spread on the control itself is 0.0012,
+so the imprecision is sampling variance in the AUCs rather than which rows were deleted.
+
+That 0.622 is not a fragile number. Across seven seeds it is $0.6201 \pm 0.0047$;
+penalised logistic regression, a different model class entirely, gives 0.5707, which is
+lower rather than higher; and the weighting of the censored summary rows---the choice a
+referee is most likely to query---moves it only between 0.594 (dropped) and 0.622
+(production). No setting we tried approaches the 0.70 bar. The regional result is equally
+insensitive to fold geometry, ranging 0.638 to 0.664 as the number of k-means regions
+varies from 5 to 12.
+
+We report the leaking numbers alongside the corrected ones because reproducing them
+requires knowing which of three reporting bases is in use, and none was previously
+written down: pooled against mean-of-folds (about 1 point), all 1{,}002 rows against the
+891 panel rows (3 to 6 points, since the 111 censored summary rows are easier to classify
+and all carry a single sentinel year), and a plain gradient-boosted fit against the
+calibrated training pipeline (about 0.4 points). Matched on basis, every previously
+published figure reproduces to within 0.012. Out-of-year calibration is retained:
+Brier 0.218 against a base-rate reference of 0.250, ECE 0.046, MCE 0.126
+(Figure~\ref{fig:risk}). The weakest year is 2019 (AUC 0.626); 2008--2012 are near
+single-class.
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=0.98\textwidth]{fig_risk_validation.pdf}
+  \caption{Out-of-year reliability, and the two folds side by side. \emph{Left:}
+  calibration survives temporal shift. \emph{Right:} the published leave-one-year-out
+  interval, whose fold leaves the held-out year's sites in training for \SI{88.7}{\percent}
+  of rows, against the same model scored jointly out-of-site and out-of-year. The published
+  interval straddles the acceptance bar; the corrected one sits below it, with
+  $P(\text{AUC}\geq0.70)=0.001$.}
+  \label{fig:risk}
+\end{figure*}
+
+\subsection{Why the model cannot rank individual roofs}
+\label{sec:ranking}
+
+This is our second negative result, and it reframes what the pipeline claims. The model is
+valid for \emph{level} and not for \emph{ranking homes against each other}.
+
+\paragraph{Variance decomposition.}
+Across the 1{,}710 residential-scale sites (2--\SI{15}{\kilo\watt}), the per-home dollar
+figure is driven by system size (p10--p90 ratio $3.20\times$, \textbf{86.7\%} of variance)
+and roof orientation ($1.30\times$, \textbf{11.1\%}); the soiling model contributes
+$1.15\times$ and \textbf{2.2\%} (Figure~\ref{fig:variance}). \textbf{97.8\% of the spread
+comes from what the detector and the lidar measure.} Doubling the soiling model's spread
+would add less differentiation than joining one public permit file. The decomposition
+mixes per-array and per-site quantities, so it estimates rather than partitions; the ratio
+is scale-invariant and therefore unaffected by the level calibration below.
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=0.98\textwidth]{fig_variance_decomposition.pdf}
+  \caption{Left: share of per-home dollar variance by driver. Right: the soiling head's
+  entire within-AOI spread, 0.38 points p10--p90 across 1{,}710 homes.}
+  \label{fig:variance}
+\end{figure*}
+
+\paragraph{The mechanism.}
+NREL labels are station-level. Across a \SI{20}{\kilo\metre} coastal AOI, feature standard
+deviations are 0.3\% to 23\% of the training standard deviations, and \textbf{58.1\% of
+model importance sits on features effectively constant across the AOI}. A model trained to
+separate 15 states has almost nothing left when shown 1{,}865 homes in one town, because
+the training set contains \emph{zero} examples of per-roof variation.
+
+\paragraph{The controlled experiment.}
+Several features were missing from the deployment matrix and silently median-filled, an
+obvious candidate explanation with an obvious fix. We supplied the WorldCover features
+properly, resolving all 3{,}349 points. The within-AOI p10--p90 spread moved from 0.776 to
+0.758 points, which is to say not at all, and dead importance moved 64.9\% to 58.1\%. The
+plumbing gap was not the cause.
+
+\paragraph{The sign reversal.}
+Arrays on tree pixels scored \emph{lower} (5.36\%) than built-up (5.55\%). The model
+learned \texttt{worldcover\_tree} from NREL stations, where a tree pixel means ``forested
+rural region, wetter air, less dust,'' not ``a tree overhanging this roof.'' \textbf{Same
+feature name, different referent.} We predicted and then confirmed the same failure for
+tilt, and deliberately excluded our measured per-array tilt from the risk model for three
+measured reasons: the training interquartile range $[\SI{7.49}{\degree},
+\SI{12.00}{\degree}]$ contains only 8.9\% of our roofs; gradient-boosted trees do not
+extrapolate, so the deepest tilt split is at \SI{26.0}{\degree} and predictions at
+\SI{30}{\degree}, \SI{35}{\degree} and \SI{40}{\degree} are identical; and the training
+feature is effectively a station identifier (42.4\% of rows at exactly
+\SI{7.49}{\degree}, 24 unique values, 0.372 correlation with longitude). The learned
+effect accordingly carries the \emph{wrong sign}. Tilt belongs in the physics, where a
+\SI{30}{\degree} roof self-cleans on less rain than a \SI{5}{\degree} one, not in a model
+that never saw per-roof tilt vary.
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=0.98\textwidth]{fig_label_unit.pdf}
+  \caption{The identifiability problem, measured rather than argued. \emph{Left:} every
+  metered residential system inside one \SI{0.5}{\degree} cell. Their annual soiling losses
+  span 0.23 to \SI{5.35}{\percent}, and a station-level label gives all 103 of them the
+  single value marked in red. \emph{Right:} the cell is not unusual. Across all 37 cells
+  holding five or more metered systems, the within-cell standard deviation is a median
+  \SI{42}{\percent} of the cell mean. Roughly half the variation a per-roof model would
+  need to explain is variation that station labels discard by construction.}
+  \label{fig:labelunit}
+\end{figure*}
+
+\paragraph{The mechanism, measured on metered roofs.}
+Figure~\ref{fig:labelunit} shows what the label unit costs. One \SI{0.5}{\degree} cell in
+our fleet holds 103 metered residential systems whose measured annual soiling losses range
+from 0.23 to \SI{5.35}{\percent}, a factor of 23. A station-level label assigns all 103 the
+same number. That cell is not a special case: across the 37 cells holding at least five
+metered systems, the within-cell standard deviation is a median \SI{42}{\percent} of the
+cell mean. Approximately half of the variation a per-roof model would have to explain is
+removed before training begins, and no feature engineering reaches it.
+
+\paragraph{What per-system labels recover.}
+Everything above is a diagnosis without a remedy, and a reader is entitled to ask whether
+\emph{any} public-data model can rank roofs or whether the task is impossible. It is not.
+The decisive test is ranking systems that share weather: two arrays in the same
+\SI{0.5}{\degree} cell see the same climate, air quality and rainfall, so a station-label
+model assigns them identical features and emits identical predictions. Its within-cell
+pairwise concordance is therefore exactly 0.5 \emph{by construction}, not as an empirical
+finding. Anything above 0.5 must come from per-array information.
+
+We test this on the PVDAQ fleet, where the labels are per system rather than per station:
+94 cells holding two or more systems, 735 systems, 11{,}653 same-cell pairs, evaluated
+leave-one-cell-out so the model never sees the cell it ranks (Figure~\ref{fig:persystem}).
+Per-array features alone---tilt, azimuth, capacity, age---give concordance \textbf{0.573}
+(95\% CI [0.512, 0.609], $P(>0.5)=0.995$, bootstrapped over cells because systems within a
+cell are correlated). Location alone, the station-model analogue, gives \textbf{0.484},
+indistinguishable from chance even with sub-cell coordinates available. Per-array
+information is therefore present and learnable, and the station-label ceiling is
+structural rather than incidental.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.96\columnwidth]{fig_per_system_ranking.pdf}
+  \caption{Within-cell pairwise concordance on systems that share weather. A station-label
+  model cannot exceed 0.5 here by construction, and per-array features clear it on
+  \texttt{perfect\_clean} labels. The result does not survive the alternative cleaning
+  assumption (\texttt{half\_norm\_clean}, concordance 0.512), which is why we report the
+  label instability rather than the ranking as the finding.}
+  \label{fig:persystem}
+\end{figure}
+
+\paragraph{But the per-system label is not yet well posed, and this is the more useful
+finding.} The result above uses the \texttt{perfect\_clean} soiling ratio. RdTools offers
+two further cleaning assumptions, and on 146 California residential systems where all three
+fits are non-degenerate they disagree about both the level and the ordering:
+
+\begin{center}\small
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+assumption & median loss & IQR & median CI width \\
+\midrule
+\texttt{perfect\_clean}   & \SI{2.72}{\percent} & [1.95, 3.74]  & 0.63 \\
+\texttt{half\_norm\_clean} & \SI{9.80}{\percent} & [8.53, 11.98] & 6.92 \\
+\texttt{random\_clean}    & \SI{20.93}{\percent} & [17.34, 24.33] & 19.84 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent
+Spearman between them, on these 146 systems with all three fits non-degenerate and a
+tighter Monte Carlo: \texttt{perfect}--\texttt{half\_norm} \textbf{0.241},
+\texttt{perfect}--\texttt{random} \textbf{0.318}, and
+\texttt{half\_norm}--\texttt{random} \textbf{0.894}. Re-running the within-cell experiment
+against \texttt{half\_norm\_clean} gives concordance \textbf{0.512}, at the edge of chance.
+(The \texttt{perfect}--\texttt{half\_norm} correlation is 0.126 across the larger
+735-system ranking sample and 0.241 here; the two populations and Monte Carlo budgets
+differ, and we quote 0.241 throughout because it is the run in which all three assumptions
+were computed on identical systems.)
+
+\emph{This is not one bad estimator.} That was our first reading and it does not survive
+the third assumption: \texttt{half\_norm} and \texttt{random} are different assumptions and
+they rank the same roofs at 0.894, while \texttt{perfect\_clean} disagrees with both.
+The uncomfortable part is that the plausible \emph{level} and the majority \emph{ranking}
+point at different estimators. Only \texttt{perfect\_clean} lands near the independent
+references for this population---\SI{2.76}{\percent} for PVDAQ systems near the pilot,
+\SI{4.70}{\percent} for NREL's coastal-California stations---and that comparison is partly
+circular, because NREL's IWSR is itself defined under a perfect-cleaning assumption. Our
+own 0.573 therefore rides on the minority ranker, and we say so rather than let a reader
+discover it.
+
+The honest statement is narrower than the section began. Per-array signal exists, per-array
+covariates exist, and station labels can reach neither. But a per-system label recovered
+this way is \emph{necessary and not yet sufficient}: the choice of cleaning assumption
+moves the level eightfold and can move the ranking to chance, and no independent reference
+can adjudicate it, because the references available share an assumption with one of the
+candidates. Closing that gap---an estimator both unbiased for recoverable loss and tight
+enough to order two roofs in one neighbourhood---is the prerequisite for per-roof soiling
+targeting. It is a measurement problem, and it is the one worth working on. We flag it
+because the obvious next move in this literature is to scale per-system label extraction,
+and scaling a label whose standard variants disagree this much will produce confident and
+unreproducible rankings.
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=0.98\textwidth]{fig_coverage.pdf}
+  \caption{Why no model here should be expected to travel. The 891 annual panel rows that
+  carry temporal structure are \SI{89.6}{\percent} west of $-\SI{114}{\degree}$, and
+  \SI{91}{\percent} of the 146 stations behind them. The eastern United States appears in
+  this dataset almost entirely as \emph{censored summary rows}---one row per station, no
+  annual breakdown, \SI{87}{\percent} of them eastern---which contribute nothing to a fold
+  that holds out a year. Every metered rooftop in our economics is Californian.}
+  \label{fig:coverage}
+\end{figure*}
+
+\paragraph{The dataset is less geographically balanced than a station count suggests.}
+Counted over all 257 stations, \SI{57}{\percent} sit west of $-\SI{114}{\degree}$, which
+sounds tolerable. Counted over the 146 stations that contribute \emph{panel} rows---the
+only ones with multiple years, and therefore the only ones a temporal fold can use---the
+figure is \SI{91}{\percent} (Figure~\ref{fig:coverage}). The eastern representation is
+almost entirely the 111 censored summary rows, \SI{87}{\percent} of which are eastern and
+each of which contributes a single observation with no annual structure. A geographic
+holdout on this dataset is therefore closer to a within-Southwest holdout than the station
+count implies, and we read our own out-of-region numbers accordingly.
+
+Two caveats on those two numbers, both of which we found by
+re-running the experiment. The fold holds out whole sites, since a region contains them
+entirely, but it does not hold out years; and the script read its hyperparameters from a
+configuration key that does not exist, so it had always fitted a stock model rather than
+the one we ship. Correcting both gives pooled \textbf{0.655} and \textbf{0.527} on the
+largest region. The direction of the conclusion is unchanged and its magnitude is worse. \SI{89.6}{\percent} of the panel rows sit west of $-\SI{114}{\degree}$, so the model has
+effectively already seen the Southwest. This model
+does not travel to an unseen region. More features will not fix it; a geographically
+balanced label set will.
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=0.98\textwidth]{fig_regional_holdout.pdf}
+  \caption{Out-of-region generalization. The largest held-out region scores near chance,
+  and no feature set recovers it.}
+  \label{fig:regional}
+\end{figure*}
+
+\paragraph{Level is biased high, and we correct the symptom, not the cause.}
+The raw head predicts 5.53\% annual recoverable loss for this AOI. PVDAQ residential
+systems within \SI{120}{\kilo\metre} measure a median of 2.76\% ($n=118$). We apply a
+multiplicative calibration of 0.500 to all three quantiles, placing the AOI at 2.76\%
+against NREL's own coastal-California station median of 2.80\%, an independent reference
+not used to derive the factor. The cause is the training geography: 774 of 891 rows are
+California, dominated by Los Angeles and San Bernardino, which is desert. The fix is a
+per-array label set, not a scalar.
+
+\subsection{The cleaning-value verdict}
+\label{sec:results-econ}
+
+\textbf{Zero of 1{,}865 detected Santa Cruz sites show a positive expected net from a
+cleaning}, on recoverable soiling, at any electricity rate to
+\$0.70/kWh, at any system size, over 2{,}000 Monte Carlo draws each.
+Maximum $P(\text{net}>0)$ across all sites is 0.0000. Figure~\ref{fig:shortfall} shows the shortfall, cleaning cost divided by annual recovered
+dollars, for every site.
+
+\paragraph{The same verdict on measured rooftops, with nothing assumed.}
+The result above rests on a modelled recovery fraction and a detected, not metered,
+array. We can now remove both. For \textbf{149} residential California systems in PVDAQ
+we measure recovery directly from RdTools soiling intervals---505 cleaning events falling
+in dry windows, separated from rain resets by daily precipitation---together with each
+system's own annual soiling loss, its observed heavy-rain frequency, and its nameplate
+capacity. \emph{What we measure is the value of a clean, not a recovery fraction.} One
+wash recovers a median \textbf{241 point-days} of performance (IQR [160, 340]), worth
+\textbf{\$28.10} at the retail offset and \$10.14 at the export rate (IQR [17.32, 43.70]
+and [6.25, 15.77]), against a median \$150 service. Those are assumption-free: they depend
+on the observed step and its duration, not on any model of unobserved cleaning.
+
+\paragraph{The dollar verdict does not depend on any of that.}
+\S\ref{sec:ranking} shows the per-system \emph{label} is assumption-dependent by a factor
+of eight. It would be reasonable to expect the economics to inherit that, and they do not,
+for an algebraic reason worth stating explicitly. Recovered dollars are the annual loss in
+dollars multiplied by the recovery fraction, and the recovery fraction carries that same
+annual loss in its denominator:
+\begin{equation*}
+\underbrace{kW \cdot h \cdot \eta \cdot p \cdot \tfrac{L}{100} \cdot 365}_{\text{annual loss in \$}}
+\;\times\;
+\underbrace{\frac{\Delta \cdot d}{\tfrac{L}{100} \cdot 365}}_{\text{recovery fraction}}
+\;=\; kW \cdot h \cdot \eta \cdot p \cdot \Delta \cdot d .
+\end{equation*}
+The annual loss $L$ cancels exactly. What a clean is worth depends only on the measured
+performance step $\Delta$, how long it persists $d$, the system size, the insolation and
+the tariff---none of which involves an assumption about unobserved cleaning. Verified on
+every system rather than one: across all 149 rooftops and all three cleaning assumptions,
+spanning an eightfold range of assumed annual loss, the largest deviation in recovered
+dollars is $4.3\times10^{-14}$ dollars, which is floating-point noise. \emph{The contribution most exposed to the label problem is the
+ranking; the one that decides the product is immune to it.}
+
+\paragraph{Recovery fraction is a ratio, and we demote it accordingly.}
+The literature's constant---assumed at 0.90, modelled here at 0.045---is
+$\Delta d / L$, a measured numerator over an \emph{assumption-dependent} denominator. By
+the same cancellation that makes the dollars robust, the ratio inherits the full label
+instability of \S\ref{sec:ranking}. On the 112 systems carrying all three cleaning
+assumptions:
+
+\begin{center}\small
+\begin{tabular}{@{}lrr@{}}
+\toprule
+denominator & median $L$ & implied recovery fraction \\
+\midrule
+\texttt{perfect\_clean}    & \SI{2.97}{\percent}  & 0.217 [0.132, 0.361] \\
+\texttt{half\_norm\_clean} & \SI{9.61}{\percent}  & 0.063 [0.048, 0.097] \\
+\texttt{random\_clean}     & \SI{20.58}{\percent} & 0.031 [0.022, 0.044] \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent
+A sevenfold range, entirely from the denominator. We therefore do \emph{not} report a
+single measured recovery fraction, and an earlier draft of this paper was wrong to. What
+survives is one half of a bracket: the \textbf{0.90 originally assumed is above all three},
+so the original business case was wrong by more than the uncertainty in any direction. The
+modelled 0.045 is \emph{not} below all three---\texttt{random\_clean} implies 0.031---so it
+falls inside the measured range rather than beneath it, and we cannot claim the simulation
+is conservative against every denominator. Anyone recomputing from the published fleet label file obtains 0.217, that
+file carrying \texttt{perfect\_clean}.
+At the marginal export rate of \$0.165/kWh, \textbf{zero of 149} systems clear; at the
+full retail offset of \$0.4573/kWh, two do. The median system requires
+\textbf{\$2.44/kWh}, roughly five times California retail (Figure~\ref{fig:value}, left).
+Peak-sun-hours are measured per site from the cached irradiance record rather than held at
+the \SI{5.5}{\hour} constant the pipeline previously applied everywhere; that constant is a
+Santa Cruz value, the measured median across 29 cells is \SI{5.09}{\hour}, and the constant
+is too high for 22 of them---so it had been making the cleaning case optimistic rather than
+conservative.
+
+The obvious objection is our \$150 service floor, which is unsourced and which 135 of the
+149 systems price at. It is not load-bearing, because what a wash returns is
+too small for any cost structure to reach. One wash on the median system recovers
+\textbf{\$28.10} at the retail offset and \$10.14 at the export rate
+(Figure~\ref{fig:value}, right). A wash would have to cost under \$10 before half of these
+systems cleared at the export rate; at \$25, below any plausible service price, 9.4\%
+clear.
+
+\emph{This comparison is per-wash on both sides, which is what makes it robust.} A
+homeowner buys one wash at a time, each worth $\Delta d$ priced, and by the cancellation
+above that value carries no cleaning assumption. We previously described the same figure as
+``the entire annual recoverable value'', which was a mislabel rather than a different
+number: the two differ only by using the \SI{5.5}{\hour} constant instead of each site's
+measured insolation, and agree to $4\times10^{-14}$ dollars per system when computed
+alike. An annual prize \emph{would} depend on the cleaning assumption, and we make no claim
+about one.
+
+\paragraph{Where cleaning would pay.}
+Stating where the product fails is weaker than stating where it would work, so we sweep
+the boundary (Figure~\ref{fig:surface}). Rain frequency enters twice and both times
+against the seller: more rain means less accumulated loss to recover, and a shorter
+benefit window before the next natural reset. Both quantities come from the same daily
+trajectory, so they compound rather than multiplying as independent constants. Reading the boundary off the full grid, a positive expected net requires \emph{all} of a
+re-soiling time constant $k \geq \SI{30}{\day}$, at most 15 heavy-rain resets per year, a
+tariff above \$0.20/kWh and a system above \SI{4}{\kilo\watt}. Each threshold is the most
+permissive value at which any grid cell clears while the other axes are free, so they are
+necessary conditions read jointly, not a recipe: only 323 of 49{,}920 cells are positive,
+and Figure~\ref{fig:surface} plots one deliberately generous slice of that grid rather
+than the thresholds themselves. The surface is
+non-monotonic in $k$: too fast and there is no benefit window, too slow and the array
+never soils enough to be worth cleaning. Coastal California sits at $k=\SI{15}{\day}$ with
+16.5 resets per year, far inside the losing region.
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=0.98\textwidth]{fig_cleaning_value.pdf}
+  \caption{The cleaning-value verdict on 149 measured rooftops, with recovery measured
+  rather than modelled. \emph{Left:} the electricity price each system would need for one
+  professional clean to break even; the median needs \$2.44/kWh against a \$0.165
+  marginal export rate. \emph{Right:} what one wash returns per system at both the export
+  rate and the full retail offset, against the cost of the service. Both sides of that
+  comparison are per-wash, and the left-hand quantity carries no cleaning assumption. What
+  a wash returns is smaller than any plausible price under either tariff.}
+  \label{fig:value}
+\end{figure*}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.98\columnwidth]{fig_breakeven_surface.pdf}
+  \caption{Where one clean would pay, under three concessions stacked in the product's
+  favour: \$0.70/kWh, a \SI{20}{\kilo\watt} roof, and a 12-point saturated soiling level.
+  The measured operating point remains deep in the losing region, and at the measured
+  median system size no grid cell is positive.}
+  \label{fig:surface}
+\end{figure}
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=0.98\textwidth]{fig_shortfall.pdf}
+  \caption{Cleaning cost over annual recovered dollars, all 1{,}865 sites. No site reaches
+  the breakeven line. Size targeting improves the ratio roughly $8\times$ and then
+  asymptotes, because recovered dollars and cleaning cost both scale with panel count.}
+  \label{fig:shortfall}
+\end{figure*}
+
+\paragraph{Scope of the verdict.}
+IWSR is defined as the insolation-weighted mean of daily soiling ratios \emph{assuming
+perfect cleaning}, so a permanent wash-only layer is excluded from the labels by
+construction. Our loss model trains on $(1-\text{IWSR})\times100$ and therefore predicts
+\emph{recoverable} loss, not total output deficit. Everything in this subsection is silent
+about the other channel (\S\ref{sec:openchannel}).
+
+\paragraph{The constant that was carrying the product.}
+\texttt{recovery\_frac} was assumed at 0.90 and models at \textbf{0.045}, a $20\times$
+overstatement. The 0.045 is a simulation output, not a measurement: it depends on a
+fitted re-soiling constant and on the SOMOSclean saturation whose fit we qualify in
+\S\ref{sec:unsourced}. The mechanism: at the calibrated re-soiling constant $k=15$
+equivalent-days an array returns to its annual mean in about two weeks, and Santa Cruz
+gets 27 heavy-rain ($\geq\SI{10}{\milli\metre}$) resets a year for free. One cleaning buys
+roughly one array-month of clean out of twelve. Two validations: the same trajectory
+reproduces NREL's measured coastal-California annual loss (model 5.06\% against measured
+4.70\%), and the result is robust to $k$---even at $k=60$, four times the calibrated
+value, in Phoenix, recovery is only 0.125. \textbf{With 0.90 restored, 44.8\% to 95.4\% of
+the AOI ``should clean.''}
+
+\paragraph{A counter-correction that does not move the verdict.}
+Pricing every site at the current net-billing tariff was itself an untested assumption.
+Public interconnection records~\cite{dgstats} filtered to the five AOI ZIP codes
+($n=7{,}536$ residential PV) show \textbf{90.1\% of the AOI on legacy net metering}
+(52.5\% NEM 2.0, 37.6\% NEM 1.0). The population-blended value of a lost kWh rises from
+\$0.1646 to \$0.4284, a $2.60\times$ understatement, and the AOI annual
+recoverable loss total rises 156\%. \textbf{The verdict did not move}: still zero of
+1{,}865, still maximum $P(\text{net}>0) = 0.0000$.
+
+\paragraph{Where the gap sits.}
+Table~\ref{tab:shortfall} reports the shortfall by size band. Targeting by size buys
+roughly $8\times$ and then asymptotes near $5\times$, because recovered dollars and
+cleaning cost both scale with panel count. Small bands look worse only because the minimum
+service charge dominates a twelve-panel job. Re-pricing across the published California
+market range, \$5 to \$20 per panel, \textbf{zero sites pay at any price on the board}.
+
+\begin{table}[t]
+\centering\small
+\caption{Shortfall (cleaning cost $\div$ annual recovered dollars) by system size. Values
+$>1$ mean the wash costs more than it returns. Computed from
+\artifact{site\_economics.csv} with the \emph{modelled} recovery fraction of 0.045 and the
+level calibration applied. \S\ref{sec:results-econ} shows that fraction is denominator-
+dependent (0.031 to 0.217) and reports the value of a wash in dollars instead; the
+shortfall ordering below is unaffected.}
+\label{tab:shortfall}
+\begin{tabular}{lrrr}
+\toprule
+Size band (kW) & $n$ sites & Median & Best \\
+\midrule
+0--5      & 877 & $45.9\times$ & $26.5\times$ \\
+5--10     & 796 & $24.6\times$ & $13.8\times$ \\
+10--15    & 119 & $16.6\times$ & $13.7\times$ \\
+15--30    & 35  & $13.8\times$ & $11.2\times$ \\
+30--60    & 16  & $10.4\times$ & $8.6\times$ \\
+60--150   & 12  & $8.5\times$  & $6.7\times$ \\
+150+      & 10  & $5.5\times$  & $\mathbf{3.6\times}$ \\
+\midrule
+All       & \textbf{1{,}865} & --- & \textbf{0 clear} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Pilot deployment}
+\label{sec:pilot}
+
+The pipeline ran end to end on the AOI, producing 3{,}362 detected arrays resolving to
+1{,}865 sites, a public dashboard with per-array size, orientation, and modelled loss, and
+50 postcards rendered and mailed live on 2026-06-30 (50 of 50 accepted, \$47.52, QR
+deep-links verified for all 50 identifiers). We present the mailing as a deliverability
+and mechanics test, not as a behavioural experiment: a 50-card drop cannot resolve a
+response rate statistically. The dashboard's honest claim is a per-home diagnosis: this is
+your array, this is its size and orientation, this is what it loses, and no, do not pay to
+clean it. \begin{figure}[t]
+  \centering
+  \includegraphics[width=0.62\columnwidth]{fig_deployment.pdf}
+  \caption{The negative result as a homeowner receives it. The panel reports the loss in
+  dollars, states that a wash leaves this roof about \$87 down, and says so first. It also
+  discloses the channel we cannot measure---``a film only a wash removes\ldots{} nobody has
+  measured how fast that builds up here''---and that we do not sell cleanings.
+  \textbf{This capture predates the level calibration of \S\ref{sec:results-econ}}: the
+  \SI{6.5}{\percent} shown is above anything the deployed data now contains, whose
+  site-level losses have median \SI{2.77}{\percent} and maximum \SI{3.35}{\percent}. The
+  overstatement runs in the product's favour and the panel still says do not pay, which is
+  the property we are evidencing; the arithmetic on a current capture is smaller. The map
+  is cropped out so no individual residence is identifiable.}
+  \label{fig:deployment}
+\end{figure}
+
+Figure~\ref{fig:deployment} is that diagnosis, captured before the level calibration
+described above. We show it because the claim
+``the honest deliverable is telling someone not to buy'' is otherwise unverifiable, and
+because the panel carries the paper's own caveat into the product: it tells the homeowner
+that the figure assumes a best-week clean, that an average date recovers about a third as
+much, and that a second soiling channel exists which nobody has measured here.
+
+In the same footprint the previous-generation stack, built on
+\SI{0.6}{\metre} NAIP imagery~\cite{naip}, found 334 arrays. Polygon counts are not
+comparable across GSD (1.80 polygons per site at \SI{21}{\centi\metre} against 1.30 at
+\SI{60}{\centi\metre}), sites are the comparable unit, and imagery and detector changed
+together.
+
+% ---------------------------------------------------------------------------
+\section{Discussion}
+
+\begin{table*}[t]
+  \centering
+  \small
+  \caption{Every headline claim, the number behind it, and the strongest objection we know
+  of. Limits are stated here rather than distributed through the text so that a reader can
+  audit the paper's confidence in one place.}
+  \label{tab:claims}
+  \begin{tabular}{p{4.6cm}p{3.3cm}p{7.4cm}}
+    \toprule
+    \textbf{Claim} & \textbf{Number} & \textbf{Strongest limit we know of} \\
+    \midrule
+    Detection is gated and permissive
+      & $F_1$ 0.826 [0.798, 0.853]
+      & One county, one imagery vintage. Permit recall of 73.6\% is era-restricted; across
+        all years it is 55.3\%. \\
+    \addlinespace
+    Our published temporal gate leaked
+      & 88.7\% of held-out rows kept their own site in training
+      & Measured, not inferred. This one has no serious objection; it is a property of the
+        fold definition. \\
+    \addlinespace
+    Station labels cannot rank roofs
+      & 0.622 [0.571, 0.670] jointly out-of-site and out-of-year, against 0.710 published
+      & Robust to seed (sd 0.005, 7 seeds), to estimator (logistic regression gives 0.571),
+        and to summary-row weighting (0.594--0.622). The panel label set is \SI{91}{\percent}
+        western at station level; the east is censored rows only. \\
+    \addlinespace
+    The drop is leakage, not lost data
+      & 83\% of the 0.0922 fall, 95\% CI [52, 99]\%
+      & Controlled directly: a size-matched training set that keeps the leak scores 0.6986
+        against 0.7144 full and 0.6222 clean. The joint fold does cost a median 28.8\% of
+        the training rows, and we report that. \\
+    \addlinespace
+    Coordinates match the full feature set
+      & 0.644 against 0.622
+      & Not a significant win for coordinates either. The claim is the absence of evidence
+        that 38 further features contribute, not evidence of their absence. \\
+    \addlinespace
+    Published physics models do no better
+      & Kimber 0.610 [0.566, 0.652], unfitted, against our 0.622
+      & Kimber's proxy is missing for 50 of 891 rows. The comparison is on ranking only;
+        neither model was built to classify at our threshold. \\
+    \addlinespace
+    Does not travel to an unseen region
+      & pooled 0.655, largest region 0.527
+      & Stable across fold geometry (0.638--0.664 for $k=5\ldots12$). Regions are k-means
+        cells, not a designed geographic sample. \\
+    \addlinespace
+    Per-system labels are necessary, not yet sufficient
+      & levels 2.72 / 9.80 / 20.93 pts across three cleaning assumptions; rankings
+        $\rho$ 0.241, 0.318, 0.894
+      & Our own 0.573 uses \texttt{perfect\_clean}, which is the \emph{minority} ranker,
+        and the only one whose level is plausible. The plausibility check is partly
+        circular: NREL's IWSR is itself a perfect-clean construction. \\
+    \addlinespace
+    The dollar verdict is label-invariant
+      & \$27.14 under all three assumptions
+      & Algebraic, not empirical: annual loss cancels between the dollar figure and the
+        recovery fraction's denominator. Holds only because we measure the step directly
+        rather than inferring it from a modelled annual loss. \\
+    \addlinespace
+    One clean recovers \$28.10 of electricity
+      & median over 505 events on 149 systems; \$150 service
+      & Dry-window events are \emph{candidate} washes; an inverter reset or a shading change
+        looks the same. Assumes cleaned and un-cleaned trajectories stay parallel. The
+        \emph{fraction} of annual loss this represents is 0.031--0.217 depending on the
+        cleaning assumption, which is why we report dollars. \\
+    \addlinespace
+    Cleaning does not clear
+      & 0 of 149 at \$0.165/kWh, 2 of 149 at retail; median needs \$2.44/kWh; one wash
+        returns \$28.10 at retail, \$10.14 at export
+      & Recoverable soiling only; a permanent wash-only layer is excluded by construction.
+        All 149 systems are Californian. Survives the \$150 service floor because the prize
+        is smaller than any plausible price. \\
+    \bottomrule
+  \end{tabular}
+\end{table*}
+
+\label{sec:discussion}
+
+\subsection{What the pipeline establishes}
+Every stage runs on public data, and the answer the last stage returns is \emph{no}. That
+is the result, not a defect. We reach \citet{mejia2013}'s conclusion for the average California site independently and
+by a different route, but our claim is stronger and narrower. On recoverable soiling, at
+sourced tariffs and a directly measured value per clean, cleaning never pays---not on the
+1{,}865 detected sites in the pilot, and not on the 149 metered rooftops where the array
+is instrumented and nothing about the loss has to be inferred from imagery. The second
+population matters more than the first, because it removes detection, area estimation and
+the risk model from the chain entirely and still returns the same answer.
+
+\subsection{The open channel we cannot see}
+\label{sec:openchannel}
+Rain removes dust. Rain does not remove moss, lichen, algae, leaf litter, sap, or built-up
+droppings, and shade plus moisture encourage them. That channel sits outside the IWSR
+labels by construction, so nothing in \S\ref{sec:results-econ} speaks to it. We tested the
+\emph{uniform} persistent-layer hypothesis on a revenue-grade PVDAQ site with 8.08 years
+of data beside a class-A pyranometer: degradation $-0.076$\%/yr (95\% CI $[-0.408,
++0.358]$), standing layer 0.0 points, and the annual maximum soiling ratio pinned at
+exactly 1.0000 in eight of eight years. That kills the uniform hypothesis. It does not
+constrain the localised coastal case: that site is a ground mount beside farmland with no
+canopy, and a whole-array ratio averages away a few bad modules.
+
+The localised loss is wildly nonlinear and \emph{saturating}, not compounding: a shaded
+cell current-limits its series string until a bypass diode cuts the substring out, so a
+few square centimetres cost far more than their area fraction and then stop. Modelled at
+cell granularity~\cite{bishop1988,holmgren2018pvlib}, four modules each losing one
+substring cost 7.00\%, and a continuous edge band across four portrait modules on
+string wiring costs 21.00\%, against breakeven bars of 2.2\% to 10.1\%. \textbf{A wash pays
+here only if the roof carries continuous edge occlusion across several modules}. That is a
+specific, falsifiable prediction about what a qualifying roof looks like, and it is
+exactly what aerial imagery can see and a dust model cannot. Run the moss economics on
+real per-roof geometry, however, and zero of 2{,}494
+geometry-scored arrays clear a wash, best case losing about \$30, because module-level
+electronics have been effectively mandated since 2019 and defuse the substring
+nonlinearity. What remains
+open is therefore the \emph{measurement}, not the product: nobody has measured biological
+soiling's power cost in a Mediterranean climate. \citet{porcar2018} confirmed biofilm in
+Berkeley but measured no power loss, and our AOI's growth-weighted time of wetness is
+2{,}444\,h/yr against Berkeley's 2{,}468, a ratio of 0.99.
+
+\subsection{A power result that reorders the obvious experiment}
+A conventional before/after wash test on a single array saturates at roughly 5\% of output
+minimum detectable effect and \emph{does not improve with more days}, because weather
+arrives in multi-day blocks and autocorrelation rises at almost exactly the rate at which
+extra samples would have helped. That is a floor measured on a site with an on-site pyranometer
+and \SI{893}{\kilo\watt} of spatial averaging; a residential roof normalised against
+satellite irradiance is $1.5$ to $2\times$ worse. The obvious study, wash 20 random homes and measure the average, is therefore both
+underpowered and aimed at the wrong estimand. Selecting on visible soiling is not a shortcut; it is what makes the study
+possible. A split-array wash on one instrumented volunteer roof reaches roughly 1.5\%
+minimum detectable effect in two weeks for about \$150, because weather is common-mode and
+cancels between halves.
+
+\subsection{Limitations}
+\label{sec:limitations}
+\textbf{(a) Label transfer.} We train on instrumented ground stations and deploy on
+residential rooftops. This is unvalidated and central.
+\textbf{(b) Ranking.} \S\ref{sec:ranking}: valid for level, not for ranking homes.
+\textbf{(c) Level.} The head reads high against every nearby measurement, and the scalar
+that corrects it treats the symptom.
+\textbf{(d) Recall.} 73.6\% on the imaged era and 55.3\% across all permit years; the
+permit denominator is not a census.
+\textbf{(e) Imagery staleness} is distinct from resolution. Any array installed after the
+flight is invisible regardless of GSD. Our permit audit script still hard-codes a 2022
+vintage constant against 2025 imagery, making the imaged-era split \emph{conservative};
+this is a known defect, flagged, not yet fixed.
+\textbf{(f) Unsourced constants}, listed in \S\ref{sec:unsourced}.
+\textbf{(g) Inter-annotator agreement} was never measured, so the mask ceiling is unknown.
+\textbf{(h) Geography.} Every metered rooftop in the economics is Californian, and the
+panel labels behind the risk model are \SI{91}{\percent} western at station level
+(Figure~\ref{fig:coverage}). The break-even boundary we map---$k\geq\SI{30}{\day}$, at
+most 15 resets a year, above \$0.20/kWh---is therefore a \emph{prediction} about drier and
+more expensive markets, not a measurement of them. It is the limitation we would close
+first.
+\textbf{(i) Label instability.} Per-system soiling labels are not yet well posed: three
+standard cleaning assumptions place the median annual loss at 2.72, 9.80 and
+\SI{20.93}{\percent} and rank the same systems at $\rho$ between 0.241 and 0.894, with the
+only plausibly-levelled variant in the minority on ordering. This does not touch the dollar
+result, which the cancellation of \S\ref{sec:results-econ} makes assumption-free, but it
+does touch every ranking claim. Any programme that scales per-system label extraction should measure this before
+trusting a ranking built on it.
+\textbf{(j) Scale.} The free weather archive is the binding constraint on extending beyond
+one region. In this work it cost roughly four hours of stalled fetching before we noticed
+that most of what we were requesting was already cached under a different span.
+
+\subsection{Unsourced constants, disclosed}
+\label{sec:unsourced}
+The minimum professional service charge (\$150) and the
+per-panel schedule are our price points, not market quotes, and that one constant decides
+most residential cases. Published California pricing runs \$5--12 per panel, so our
+schedule sits at or below the bottom of the range and currently \emph{flatters} the
+product. The production anchor of 1{,}500\,kWh/kWp/yr
+is PVWatts-typical and unmeasured for this AOI. The packing factor (0.90) and midday
+self-consumption share ($\sigma = 0.30$) are unsourced. The avoided-cost export table is
+another utility's standing in for the local one, same methodology, level unverified. The SOMOSclean saturation parameter was fitted against the wrong side of the trajectory:
+the objective scored 31 December, mid wet season, against an annual-mean measured IWSR.
+That does not affect the annual-mean validation, but a refit would not be expected to
+return 0.08. The net-metering cliff dates are encoded from memory and flagged in code as
+requiring verification against the regulatory decision.
+
+\subsection{Ethics and data provenance}
+All inputs are public records used within their terms. Addresses are joined from county
+parcel data to arrays detected in public imagery for the purpose of contacting the
+property owner; we retain no personally identifying information beyond what the mailing
+requires, and the public dashboard renders array geometry and modelled estimates only. We
+state on the dashboard that these are modelled estimates from public data, not a
+professional energy audit and not a guarantee. The deployed panel
+(Figure~\ref{fig:deployment}) does report a percentage and a dollar figure for an
+individual roof, which is a stronger claim than we would make in text, and we mark the
+percentage as a county-level estimate rather than a measurement of that roof precisely
+because we have no production data for it. We regard that labelling as the minimum, not as
+sufficient: a per-address number carries an authority the underlying model does not earn,
+and \S\ref{sec:ranking} is the reason why.
+
+% ---------------------------------------------------------------------------
+\section{Conclusion}
+\label{sec:conclusion}
+
+A soiling-targeting system can be built end to end on public data, and most of it works.
+Arrays detect at $F_1$ 0.826 with 73.6\% independently measured recall, and per-array roof
+geometry recovers from public lidar, agreeing with installer filings on the median tilt to
+\SI{0.03}{\degree} while disagreeing about the distribution for a reason we can name.
+
+What it cannot do is rank individual roofs, and the validation that suggested otherwise
+was leaking: folds that hold out a site or a year but never both flatter the model by about
+nine points. Corrected, the model scores 0.622, two coordinates score 0.644, and an
+unfitted empirical formula from 2006 scores 0.610. Those three numbers say the same thing
+from three directions. The cause is structural: public soiling labels are measured at
+stations, so every roof in a catchment inherits one label and no per-roof feature has
+anything to fit.
+
+We tested the obvious repair rather than leaving it as an open question, and the answer is
+partial. Per-system labels derived from public production telemetry \emph{do} carry
+per-roof signal---0.573 within-cell concordance against a structural ceiling of 0.5---but
+three standard ways of computing such a label disagree by a factor of eight on the level
+and by as much as $\rho = 0.241$ on the ordering, and the one whose level is plausible is
+the one the other two disagree with. The prerequisite for per-roof soiling targeting is therefore a label
+estimator that is both unbiased for recoverable loss and tight enough to order two roofs in
+one neighbourhood. That is a measurement problem, and it is the one worth working on.
+
+Whether any of it would matter is settled separately, and more cheaply. On 149 metered
+rooftops one wash recovers \$28.10 of electricity on the median system at the retail
+offset, \$10.14 at the export rate, against a \$150 service; the median roof needs
+electricity at \$2.44/kWh to break even. A wash must cost under \$10 before half of these
+roofs clear at the export rate. No ranking model, however good, creates
+value that is not there---which is why we would advise anyone entering this problem to
+compute the arithmetic before building the pipeline, as we did not.
+
+Two further channels remain genuinely open. The wash-only biological layer our labels
+exclude by construction may carry measurable power loss in a Mediterranean climate; nobody
+has measured it, and an afternoon with one instrumented roof would begin to settle it. And
+every economic number here comes from Californian systems, so the boundary we map---$k \geq
+\SI{30}{\day}$, at most 15 rain resets a year, above \$0.20/kWh---is a prediction about
+drier and more expensive markets rather than a measurement of them.
+
+% ---------------------------------------------------------------------------
+\section*{Reproducibility}
+\label{sec:repro}
+Every number in this paper traces to a committed artifact, and the claim is checkable
+rather than asserted: \texttt{paper/verify\_numbers.py} reads each headline value out of
+the JSON that produced it and fails if the rounded form is absent from the manuscript. It
+is wired into \texttt{make paper}, so the PDF cannot be built from stale claims. At
+submission it passes 30 of 30, and it also fails the build if a \emph{retired} number
+reappears.
+
+The corrected validation results are produced by a standalone audit that imports nothing
+from the pipeline it audits and reads the training matrix read-only, so a reader can
+reproduce the negative results without trusting our code:
+
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+Result & Script \\
+\midrule
+Fold taxonomy, leak measurement, 0.622 & \texttt{audit\_soiling\_validation.py} \\
+Reporting-basis reconciliation         & \texttt{audit\_reconcile\_basis.py} \\
+Out-of-region, year axis restored      & \texttt{audit\_regional\_holdout.py} \\
+Seed, estimator, weighting, geometry   & \texttt{audit\_robustness.py} \\
+Kimber and SOMOSclean baselines        & \texttt{audit\_physics\_baselines.py} \\
+Cleaning events from telemetry         & \texttt{audit\_cleaning\_intervals.py} \\
+Rain reset against manual wash         & \texttt{audit\_rain\_vs\_wash.py} \\
+Measured recovery fraction             & \texttt{audit\_recovery\_empirical.py} \\
+Within-cell ranking                    & \texttt{audit\_per\_system\_ranking.py} \\
+Economics on metered rooftops          & \texttt{audit\_real\_systems\_econ.py} \\
+Value per clean, label invariance      & \texttt{audit\_value\_per\_clean.py} \\
+Three-assumption label comparison      & \texttt{audit\_label\_variants.py} \\
+Training-size control                  & \texttt{audit\_trainsize\_control.py} \\
+Break-even surface                     & \texttt{breakeven\_surface.py} \\
+\midrule
+Detection gate                         & \texttt{detect/eval\_tile\_f1.py} \\
+Recall probe                           & \texttt{permit\_recall\_audit.py} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent
+All of the above run from cached inputs and need no network. Every figure is emitted by a
+script under \texttt{paper/figures/} that reads those artifacts directly; no figure
+contains a hand-entered number.
+
+\paragraph{What we got wrong, and how it was caught.} Three results in this paper changed
+after they had been written down as findings, each because one setting was varied: the
+recovery fraction turned out to have no single value at all---0.031, 0.063 or 0.217
+according to which cleaning assumption supplies its denominator, which is why this paper
+reports dollars per wash instead---the within-cell ranking fell from 0.573 to 0.512 on that
+same choice, and the out-of-region figure moved once the production hyperparameters were
+actually loaded. None
+was found by review. We record this because it is the strongest argument we can make for
+the robustness table in \S\ref{sec:results-risk} and for
+\texttt{audit\_robustness.py} existing at all.
+
+\section*{Acknowledgements}
+We thank the Santa Cruz County GIS and building-permit offices, and NREL for publishing
+both the soiling map and PVDAQ openly.
+
+\bibliographystyle{plainnat}
+\bibliography{refs}
+
+\end{document}

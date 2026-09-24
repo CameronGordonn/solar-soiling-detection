@@ -3,28 +3,41 @@
 # the LAST matching pattern wins, so specific lanes are listed after the default.
 #
 # Ownership mirrors docs/TEAM.md. Adjust here whenever lanes move.
-# NOTE: verify @akshitha-nagaraj resolves (github.com/akshitha-nagaraj) before first merge.
+#
+# Rewritten 2026-09-02, when Cameron's tenure ended (last day 2026-08-31). Every
+# pattern here previously named @CameronGordonn, which meant each PR after his
+# departure would have requested review from someone who had left, and GitHub gives
+# no warning when that happens: the review is simply never delivered. The split is
+# the one the hand-off implies rather than a new plan — the engineering lanes follow
+# the person who is still building (@akshitha-nagaraj), and direction plus the
+# canonical status doc follow the person who sets it (@craig11f).
+#
+# A CODEOWNERS entry only works if the named account has WRITE on this repo.
+# Verified 2026-09-02: @akshitha-nagaraj and @craig11f both do.
 
-# --- Default: everything falls to Cameron unless a lane below claims it ---
-*                           @CameronGordonn
+# --- Default: direction and anything unclaimed ---
+*                           @craig11f
 
-# --- Stage 1 (detection) + Stage 2 (risk): Cameron's lanes ---
-/scripts/detect/            @CameronGordonn
-/scripts/data/              @CameronGordonn
-/scripts/labeling/          @CameronGordonn
-/scripts/predict/           @CameronGordonn
-/scripts/analyze/           @CameronGordonn
-/src/risk/                  @CameronGordonn
-/src/utils/                 @CameronGordonn
+# --- Model + data lanes: the detector, the risk model, the pipelines they run on ---
+/scripts/detect/            @akshitha-nagaraj
+/scripts/data/              @akshitha-nagaraj
+/scripts/labeling/          @akshitha-nagaraj
+/scripts/predict/           @akshitha-nagaraj
+/scripts/analyze/           @akshitha-nagaraj
+/src/risk/                  @akshitha-nagaraj
+/src/utils/                 @akshitha-nagaraj
 
-# --- Product surface: Akshitha's lane (API, CLI, outreach funnel) ---
+# --- Product surface: API, CLI, outreach funnel ---
 /src/solarsoiled/           @akshitha-nagaraj
 /scripts/outreach/          @akshitha-nagaraj
 
-# --- Permissive-stack migration (RF-DETR + SAM port): Akshitha's lane ---
+# --- Permissive-stack migration (RF-DETR + SAM port) ---
 # The port directory doesn't exist yet. Uncomment/adjust the path when it lands
 # (see docs/PERMISSIVE_STACK_MIGRATION.md, docs/HANDOFF_imagery_ingestion.md).
 # /src/detect_permissive/   @akshitha-nagaraj
 
-# --- Canonical status doc: Cameron owns the merge (shared-edit collision point) ---
-/docs/Q2_PLAN.md            @CameronGordonn
+# --- Registry: a beta->GA flip is a shipping decision, not a code change ---
+/models/registry.yaml       @craig11f
+
+# --- Canonical status doc: direction owns the merge (shared-edit collision point) ---
+/docs/Q2_PLAN.md            @craig11f

@@ -8,13 +8,18 @@ End-to-end geospatial ML system for detecting rooftop solar arrays in public aer
 
 This is a negative commercial result carried openly rather than buried. **The detection stack is the asset** — it passed its shipping gate and it is licence-clean — and the honest product today is a *diagnosis* ("here is what your array loses, and no, do not pay to clean it"), not a cleaning lead list.
 
+> 📄 **The write-up is in this repo: [`paper/paper.pdf`](paper/paper.pdf)** — *Station Labels Cannot
+> Rank Roofs: Why Public-Data Soiling Models Do Not Transfer, and What Cleaning Is Actually Worth*.
+> It is the canonical account of what this system can and cannot do, and it **corrects the Stage 2
+> numbers below**. See [Paper](#paper).
+
 > **New to the team? Start with [`docs/ONBOARDING.md`](docs/ONBOARDING.md)** — env setup, the data/secrets
 > handoff, and what to read in what order (it takes under an hour to get productive). Ownership + how we
 > work: [`docs/TEAM.md`](docs/TEAM.md). This README is the *what/why*; those are the *how-to-start*.
 
 **Current metrics** — honest, methodology explained in [Results](#results):
 - Stage 1: **GA gate PASSED 2026-08-07.** `rfdetr_w2_20260807` scores **tile-level box-F1 0.8260** on test (P 0.850 / R 0.803, 95% CI [0.798, 0.853], n_gt 585), clearing all three conditions — F1 ≥ 0.75, CI-lower ≥ 0.70, recall ≥ 0.70 — with confidence tuned on val and **frozen before test was touched**. RF-DETR @728 + SAM2, Apache-2.0. ⚠️ **Every SAHI-F1 figure in this repo's history, including R2's 0.570, is measured on different labels, different imagery and a different architecture, and is not comparable to this number.**
-- Stage 2: **GA-ready within its training geography** — `run_optionb`, all three gates clear on honest evaluation: spatial-CV AUC **0.712** (re-measured 2026-08-06; the older 0.728 is `run_optionb`'s stored figure and does not reproduce), pooled out-of-year AUC **0.710** (rolling leave-one-year-out, n=891, CI [0.676, 0.742]), calibration retained out-of-year. Further tuning is below measurement resolution. **It does not generalize to an unseen region**: pooled out-of-region AUC 0.677, worst region 0.548. See [docs/CANONICAL_NUMBERS.md](docs/CANONICAL_NUMBERS.md).
+- Stage 2: ⚠️ **the gate it cleared was leaking** — corrected 2026-09-22 while writing the paper, and this supersedes every Stage 2 figure published before that date. The registry gates used folds that hold out either *site* or *year* but not both; for **88.7%** of rows the held-out year's sites remained in training through their other years. Under a jointly out-of-site and out-of-year fold the model scores AUC **0.622** (95% CI [0.571, 0.670], P(AUC ≥ 0.70) = 0.001), not the **0.710** the gate recorded. A size-matched control attributes **83%** of the fall to leakage (95% CI [52, 99]). For scale: **latitude and longitude alone score 0.644**, and an unfitted 2006 empirical model scores 0.610. The regional holdout carried the same defect plus a config key that silently fitted a stock model — corrected to 0.655 pooled, 0.527 on the largest region. Matched on reporting basis every earlier figure still reproduces to within 0.012, so this is a fold error, not a measurement error. See [`paper/paper.pdf`](paper/paper.pdf) §4.4 and [docs/CANONICAL_NUMBERS.md](docs/CANONICAL_NUMBERS.md).
 - Stage 2, the limit worth knowing: the labels are **station-level**, so the model is valid for *level* and **not for ranking homes against each other**. Across 1,710 residential sites, array size (from detection) drives **86.7%** of the per-home dollar spread, roof orientation **11.1%**, and the risk model **2.2%**. See [`docs/SOILING_LEVEL_INVESTIGATION.md`](docs/SOILING_LEVEL_INVESTIGATION.md).
 
 **Live product** — the dashboard + calculator now live in the **BBF site** (`../BBF-Website`, Cloudflare Pages), folded into its Tools section; the old GitHub Pages landing is retired:
@@ -125,11 +130,13 @@ All external data fetches are disk-cached. Weather and air quality data streams 
 | Stage 1 | **tile-level box-F1 @ IoU 0.50** | The gate. Production path, conf tuned on val and frozen, micro-averaged | **0.8260** ✓ (`rfdetr_w2_20260807`, 95% CI [0.798, 0.853], n_gt 585) |
 | Stage 1 | test precision / recall | Recall is the funnel — a missed array is a missed lead | P **0.850** / R **0.803** ✓ |
 | Stage 1 | SAM2 mask area vs GT | Area feeds the dollar chain, so bias here is a pricing error | median area/GT **1.01**, roof-grab **0%** |
-| Stage 2 | **Spatial-CV AUC** | 10km GroupKFold prevents geographic leakage; conservative *within-geography* estimate | **0.712** ✓ (0.728 = `run_optionb` as stored, does not reproduce) |
-| Stage 2 | **Pooled out-of-year AUC** | Rolling leave-one-year-out across 15 panel years (n=891); temporal generalization | **0.710** ✓ (95% CI [0.676, 0.742]) |
+| Stage 2 | **Spatial-CV AUC** | 10km GroupKFold. Has the mirror defect of the fold below — read it with the row after next | 0.712 (0.728 = `run_optionb` as stored, does not reproduce) |
+| Stage 2 | **Pooled out-of-year AUC** | Rolling leave-one-year-out across 15 panel years (n=891) | 0.710 (95% CI [0.676, 0.742]) — ⚠️ **leaking**, see below |
+| Stage 2 | **Joint out-of-site + out-of-year AUC** | The honest fold. Holds out site *and* year together; the two rows above hold out one or the other | **0.622** ✗ (95% CI [0.571, 0.670], P(AUC ≥ 0.70) = 0.001) |
+| Stage 2 | Reference points for that 0.622 | What the 40-feature model has to beat to be earning its keep | lat/lon alone **0.644**; unfitted Kimber 2006 **0.610** |
 | Stage 2 | Out-of-year calibration | Each training-year isotonic map applied to its held-out year | Brier 0.218 < 0.250 base-rate ✓ |
 
-**Gates**: Stage 1 GA requires **all three** of tile-F1 ≥ 0.75, CI-lower ≥ 0.70, recall ≥ 0.70 — **all clear**. Stage 2 GA: spatial-CV ≥ 0.70 **and** pooled out-of-year ≥ 0.70 **and** calibration retained — **all clear**. Both ship `beta` until the registry is flipped.
+**Gates**: Stage 1 GA requires **all three** of tile-F1 ≥ 0.75, CI-lower ≥ 0.70, recall ≥ 0.70 — **all clear**, and the paper's permit-recall probe (73.6% against permits the detector never saw) is independent corroboration. Stage 2 GA was recorded as clear on spatial-CV ≥ 0.70 **and** pooled out-of-year ≥ 0.70 **and** calibration retained — **that pass does not survive the fold correction above**, and the registry entry has not yet been un-flipped. Treat Stage 2 as measuring soiling *level*, not as ranking roofs.
 
 `production` resolves to **`rfdetr-w2-20260807`** (RF-DETR + SAM2, Apache-2.0), flipped 2026-08-23. The live dashboard's 1,865 sites were already produced by it, so the alias describes what ships rather than what preceded it. R2 stays registered as `stage1-60cm-legacy` for the 60cm path; it is AGPL and evaluation-only. **The live constraint is geographic, not licensing**: W2 is gated on Santa Cruz County 21cm imagery, and outside that AOI the county service has no coverage. See [`docs/COMMERCIALIZATION.md`](docs/COMMERCIALIZATION.md).
 
@@ -220,7 +227,7 @@ _Legacy 60cm path, retained for baseline evaluation only and **AGPL, not shippin
 
 - **Tariff vintage for the 1,310 city-jurisdiction sites.** A legacy-NEM home is worth **2.78×** more per lost kWh, which is the sharpest per-home targeting signal in the project, and it comes from a public-records join rather than from modelling. The county archive will never cover these — the split is jurisdictional, not age-related (city APN books: 0.0% county coverage; county books: 62.5%). Records request drafted at [`docs/outreach/`](docs/outreach/).
 - **The moss / lichen channel.** Rain removes dust but not moss, lichen, algae or bird droppings, so that entire loss channel sits **outside** what the NREL labels, `sl_sat`, and the measured 0.045 recovery describe. It is the only remaining route to per-home differentiation and to closing the economics gap. The deciding variable (edge-band thickness, ~30 mm) is **sub-pixel at our best 6cm imagery**, so the next step is ground photography, not more compute. Written stop rule that would kill the thesis: [`docs/AOI_CLEANING_TARGETING_PLAN.md`](docs/AOI_CLEANING_TARGETING_PLAN.md).
-- **Paper.** Roof-geometry results are written up and ready for hand-off: [`docs/HANDOFF_roof_geometry_for_paper.md`](docs/HANDOFF_roof_geometry_for_paper.md).
+- **Paper — drafted, not yet submitted.** `paper/paper.tex` is complete at 16 pages and targets *Solar Energy*; `paper/paper_detection.tex` is the detection half and is **not** submission-ready (methods and results only, no introduction or discussion — PVSC or an arXiv note is the honest venue). Open items are tracked in [`paper/SPLIT_PLAN.md`](paper/SPLIT_PLAN.md). The roof-geometry hand-off that fed it: [`docs/HANDOFF_roof_geometry_for_paper.md`](docs/HANDOFF_roof_geometry_for_paper.md).
 
 _(Done and **not to be revisited**: Stage 1 and Stage 2 model work are both finished — further chasing is below measurement resolution in both. **Duke joint-curriculum, MERRA-2, mask containment, and SAM2 negative points were each tried and dropped** — measured as neutral or harmful. The Santa Cruz mailer `mailers_v13` (50 cards) went out live 2026-06-30.)_
 
@@ -288,8 +295,10 @@ than on every `--rm` run. Outputs land in `outputs/aoi/<partner_id>/`.
 
 ### Local (dev)
 
-> A fresh clone is **code only** — the data, model weights, and secrets are gitignored
-> ([`DATA.md`](DATA.md) lists them; get them from Cameron per [`docs/ONBOARDING.md`](docs/ONBOARDING.md)).
+> A fresh clone is **code only** — the data, model weights, and secrets are gitignored.
+> Pull them from the `handoff-v1` GitHub Release on this repo; org membership is the only
+> access needed, and `make verify-handoff` checksums the restore
+> ([`DATA.md`](DATA.md) has the commands, [`docs/ONBOARDING.md`](docs/ONBOARDING.md) §1 the full path).
 > Once the env + data are in place, `PYTHONPATH=. conda run -n solar-soiling python scripts/predict/holdout_ci.py`
 > reproduces the Stage-2 GA number in seconds — a good "is my setup working" check.
 
@@ -332,6 +341,55 @@ Model weights are gitignored — place `.pth` / `.pt` files in `models/` manuall
 
 ---
 
+## Paper
+
+**[`paper/paper.pdf`](paper/paper.pdf) — *Station Labels Cannot Rank Roofs: Why Public-Data Soiling
+Models Do Not Transfer, and What Cleaning Is Actually Worth.*** Cameron Gordon, Joshua Ramirez,
+Akshitha Nagaraj, Craig Fellers (Better Behavior Foundation). 16 pages. Drafted for *Solar Energy*;
+not yet submitted.
+
+It asks how far a soiling-targeting system gets on public data alone, and reports where it fails
+and why. Three findings, in the order they reorder each other:
+
+1. **Locating arrays is solved.** Tile-level box-F1 **0.826** (95% CI [0.798, 0.853]), and **73.6%**
+   recall against building permits the detector never saw.
+2. **Ranking them is not, and our own validation hid that.** Folds holding out *site* or *year* but
+   not both flatter the model; closing the leak moves pooled AUC **0.710 → 0.622**. The limit is the
+   **label unit** — public labels are measured at stations, so every roof in a catchment inherits
+   one. Per-system telemetry does carry per-array signal (0.573 against the 0.5 a station-label model
+   cannot exceed by construction), but three standard cleaning assumptions put the same systems'
+   median annual loss at 2.72%, 9.80% and 20.93% and rank them at ρ 0.24–0.89. Per-system labels are
+   **necessary and not yet sufficient**.
+3. **A third result reorders the first two and is immune to the second.** On 149 metered California
+   rooftops one wash recovers a median **$28.10** of electricity against a **$150** service; the
+   median roof needs **$2.44/kWh** to break even. Annual loss cancels between the value of a clean
+   and the recovery fraction's denominator, so the dollar figure is **identical under all three
+   labelling assumptions** while the fraction itself spans 0.031 to 0.217.
+
+**The companion.** [`paper/paper_detection.tex`](paper/paper_detection.tex) holds the engineering
+results — the detection gate, the SAM2 prompt-box finding, the permit-recall probe and a web-Mercator
+projection trap. It is a draft, deliberately not a journal submission. Which paper is which, and why
+the split happened: [`paper/README.md`](paper/README.md).
+
+**Every headline number is checked against its artifact.** `paper/verify_numbers.py` fails the build
+if any value in `paper.tex` has drifted from the JSON that produced it — it passes **30 of 30**, and
+it exists because three results in this paper changed after being written down as findings and none
+of the three was caught by review.
+
+```bash
+cd paper
+python3 verify_numbers.py     # 30/30 headline numbers match their artifact
+make figures                  # regenerate every figure from artifacts
+make                          # figures -> verify -> build/paper.pdf  (needs tectonic)
+make overleaf                 # upload bundle: tex + bbl + refs.bib + figures
+```
+
+The checked-in [`paper/paper.pdf`](paper/paper.pdf) and
+[`paper/paper_detection.pdf`](paper/paper_detection.pdf) are built from exactly this source, so you
+do not need a LaTeX toolchain to read them.
+
+---
+
 ## Documentation
 
 | Doc | Purpose |
@@ -350,6 +408,10 @@ Model weights are gitignored — place `.pth` / `.pt` files in `models/` manuall
 | [docs/AOI_CLEANING_TARGETING_PLAN.md](docs/AOI_CLEANING_TARGETING_PLAN.md) | Moss/lichen thesis, substring shade physics, ranked experiments + stop rule |
 | [docs/SOILING_LEVEL_INVESTIGATION.md](docs/SOILING_LEVEL_INVESTIGATION.md) | Why the risk model can't rank homes within an AOI (structural, not fixable by features) |
 | [docs/HANDOFF_roof_geometry_for_paper.md](docs/HANDOFF_roof_geometry_for_paper.md) | Roof tilt/azimuth from 3DEP lidar — method, two-method validation, paper notes |
+| [docs/TILT_SOILING_EVIDENCE.md](docs/TILT_SOILING_EVIDENCE.md) | What the evidence does and does not support for tilt as a soiling driver |
+| [docs/PERSISTENT_SOILING_SCREEN.md](docs/PERSISTENT_SOILING_SCREEN.md) | The persistent (wash-only) loss channel the NREL labels exclude by construction |
+| [docs/CRAIG_WORKING_GUIDE.md](docs/CRAIG_WORKING_GUIDE.md) | Changing things safely without a technical background — which commands cost money |
+| [paper/README.md](paper/README.md) | The paper bundle — which paper is which, build order, the numbers check |
 | [docs/COMMERCIALIZATION.md](docs/COMMERCIALIZATION.md) | Licensing — AGPL resolved by the backbone swap; what is still exposed |
 | [docs/PRODUCT_VISION.md](docs/PRODUCT_VISION.md) | Strategy, beta/GA contract, customer-readiness arc |
 | [docs/Q2_PLAN.md](docs/Q2_PLAN.md) | Current roadmap and workstream status |

@@ -67,6 +67,11 @@ OLD29_FEATURES = [
     "pm10_7d_mean", "pm10_30d_mean", "pm10_90d_mean",
 ] + KIMBER_FEATURES
 
+AQ_FEATURES = [
+    "pm2_5_7d_mean", "pm2_5_30d_mean", "pm2_5_90d_mean",
+    "pm10_7d_mean", "pm10_30d_mean", "pm10_90d_mean",
+]
+
 # Pre-regularization XGBoost block (configs/soiling/model.yaml before ad947bf,
 # 2026-07-05): depth 5, XGBoost-default reg_lambda=1.
 OLD_XGB_PARAMS = {
@@ -87,6 +92,9 @@ VARIANTS: dict[str, dict] = {
     "abl_full40": dict(
         base="full", drop=[], hp="new",
         desc="run_optionb 40-feature set, current model.yaml — reference"),
+    "abl_no_aq34": dict(
+        base="full", drop=AQ_FEATURES, hp="new",
+        desc="reference minus the 6 air-quality features (21% row coverage, zero gain)"),
     "abl_no_kimber": dict(
         base="full", drop=KIMBER_FEATURES, hp="new",
         desc="reference minus the 4 Kimber IWSR features"),

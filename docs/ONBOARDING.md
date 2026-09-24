@@ -21,7 +21,8 @@ conda activate solar-soiling
 make bootstrap                     # pip install -e ".[dev,api]"
 
 make test-fast                     # ── TIER 1 ──
-# expect: 470 passed, 1 skipped, 2 deselected   (~3m; measured 2026-08-31)
+# expect: 492 passed, 3 skipped, 2 deselected   (2026-09-24)
+#   ~3m30s cold in CI; under a minute on a warm dev box. Both are normal.
 ```
 
 **Stop here and make sure Tier 1 is green.** It needs no data, no credentials, and no GPU. It is
@@ -244,12 +245,17 @@ coastal Santa Cruz** (0 of 1,865 sites). That last one is a confirmed kill-risk,
 
 ---
 
-## 7. This document has been validated by exactly one person
+## 7. What has been validated, and by whom
 
-Cameron wrote §1 and ran it in a throwaway clone. **Nobody else has.** The gaps in an onboarding
-doc are precisely the things its author stopped noticing, which is how this file went months
-without mentioning `setup/setup_conda.sh` at all.
+Cameron ran §1 in a throwaway clone, and on 2026-09-02 re-ran both the local path and the Docker
+path end to end. So the instructions are known to work.
+
+**They have still only ever been run by their author.** That is a different claim, and it is the
+one that matters here: the gaps in an onboarding doc are precisely the things its author stopped
+noticing, which is how this file went months without mentioning `setup/setup_conda.sh` at all. A
+path that works for the person who built it is evidence, not proof.
 
 **If you are the first newcomer: treat §1 as a test, not as instructions.** Log every point where
 you had to guess, ask, or look elsewhere, and fix it in the same PR as your first real change.
-That log is worth more than anything else you will produce in your first week.
+That log is worth more than anything else you will produce in your first week — and it is the only
+thing that will retire this section.

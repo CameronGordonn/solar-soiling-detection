@@ -60,7 +60,8 @@ conda install -y -c conda-forge \
     shapely \
     pyproj \
     scikit-image \
-    pyyaml
+    pyyaml \
+    llvm-openmp
 
 echo ""
 echo "=== PyTorch ==="

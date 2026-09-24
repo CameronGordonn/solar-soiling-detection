@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import json
 import logging
+import math
 from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Callable, Iterable
@@ -24,6 +25,10 @@ from solarsoiled.manifest import write_manifest
 try:  # shared economics core (pure-stdlib); tolerate either import convention
     from risk.economics import (
         BASE_RATE, BASE_SOILING_PCT, BASE_SUN, Uncertainty, array_recommendation,
+        PERSISTENT_SOILING_INTERVENTION_PCT, PERSISTENT_SOILING_VALUE_USD_PER_KWH,
+        PERSISTENT_SOILING_TWO_YEAR_HORIZON_YEARS,
+        PERSISTENT_SOILING_TWO_YEAR_INTERVENTION_PCT, SYSTEM_DERATE,
+        persistent_soiling_dollars_at_risk,
         sun_hours_from_poa_rel,
         array_recommendation_mc, system_kw_from_area,
     )
@@ -31,6 +36,10 @@ try:  # shared economics core (pure-stdlib); tolerate either import convention
 except ImportError:  # pragma: no cover
     from src.risk.economics import (
         BASE_RATE, BASE_SOILING_PCT, BASE_SUN, Uncertainty, array_recommendation,
+        PERSISTENT_SOILING_INTERVENTION_PCT, PERSISTENT_SOILING_VALUE_USD_PER_KWH,
+        PERSISTENT_SOILING_TWO_YEAR_HORIZON_YEARS,
+        PERSISTENT_SOILING_TWO_YEAR_INTERVENTION_PCT, SYSTEM_DERATE,
+        persistent_soiling_dollars_at_risk,
         sun_hours_from_poa_rel,
         array_recommendation_mc, system_kw_from_area,
     )
@@ -65,6 +74,128 @@ _EXCEPTION_DISTANCE_AGRICULTURE_M = 500.0
 _EXCEPTION_DISTANCE_HIGHWAY_M = 200.0
 _EXCEPTION_TILT_DEG = 5.0       # panels at or below this angle don't self-clean in rain
 _EXCEPTION_SYSTEM_KW = 8.0      # above this size professional ROI is more likely
+
+
+def _as_bool(value) -> bool:
+    """Coerce CSV and GeoJSON boolean representations without guessing."""
+    if isinstance(value, str):
+        return value.strip().lower() in {"1", "true", "yes"}
+    return bool(value)
+
+
+def _load_persistent_screen(path: Path | None) -> dict[int, dict]:
+    """Load the optional lidar Persistent Soiling screen, keyed by stable ``array_id``.
+
+    A missing sidecar is normal for AOIs that have not been lidar-screened.  It
+    therefore produces ``not_assessed`` rows rather than silently treating them as
+    low persistent-soiling risk.
+    """
+    if path is None or not Path(path).is_file():
+        return {}
+    import pandas as pd
+
+    screen = pd.read_csv(path)
+    if "array_id" not in screen.columns:
+        raise ValueError(f"persistent screen {path} is missing required array_id column")
+    if screen["array_id"].duplicated().any():
+        raise ValueError(f"persistent screen {path} has duplicate array_id values")
+    return {
+        int(row["array_id"]): row.dropna().to_dict()
+        for _, row in screen.iterrows()
+        if pd.notna(row["array_id"])
+    }
+
+
+def _load_pvwatts_reference(path: Path) -> float | None:
+    """Read a cached no-soiling PVWatts reference yield, never call the web at runtime."""
+    if not path.is_file():
+        return None
+    try:
+        value = float(json.loads(path.read_text(encoding="utf-8"))["annual_ac_kwh_per_kwdc"])
+    except (KeyError, TypeError, ValueError, json.JSONDecodeError) as exc:
+        raise ValueError(f"invalid PVWatts reference file: {path}") from exc
+    return value if value > 0 else None
+
+
+def _finite_positive(value) -> float | None:
+    """Return a positive finite float without treating blank CSV values as zero."""
+    try:
+        numeric = float(value)
+    except (TypeError, ValueError):
+        return None
+    return numeric if math.isfinite(numeric) and numeric > 0 else None
+
+
+def _persistent_soiling_fields(
+    screen_row: dict | None,
+    econ_fields: dict,
+    *,
+    group_kw: float | None = None,
+    group_sun_hours: float | None = None,
+    group_elec_rate: float | None = None,
+) -> dict:
+    """Return Persistent Soiling fields, separate from the Regular Soiling decision.
+
+    The Persistent Soiling score applies to one detected panel group. Its conditional dollar
+    scenario therefore uses that group's traced capacity rather than the whole
+    property's capacity, which can span several independently oriented groups.
+    """
+    base = {
+        "persistent_soiling_status": "not_assessed",
+        "persistent_soiling_inspection_action": "none",
+        "persistent_soiling_loss_threshold_pct": PERSISTENT_SOILING_INTERVENTION_PCT,
+        "persistent_soiling_value_usd_per_kwh": PERSISTENT_SOILING_VALUE_USD_PER_KWH,
+        "persistent_soiling_dollars_at_risk": None,
+        "persistent_soiling_two_year_loss_threshold_pct": PERSISTENT_SOILING_TWO_YEAR_INTERVENTION_PCT,
+        "persistent_soiling_two_year_horizon_years": PERSISTENT_SOILING_TWO_YEAR_HORIZON_YEARS,
+        "persistent_soiling_two_year_dollars_at_risk": None,
+        "persistent_soiling_group_kw": None,
+    }
+    if screen_row is None:
+        return base
+
+    candidate = _as_bool(screen_row.get("persistent_soiling_top_decile"))
+    base.update({
+        "persistent_soiling_status": "inspection_candidate" if candidate else "not_flagged",
+        "persistent_soiling_inspection_action": "inspect" if candidate else "none",
+        "persistent_soiling_score": screen_row.get("persistent_soiling_score"),
+        "persistent_soiling_rank": screen_row.get("persistent_soiling_rank"),
+        "persistent_soiling_top_decile": candidate,
+        "low_tilt_score": screen_row.get("low_tilt_score"),
+        "canopy_exposure_score": screen_row.get("canopy_exposure_score"),
+        "nearest_canopy_m": screen_row.get("nearest_canopy_m"),
+        "canopy_frac": screen_row.get("canopy_frac"),
+        # These are policy settings carried by the screen, not fitted model
+        # coefficients.  Keeping them with the output lets the product display
+        # the exact Persistent Soiling calculation used for an inspected array.
+        "persistent_soiling_tilt_weight": screen_row.get("tilt_weight"),
+        "persistent_soiling_canopy_weight": screen_row.get("canopy_weight"),
+        "persistent_soiling_canopy_radius_m": screen_row.get("canopy_radius_m"),
+        "persistent_soiling_top_fraction": screen_row.get("inspection_fraction"),
+    })
+    group_kw = _finite_positive(group_kw)
+    group_sun_hours = _finite_positive(group_sun_hours) or _finite_positive(
+        econ_fields.get("sun_hours")
+    ) or BASE_SUN
+    # Only use an explicit per-group tariff. The ordinary Regular Soiling economics default to
+    # the NBT reference rate, while public Persistent Soiling scenarios intentionally use the
+    # disclosed Santa Cruz blend when no property tariff has been attached.
+    group_elec_rate = _finite_positive(group_elec_rate) or PERSISTENT_SOILING_VALUE_USD_PER_KWH
+    if candidate and group_kw is not None:
+        annual_dollars_at_risk = round(
+            persistent_soiling_dollars_at_risk(
+                group_kw, group_sun_hours, group_elec_rate
+            ),
+            2,
+        )
+        base["persistent_soiling_group_kw"] = round(group_kw, 2)
+        base["persistent_soiling_value_usd_per_kwh"] = round(group_elec_rate, 4)
+        base["persistent_soiling_dollars_at_risk"] = annual_dollars_at_risk
+        base["persistent_soiling_two_year_dollars_at_risk"] = round(
+            annual_dollars_at_risk * PERSISTENT_SOILING_TWO_YEAR_HORIZON_YEARS,
+            2,
+        )
+    return base
 
 
 def _cleaning_method(
@@ -254,6 +385,7 @@ def _site_economics(
     elec_rate: float,
     parcels=None,
     monte_carlo: bool = True,
+    pvwatts_reference_kwh_per_kwdc: float | None = None,
 ) -> tuple[dict, dict]:
     """Cost each SITE once, not each polygon. Returns (per_array_econ, per_site_econ).
 
@@ -309,8 +441,18 @@ def _site_economics(
         # median fill. Sites with no usable lidar fit keep the caller's flat `sun_hours`;
         # see sun_hours_from_poa_rel, which refuses to invent a value.
         site_poa_rel = _wavg("poa_rel")
-        site_sun_hours = (sun_hours_from_poa_rel(site_poa_rel, sun_hours)
-                          if site_poa_rel is not None else sun_hours)
+        if pvwatts_reference_kwh_per_kwdc is not None:
+            # PVWatts gives annual delivered AC for the 20-degree south reference.
+            # Lidar's POA ratio transfers that reference to the actual roof without
+            # a live external call in the API or dashboard.
+            site_yield = pvwatts_reference_kwh_per_kwdc * (site_poa_rel or 1.0)
+            site_sun_hours = site_yield / (365.0 * SYSTEM_DERATE)
+            yield_source = "pvwatts_reference+lidar_orientation" if site_poa_rel is not None else "pvwatts_reference"
+        else:
+            site_sun_hours = (sun_hours_from_poa_rel(site_poa_rel, sun_hours)
+                              if site_poa_rel is not None else sun_hours)
+            site_yield = site_sun_hours * 365.0 * SYSTEM_DERATE
+            yield_source = "lidar_orientation_fallback" if site_poa_rel is not None else "flat_ghi_fallback"
 
         if not site_kw:
             econ = None
@@ -335,7 +477,9 @@ def _site_economics(
             "loss_pct_source": loss_source,
             "poa_rel": round(site_poa_rel, 4) if site_poa_rel is not None else None,
             "sun_hours": round(site_sun_hours, 3),
-            "sun_hours_source": "lidar_orientation" if site_poa_rel is not None else "flat_ghi_fallback",
+            "sun_hours_source": yield_source,
+            "annual_yield_kwh_per_kwdc": round(site_yield, 1),
+            "usd_per_kwh": round(elec_rate, 4),
             "expected_net_usd": econ["expected_net_usd"] if econ else None,
             "economic_action": econ["recommended_action"] if econ else None,
             "roi": econ["roi"] if econ else None,
@@ -367,6 +511,7 @@ def recommend_per_array(
     elec_rate: float = BASE_RATE,
     parcels=None,
     monte_carlo: bool = True,
+    persistent_screen_csv: Path | None = None,
 ) -> list[dict]:
     """Return a list of per-array recommendation dicts.
 
@@ -381,10 +526,21 @@ def recommend_per_array(
       cleaning_window: "YYYY-MM-DD → YYYY-MM-DD" or None
       priority: "high" | "medium" | "low"
       action: "clean" | "monitor"
+
+    If a persistent-screen sidecar exists, its top-decile rows receive a separate
+    inspection signal. This Persistent Soiling screen never changes the Regular Soiling
+    clean/monitor action,
+    expected loss, or expected net benefit.
     """
     gdf = gpd.read_file(risk_geojson)
+    screen_path = persistent_screen_csv or Path(risk_geojson).with_name("persistent_soiling_screen.csv")
+    persistent_by_array = _load_persistent_screen(screen_path)
+    pvwatts_reference = _load_pvwatts_reference(
+        Path(risk_geojson).with_name("pvwatts_reference.json")
+    )
     econ_by_row, _ = _site_economics(gdf, sun_hours=sun_hours, elec_rate=elec_rate,
-                                     parcels=parcels, monte_carlo=monte_carlo)
+                                     parcels=parcels, monte_carlo=monte_carlo,
+                                     pvwatts_reference_kwh_per_kwdc=pvwatts_reference)
 
     window_start = aoi_recommendation.get("window_start")
     window_end = aoi_recommendation.get("window_end")
@@ -406,6 +562,16 @@ def recommend_per_array(
         # Site-level dollars: the polygon's economics are its SITE's economics (one
         # truck roll per property), computed once in _site_economics above.
         econ_fields = econ_by_row.get(row_idx, {})
+        group_kw = system_kw_from_area(area)
+        group_sun_hours = _finite_positive(row.get("sun_hours"))
+        group_elec_rate = _finite_positive(row.get("usd_per_kwh"))
+        persistent_fields = _persistent_soiling_fields(
+            persistent_by_array.get(aid),
+            econ_fields,
+            group_kw=group_kw,
+            group_sun_hours=group_sun_hours,
+            group_elec_rate=group_elec_rate,
+        )
 
         # The "large system" exception must be judged on the SITE, not the fragment —
         # a 12 kW house split into five 21cm polygons would otherwise never trigger it.
@@ -429,6 +595,7 @@ def recommend_per_array(
                 "action_reason": ("weather window closed" if not window_open
                                   else f"risk_score {score:.3f} below threshold {risk_threshold}"),
                 **econ_fields,
+                **persistent_fields,
             })
         else:
             _, (recovery_lo, recovery_hi) = _bucket(score)
@@ -468,6 +635,7 @@ def recommend_per_array(
                     "weather window open, risk above threshold, and net benefit positive"
                 ),
                 **econ_fields,
+                **persistent_fields,
             }
             if not economically_blocked:
                 row["expected_recovery_pct"] = [recovery_lo, recovery_hi]

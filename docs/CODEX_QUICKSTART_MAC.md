@@ -103,7 +103,7 @@ brew install miniforge            # only if conda is not already installed
 bash setup/setup_conda.sh         # creates the `solar-soiling` env on python 3.10
 conda activate solar-soiling
 make bootstrap
-make test-fast                    # expect 470 passed, 1 skipped, 2 deselected
+make test-fast                    # expect 492 passed, 3 skipped, 2 deselected
 ```
 
 Stop and confirm that is green before going further. It needs no data and no credentials, and it

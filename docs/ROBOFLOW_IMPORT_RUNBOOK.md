@@ -92,9 +92,13 @@ Instead, selectively update only the labels for tiles you actually relabeled. Th
 
 3. Tiles you did not relabel: leave their `.txt` files untouched.
 
-**Option B2 — Ask Cameron to re-export with splits:**
+**Option B2 — re-export with splits (cleaner, and preferred):**
 
-In Roboflow, go to the dataset version → Generate → make sure "Split" is set (not "All train"). Re-export as COCO Segmentation. This is cleaner and avoids manual file juggling.
+In Roboflow, go to the dataset version → Generate → make sure "Split" is set (not "All train"). Re-export as COCO Segmentation. This avoids the manual file juggling in B1 entirely.
+
+This needs a Roboflow seat on the workspace. It was Cameron's account until 2026-08-31, so if you
+cannot reach Generate, that is an **access** problem, not a procedure one: ask Craig to add you
+rather than falling back to B1. See [`TEAM.md`](TEAM.md).
 
 ---
 

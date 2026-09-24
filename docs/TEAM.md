@@ -5,18 +5,29 @@ How we work now that this is a multi-person project. New here? Start with
 
 ## Who owns what
 
+**Updated 2026-09-02. Cameron's last day was 2026-08-31; every lane he held has moved.**
+The table below is the current split, and [`.github/CODEOWNERS`](../.github/CODEOWNERS) is
+its machine-readable half. Change both together or PR review routes to the wrong person.
+
 | Area | Owner | Notes |
 |---|---|---|
-| Overall direction, product, business | **Cameron** | Roadmap, partner/outreach decisions, registry `beta→GA` flips. |
-| Stage-1 detector training runs | **Cameron** | Runs on Colab Pro. R0 retrain + relabel loop. |
+| Overall direction, product, business | **Craig** | Roadmap, partner/outreach decisions, and the registry `beta→GA` flips. |
+| Stage-1 detector training runs | **Akshitha** | Runs on Colab Pro. Gate is `scripts/detect/eval_tile_f1.py`; the passing checkpoint is `rfdetr_w2_20260807`. |
 | Stage-1 permissive-stack migration (RF-DETR + SAM + the port) | **Akshitha** | The AGPL-escape workstream — CV research + infra. Runbook: [`PERMISSIVE_STACK_MIGRATION.md`](PERMISSIVE_STACK_MIGRATION.md). |
 | Product surface — API, dashboard, outreach funnel, A/B | **Akshitha** | FastAPI backend, BBF dashboard, conversion experiments. |
 | Reusable infra / faster ramp-up | **Akshitha** | Codifying what we've learned into tooling future projects reuse. |
-| Stage-2 soiling-risk model | **Cameron** | GA-ready; largely frozen. Product-side work only from here. |
+| Stage-2 soiling-risk model | **Akshitha** | GA as of 2026-09-02 and frozen. It does **not** generalise to an unseen region (out-of-region AUC 0.677); the open work is a geographically balanced label set, not tuning. See [`PVDAQ_LANE_HANDOFF_20260831.md`](PVDAQ_LANE_HANDOFF_20260831.md). |
+| White paper | **Josh** (methods/results), **Hunter** (giving-experiment data) | Not blocking anything in this repo. |
 
-This is a starting split from the 2026-07 kickoff — adjust as we go. The intent is
-**non-overlapping lanes**: Cameron drives the detector training + product/business, Akshitha owns
-the permissive-detector migration and the product/infra surface.
+The intent is still **non-overlapping lanes**: Craig sets direction and holds the shipping
+decisions, Akshitha owns the engineering surface end to end. That concentration is a fact to
+manage, not a design — it is a single-maintainer repo until someone else is added.
+
+> **Open, and not fixable from inside the repo: Cameron is the only GitHub org owner of
+> Better-Behavior-Foundation, and the only admin on this repository.** Custody of the 1.5 GB
+> `handoff-v1` release is custody of the org itself, so a second owner is the difference
+> between a hand-off and a single point of failure. Promote at least one more person
+> (Craig and Akshitha were the custodians of record) before Cameron's account goes quiet.
 
 ## Working state — where "what's going on right now" lives
 

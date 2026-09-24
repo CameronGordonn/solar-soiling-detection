@@ -66,5 +66,5 @@ Lives in **`BBF-Website`** (separate repo), not solar-soiling-ml:
 - **PII/secret gate** (`SYNC.md` in the public repo) applies to everything world-readable here — the
   dashboard ships client-side JS. Identify arrays by **ID only**; no addresses, owner names, APNs, or
   keys. An address file leaked once and had to be history-scrubbed.
-- **Deploys are Cameron's call** (Cloudflare Pages) — open a PR; don't self-deploy.
+- **Deploys are Craig's call** (Cloudflare Pages) — open a PR; don't self-deploy. (Was Cameron's until 2026-08-31; see [`TEAM.md`](TEAM.md).)
 - **Never re-run a sent Lob batch.** `mailers_v13` already went out 50/50.

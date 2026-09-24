@@ -10,9 +10,10 @@ Pure-stdlib (no pandas/numpy) so it imports/runs anywhere. Dollar model:
     net_benefit_$ = annual_loss_$ * recovery_frac - cleaning_cost(system_kw)
 
 --------------------------------------------------------------------------------
-2026-08-09 GROUNDING PASS. Five of this module's constants were unsourced, and three
-of them were wrong by more than an order of magnitude in the same direction. Each is
-now sourced inline or explicitly marked ``UNSOURCED``. The headline corrections:
+2026-08-09 grounding pass and 2026-09-04 seasonal-planning update. Five of this
+module's constants were unsourced, and three of them were wrong by more than an
+order of magnitude in the same direction. Each is now sourced inline or explicitly
+marked ``UNSOURCED``. The headline corrections:
 
   ``BASE_RATE``      0.25 $/kWh (unsourced flat)  ->  regime-dependent, see risk.rates.
                      A lost kWh is worth full retail (~$0.457 in Santa Cruz) only if the
@@ -21,18 +22,20 @@ now sourced inline or explicitly marked ``UNSOURCED``. The headline corrections:
                      solar home is most likely exporting, so the blended value for a
                      post-2023 no-battery customer is ~$0.165 — BELOW the old constant.
 
-  ``recovery_frac``  0.90 of annual loss from one clean  ->  ~0.045 measured.
-                     THE SINGLE LARGEST ERROR IN THE CHAIN, ~20x. One cleaning does not
-                     keep an array clean for a year: at SOMOSclean k=15 the array
-                     re-soils to its annual mean in ~2 weeks, and Santa Cruz gets 27-49
-                     heavy-rain days a year that reset it for free. See risk.recovery.
+  ``recovery_frac``  0.90 of annual loss from one clean  ->  a scheduled seasonal
+                     recovery of about 0.445 for a professional clean and 0.346 for a
+                     basic rinse. The planning model assumes a six-month April-September
+                     dry season, winter rain that resets ordinary dust, and an early-July clean
+                     that avoids the final three dry-season months. It is a disclosed
+                     scenario, not a measurement of a particular roof.
 
   ``M2_PER_KW``      5.67 (implying 176 W/m2, no stated packing factor)  ->  derived
                      from a sourced module power density and an EXPLICIT packing factor.
 
-The direction of all three corrections matters: the rate and recovery fixes make the
-product look *worse*, and they are much larger than the constant refreshes that make it
-look better. Reporting that is the point — see risk register C1.
+The rate correction and seasonal planning scenario answer different questions. The
+former prices a lost kilowatt-hour at the applicable tariff; the latter values the
+remaining dry-season production after a scheduled clean. Keep both explicit rather
+than treating an average weather trajectory as a roof-specific cleaning verdict.
 --------------------------------------------------------------------------------
 """
 
@@ -46,15 +49,31 @@ from dataclasses import dataclass
 try:  # tolerate either import convention (installed package vs. src/ on path)
     from risk.rates import (
         ACC_EXPORT_PROD_WEIGHTED_USD_PER_KWH, DEFAULT_REGIME, REGIMES,
-        RETAIL_OFFSET_USD_PER_KWH, marginal_value_usd_per_kwh,
+        AOI_BLENDED_USD_PER_KWH, RETAIL_OFFSET_USD_PER_KWH, marginal_value_usd_per_kwh,
     )
 except ImportError:  # pragma: no cover
     from src.risk.rates import (
         ACC_EXPORT_PROD_WEIGHTED_USD_PER_KWH, DEFAULT_REGIME, REGIMES,
-        RETAIL_OFFSET_USD_PER_KWH, marginal_value_usd_per_kwh,
+        AOI_BLENDED_USD_PER_KWH, RETAIL_OFFSET_USD_PER_KWH, marginal_value_usd_per_kwh,
     )
 
 DAYS_PER_YEAR = 365
+
+# Product intervention threshold for the *unlabeled* persistent-soiling screen. This
+# is not a model prediction: it only prices the annual consequence if an inspection
+# confirms persistent loss at this level. Three percent is the annual scenario used to
+# test whether the high-impact tail warrants a cleaning visit; it must never be shown as
+# a predicted loss for a particular roof.
+PERSISTENT_SOILING_INTERVENTION_PCT = 3.0
+# A confirmed persistent loss continues until it is removed. This two-year planning
+# scenario therefore holds the same 3% loss rate across two production years and
+# doubles the undiscounted energy value at risk.
+PERSISTENT_SOILING_TWO_YEAR_INTERVENTION_PCT = 3.0
+PERSISTENT_SOILING_TWO_YEAR_HORIZON_YEARS = 2
+# Santa Cruz pilot population blend, not a statewide flat rate.  It is derived from
+# the measured 90.1% legacy-NEM / 9.9% net-billing tariff mix and the production-time
+# values in risk.rates.  A wider rollout must replace this with each site's tariff.
+PERSISTENT_SOILING_VALUE_USD_PER_KWH = AOI_BLENDED_USD_PER_KWH
 
 # ── electricity value ─────────────────────────────────────────────────────────
 # SOURCED. Default is the central value for the default billing regime (NBT, no
@@ -96,8 +115,9 @@ BASE_SUN = 5.5
 # INDIVIDUAL home: per-roof POA/GHI runs 0.889 (p10) to 1.156 (p90).
 #
 # Net effect at the fleet mean: 5.5 * 1.029 * 365 * 0.84 = 1,735 kWh/kWp/yr, against a
-# PVWatts-typical 1,400-1,600 for coastal-CA residential. Still mildly GENEROUS, which is
-# the safe direction for a product whose conclusion is "do not clean".
+# PVWatts-typical 1,400-1,600 for coastal-CA residential. The production assumption
+# remains explicit so Regular Soiling and conditional Persistent Soiling scenarios
+# can be independently reviewed.
 SYSTEM_DERATE = 0.84
 
 # Annual clear-sky plane-of-array irradiance for the reference orientation (20 deg, due
@@ -124,8 +144,9 @@ def sun_hours_from_poa_rel(poa_rel: float | None, base_sun: float = BASE_SUN) ->
       Santa Cruz AOI the per-site ratio runs p10 0.93 / median 1.06 / p90 1.15, and the AOI
       total rises 3.0%.
 
-    The net effect on the product conclusion is nil: 0 of 1,865 sites were worth cleaning
-    before this change and 0 after. It sharpens who is least bad, it does not rescue anyone.
+    This improves the production input for each roof. The public cleaning model then
+    evaluates Regular Soiling on its July dry-season window and Persistent Soiling
+    through a separate inspection screen.
     """
     if poa_rel is None or not math.isfinite(float(poa_rel)) or float(poa_rel) <= 0:
         return float(base_sun)
@@ -240,29 +261,39 @@ RINSE_COST_FACTOR = 0.50       # basic ~ half a professional before the floor ap
 _RATE_KW = (3, 10, 20, 50, 100, 200, 500, 1000)
 _RATE_USD = (8.0, 7.0, 5.5, 4.0, 3.0, 2.5, 2.0, 1.5)
 
-# ── recovery: what one cleaning actually buys ─────────────────────────────────
-# MEASURED, and the largest correction in this module. `risk.recovery` integrates the
-# SOMOSclean daily trajectory between a cleaning date and the next natural reset, on two
-# years of real Santa Cruz weather (Open-Meteo archive, 2024-08-01..2026-07-31, first
-# year discarded as trajectory spin-up):
+# ── recovery: what one scheduled seasonal cleaning buys ───────────────────────
+# The public Regular Soiling recommendation uses an explicit seasonal planning
+# assumption:
 #
-#   SOMOSclean annual-mean soiling loss over the evaluation year   5.06%
-#     (validation: NREL coastal-CA measured p50 is 4.70% — the physics model reproduces
-#      the measured level, so the ratio below rests on a calibrated trajectory)
-#   BEST single-clean recovery (production-weighted, best date 2025-08-08)   0.045
-#   MEAN over all candidate dates                                            0.016
-#   WORST (clean just before a rain reset)                                   0.000
+#   * ordinary dust accumulates through a six-month April-September dry season;
+#   * enough rain falls from October through March to reset that ordinary dust; and
+#   * a visit is scheduled in early July, leaving roughly three dry-season months to
+#     protect.
 #
-# Mechanism: at k=15 equivalent-days the array returns to its annual-mean soiling within
-# about two weeks of a clean, and Santa Cruz saw 27 heavy-rain (>=10 mm) days in the
-# evaluation year, each of which resets the trajectory for free. One cleaning therefore
-# buys roughly one array-month of cleanliness out of twelve — not a year of it.
+# Regular dust is modeled as a linear dry-season accumulation. A clear-sky, production
+# weighting for Santa Cruz (36.97 N, 20-degree reference plane) gives 0.4944 for the
+# share of the annual Regular Soiling cost avoided by a *perfect* early-July reset. The
+# number
+# is slightly below one half because April-June output is marginally larger than
+# July-September output at this latitude. It was derived with
+# ``risk.recovery.clearsky_daily_weight`` over 2026-04-01..2026-09-27 and is pinned in
+# the tests below. This captures the economic question a homeowner actually has: what
+# production remains to save after a mid-season clean, rather than treating 27 annual
+# rain events as evenly spaced.
 #
-# The old 0.90 assumed a single clean captured 90% of the annual loss, which is only
-# true in a climate with no rain reset and negligible re-soiling. Keeping it would
-# overstate every recovery figure by ~20x.
-DEFAULT_RECOVERY_PRO = 0.045      # measured best-date professional clean, coastal SCC
-DEFAULT_RECOVERY_RINSE = 0.032    # same date at clean_efficacy=0.70 (measured)
+# A professional scrub is assumed to remove 90% of the material present; a water-fed
+# pole rinse removes 70%. The constants therefore apply each method's efficacy to that
+# full-reset seasonal value. They are a planning scenario, not an observed recovery
+# measurement for an individual roof. ``risk.recovery`` retains the real-weather,
+# SOMOSclean trajectory (which reported a 4.5% best-date sensitivity under its
+# saturation assumptions) for comparison and future calibration.
+REGULAR_SOILING_DRY_SEASON_DAYS = 180
+REGULAR_SOILING_MIDSEASON_CLEAN_DAY = 91
+REGULAR_SOILING_FULL_RESET_RECOVERY = 0.4944
+PROFESSIONAL_CLEAN_EFFICACY = 0.90
+RINSE_CLEAN_EFFICACY = 0.70
+DEFAULT_RECOVERY_PRO = REGULAR_SOILING_FULL_RESET_RECOVERY * PROFESSIONAL_CLEAN_EFFICACY
+DEFAULT_RECOVERY_RINSE = REGULAR_SOILING_FULL_RESET_RECOVERY * RINSE_CLEAN_EFFICACY
 
 #: Set True to restore the pre-2026-08-09 behaviour for A/B comparison only.
 LEGACY_RECOVERY_PRO = 0.90
@@ -326,6 +357,50 @@ def annual_loss_usd(system_kw: float, sun_hours: float, soiling_frac: float, ele
     """
     annual_kwh = system_kw * sun_hours * DAYS_PER_YEAR * derate
     return annual_kwh * soiling_frac * elec_rate
+
+
+def persistent_soiling_dollars_at_risk(
+    system_kw: float,
+    sun_hours: float,
+    elec_rate: float = PERSISTENT_SOILING_VALUE_USD_PER_KWH,
+    *,
+    persistent_loss_pct: float = PERSISTENT_SOILING_INTERVENTION_PCT,
+) -> float:
+    """Annual energy value at risk *if* persistent loss is confirmed.
+
+    The persistent screen has no ground-truth loss labels, so this helper must not
+    be presented as an expected loss or blended into the NREL/weather model.  It
+    prices a fixed, disclosed intervention threshold for inspection candidates.
+    """
+    if persistent_loss_pct < 0:
+        raise ValueError("persistent_loss_pct must be non-negative")
+    return annual_loss_usd(
+        system_kw, sun_hours, persistent_loss_pct / 100.0, elec_rate
+    )
+
+
+def persistent_soiling_two_year_dollars_at_risk(
+    system_kw: float,
+    sun_hours: float,
+    elec_rate: float = PERSISTENT_SOILING_VALUE_USD_PER_KWH,
+    *,
+    persistent_loss_pct: float = PERSISTENT_SOILING_TWO_YEAR_INTERVENTION_PCT,
+    horizon_years: int = PERSISTENT_SOILING_TWO_YEAR_HORIZON_YEARS,
+) -> float:
+    """Energy value at risk across a disclosed multi-year persistent-loss scenario.
+
+    This mirrors :func:`persistent_soiling_dollars_at_risk` but keeps the time horizon
+    visible in the API. It does not discount future revenue or predict persistence; it
+    simply prices a confirmed sustained loss over the stated number of years.
+    """
+    if horizon_years <= 0:
+        raise ValueError("horizon_years must be positive")
+    return horizon_years * persistent_soiling_dollars_at_risk(
+        system_kw,
+        sun_hours,
+        elec_rate,
+        persistent_loss_pct=persistent_loss_pct,
+    )
 
 
 def scenario_net(loss_usd: float, scen: dict, system_kw: float) -> tuple[float, float, float]:
@@ -433,9 +508,9 @@ class Uncertainty:
     #: Electricity value band. Defaults to the active regime's sigma band.
     rate_lo: float | None = None
     rate_hi: float | None = None
-    #: Recovery-fraction band. Defaults to (worst, best) measured over cleaning dates:
-    #: a clean timed just before rain recovers ~0, a well-timed one ~0.045.
-    recovery_lo_frac: float = 0.0
+    #: Recovery-fraction band for the disclosed July seasonal-cleaning schedule. The
+    #: low end reflects a basic rinse and the high end a professional scrub.
+    recovery_lo_frac: float = DEFAULT_RECOVERY_RINSE
     recovery_hi_frac: float = DEFAULT_RECOVERY_PRO
 
 
@@ -538,8 +613,8 @@ def array_recommendation_mc(
             if key == "no_clean":
                 nets[key].append(0.0)
                 continue
-            # Scale each paid strategy's recovery by the sampled timing factor, keeping
-            # the rinse/professional ratio fixed at its measured value.
+            # Sample between the disclosed basic-rinse and professional-scrub planning
+            # cases, keeping their ratio fixed across the two paid strategies.
             ratio = (scen["recovery_frac"] / DEFAULT_RECOVERY_PRO) if DEFAULT_RECOVERY_PRO else 1.0
             rec = loss_usd * s_recov * ratio
             net = rec - scen["cost_fn"](s_kw)

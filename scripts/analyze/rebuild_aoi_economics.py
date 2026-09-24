@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"""Re-score an AOI's dollars through the grounded economics engine (2026-08-09).
+"""Re-score an AOI's dollars through the grounded economics engine.
 
 Every cached ``risk.geojson`` / ``recommendations.json`` / ``manifest.json`` predates the
-economics grounding pass and encodes constants that are now known wrong — chiefly
-``recovery_frac = 0.90`` (measured 0.045) and a flat ``$0.25/kWh`` (sourced $0.165). This
-regenerates the dollar layer so what is served matches the code.
+economics grounding pass and may encode retired defaults such as a flat ``$0.25/kWh``.
+The current public regular-soiling scenario values a July clean across the remaining
+April-September dry-season production; the weather-trajectory ``0.045`` result remains
+a historical sensitivity, not the public planning default. This regenerates the dollar
+layer so what is served matches the code.
 
     PYTHONPATH=. python scripts/analyze/rebuild_aoi_economics.py --aoi santa-cruz-w2-21cm
 
@@ -64,6 +66,9 @@ def main(argv=None) -> int:
                          "sites without a usable fit keep the flat BASE_SUN")
     ap.add_argument("--vintage", default="site_vintage.csv",
                     help="per-site install dates, for tariff regime and degradation")
+    ap.add_argument("--site-group-map", default="public_site_group_map.csv",
+                    help="anonymous array_id -> public site-key grouping, relative to the AOI dir; "
+                         "preserves an established dashboard household unit when private parcels are unavailable")
     ap.add_argument("--degradation-pct-yr", type=float, default=None,
                     help="override the Jordan & Kurtz median 0.5%%/yr")
     ap.add_argument("--level-calibration", type=float, default=None,
@@ -106,9 +111,15 @@ def main(argv=None) -> int:
     # relative width. Nothing about the ranking or the spread is claimed to improve;
     # the model still cannot discriminate within this AOI and known_limitations still
     # says so. Only the level moves.
-    lvl, lvl_why = level_factor(args.aoi, REPO / "outputs/soiling/aoi_level_check.json")
     if args.level_calibration is not None:
         lvl, lvl_why = args.level_calibration, "explicit --level-calibration override"
+    elif loss_source == "regression_head":
+        lvl, lvl_why = level_factor(args.aoi, REPO / "outputs/soiling/aoi_level_check.json")
+    else:
+        # BASE_SOILING_PCT is already the independently measured coastal-CA
+        # reference level. Applying the regression head's 0.5 correction a
+        # second time would turn a 2.80% fallback into an unsupported 1.40%.
+        lvl, lvl_why = 1.0, "coastal-CA fallback already supplies the calibrated level"
     if lvl != 1.0:
         for c in ("loss_pct_p10", "loss_pct_p50", "loss_pct_p90"):
             if c in gdf.columns:
@@ -127,8 +138,9 @@ def main(argv=None) -> int:
     # Fleet-mean POA/GHI is 1.029, so AOI totals barely move (+3.0% measured), but per-home
     # the multiplier spans 0.889-1.156. Note the sign against THIS baseline: 69% of sites go
     # UP, because BASE_SUN is a GHI figure and every tilted roof beats the horizontal -- it
-    # is only against the south-20deg reference that most roofs score low. Cleaning verdicts
-    # are unchanged: 0 of 1,865 before, 0 after.
+    # is only against the south-20deg reference that most roofs score low. The current
+    # public model uses these inputs for the Regular Soiling planning scenario and keeps
+    # Persistent Soiling as a separate inspection screen.
     rp_path = aoi_dir / args.roof_planes
     if rp_path.is_file():
         rp = pd.read_csv(rp_path)
@@ -139,7 +151,37 @@ def main(argv=None) -> int:
     else:
         print(f"[roof] no {rp_path.name}; falling back to flat BASE_SUN for every site")
 
-    gdf = assign_sites(gdf, parcels=parcels)
+    # Reuse the established public household grouping when it is present. The
+    # private parcel layer is intentionally gitignored and is often unavailable
+    # in a developer checkout; silently falling back to proximity can change the
+    # published system count and, therefore, the per-site truck-roll economics.
+    # The group map contains only array ids and already-public salted site keys.
+    group_map_path = aoi_dir / args.site_group_map
+    if group_map_path.is_file():
+        group_map = pd.read_csv(group_map_path)
+        required = {"array_id", "site_key"}
+        missing = required.difference(group_map.columns)
+        if missing:
+            raise ValueError(f"{group_map_path} missing columns: {sorted(missing)}")
+        if group_map["array_id"].duplicated().any():
+            raise ValueError(f"{group_map_path} has duplicate array_id values")
+        group_by_array = dict(zip(group_map["array_id"].astype(int), group_map["site_key"].astype(str)))
+        live_ids = set(gdf["array_id"].astype(int))
+        map_ids = set(group_by_array)
+        if live_ids != map_ids:
+            missing_ids = sorted(live_ids - map_ids)
+            extra_ids = sorted(map_ids - live_ids)
+            raise ValueError(
+                f"{group_map_path} does not match {args.risk_file}: "
+                f"missing={missing_ids[:5]} extra={extra_ids[:5]}. "
+                "Regenerate the group map deliberately; refusing to change household grouping."
+            )
+        gdf["site_id"] = gdf["array_id"].astype(int).map(lambda aid: f"public:{group_by_array[aid]}")
+        gdf["site_source"] = "public_group_map"
+        print(f"[sites] reused {group_map_path.name} ({gdf['site_id'].nunique()} established sites)")
+    else:
+        gdf = assign_sites(gdf, parcels=parcels)
+        print(f"[sites] no {group_map_path.name}; using parcel/proximity grouping")
     diag = cluster_diagnostics(gdf)
     print(f"[sites] {diag['n_polygons']} polygons -> {diag['n_sites']} sites "
           f"({diag['fragmentation_factor']:.2f}x fragmentation)")
@@ -321,7 +363,9 @@ def main(argv=None) -> int:
             "with it: 881 of NREL's 891 rows came from the same class of method PVDAQ "
             "uses, so both inherit its systematic error. Re-measure with "
             "scripts/analyze/aoi_level_check.py.",
-            "recovery_frac is coastal-Santa-Cruz specific; k=15 is the dominant sensitivity.",
+            "The public Regular Soiling recovery is a disclosed April-September planning "
+            "scenario with a July clean. The 0.045 SOMOSclean weather-trajectory result "
+            "remains a separate sensitivity; neither quantity estimates Persistent Soiling.",
             "ACC export table is SDG&E's standing in for PG&E's.",
         ],
         "beta": True,

@@ -4,6 +4,14 @@ Grounding the SolarSoiled soiling-loss and cleaning-economics model in measured 
 Every constant in the dollar chain (`detected area → system_kw → annual_loss_usd →
 clean/no-clean`) was audited, sourced, or explicitly marked unsourced.
 
+> **Public product update, 2026-09-04.** This audit records the historical
+> SOMOSclean weather-trajectory sensitivity of `recovery_frac = 0.045`. The live
+> dashboard now presents a separate, disclosed April-September seasonal-planning
+> scenario: a July clean protects the remaining three dry-season months, using
+> recovery fractions 0.44496 (professional) and 0.34608 (basic). It also keeps
+> Persistent Soiling in a separate inspection screen. Do not copy this
+> document's retired blanket no-clean verdict into public product copy.
+
 **Headline: the product is uneconomic in coastal Santa Cruz, and the margin is not
 close.** Zero of 1,865 sites produce a positive expected net, at any electricity rate up
 to $0.70/kWh, at any system size, under 2,000 Monte Carlo draws each. This confirms

@@ -27,23 +27,9 @@ from solarsoiled.recommend import (
 )
 from solarsoiled.registry import RegistryError, ResolvedWeights, resolve as resolve_weights, resolve_soiling
 
-# Ensure repo root is on sys.path so scripts.* and src.* imports resolve.
+# Ensure repo root is on sys.path so command-local script imports resolve.
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
-
-from scripts.data.tile_naip_image import main as _tile_main  # noqa: E402
-from scripts.data.fetch_scc_imagery import main as _fetch_scc_raw  # noqa: E402
-from scripts.detect.infer import main as _infer_main  # noqa: E402
-from scripts.detect.rfdetr_infer import main as _rfdetr_infer_main  # noqa: E402
-from scripts.detect.evaluate import main as _eval_main  # noqa: E402
-from scripts.detect.eval_threshold_sweep import main as _eval_sweep_main  # noqa: E402
-from scripts.detect.per_detection_rca import main as _rca_main  # noqa: E402
-from scripts.detect.sahi_threshold_sweep import main as _sahi_sweep_main  # noqa: E402
-from scripts.detect.export_polygons_geojson import export_polygons as _export_polygons  # noqa: E402
-from scripts.analyze.extract_array_features import extract_features as _extract_features  # noqa: E402
-from scripts.analyze.build_risk_features import main as _build_features_main  # noqa: E402
-from scripts.predict.predict_risk import main as _predict_risk_main  # noqa: E402
-from scripts.labeling.bucket_overlays import main as _bucket_overlays_main  # noqa: E402
 
 
 app = typer.Typer(
@@ -95,8 +81,10 @@ def _fetch_scc_main(argv: list[str]) -> int:
     CLI that must not kill the process -- a partial AOI still has a consistent tile_index and
     the user needs the message, not a traceback.
     """
+    from scripts.data.fetch_scc_imagery import main as fetch_scc_raw
+
     try:
-        _fetch_scc_raw(argv)
+        fetch_scc_raw(argv)
         return 0
     except SystemExit as exc:
         return int(exc.code or 0)
@@ -173,8 +161,10 @@ def tile(
         if rc:
             raise typer.Exit(rc)
     elif imagery == "naip":
+        from scripts.data.tile_naip_image import main as tile_main
+
         download_arg = aoi if download else None
-        _tile_main(
+        tile_main(
             download_aoi=download_arg,
             out_tiles_dir=paths.tiles_dir,
             out_tile_index=paths.tile_index,
@@ -239,10 +229,14 @@ def detect(
             # Labels are written atomically, so this cannot pick up a partial tile.
             "--resume",
         ]
-        rc = _rfdetr_infer_main(infer_argv)
+        from scripts.detect.rfdetr_infer import main as rfdetr_infer_main
+
+        rc = rfdetr_infer_main(infer_argv)
         if rc:
             raise typer.Exit(rc)
     else:
+        from scripts.detect.infer import main as infer_main
+
         infer_argv = [
             "--weights", str(resolved.path),
             "--source", str(paths.tiles_dir),
@@ -253,9 +247,11 @@ def detect(
         ]
         if sahi:
             infer_argv.append("--sahi")
-        _infer_main(infer_argv)
+        infer_main(infer_argv)
 
-    _export_polygons(
+    from scripts.detect.export_polygons_geojson import export_polygons
+
+    export_polygons(
         labels_dir=paths.detect_labels_dir,
         tile_index_path=paths.tile_index,
         output_geojson=paths.arrays_geojson,
@@ -304,15 +300,20 @@ def score(
     as_of: str | None = typer.Option(None, "--as-of", help="YYYY-MM-DD; default = today UTC"),
 ) -> None:
     """Extract array features → soiling features → risk scores. Writes risk.geojson."""
-    resolved_soiling = _resolve_soiling_model(soiling_model)
     aoi_obj, paths = _resolve_aoi(aoi, partner_id)
     if not paths.arrays_geojson.is_file():
         raise typer.BadParameter(
             f"missing {paths.arrays_geojson} — run `solarsoiled detect --aoi …` first"
         )
+
+    from scripts.analyze.build_risk_features import main as build_features_main
+    from scripts.analyze.extract_array_features import extract_features
+    from scripts.predict.predict_risk import main as predict_risk_main
+
+    resolved_soiling = _resolve_soiling_model(soiling_model)
     paths.features_dir.mkdir(parents=True, exist_ok=True)
 
-    _extract_features(
+    extract_features(
         input_geojson=paths.arrays_geojson,
         out_table=paths.array_features_parquet,
         out_geo=paths.array_features_geo_parquet,
@@ -326,9 +327,9 @@ def score(
     ]
     if as_of:
         build_argv += ["--as-of", as_of]
-    _build_features_main(build_argv)
+    build_features_main(build_argv)
 
-    _predict_risk_main([
+    predict_risk_main([
         "--model", str(resolved_soiling.path),
         "--features", str(paths.inference_matrix),
         "--arrays", str(paths.array_features_geo_parquet),
@@ -367,12 +368,74 @@ def recommend(
         paths.risk_geojson,
         payload,
         risk_threshold=risk_threshold,
+        persistent_screen_csv=paths.persistent_soiling_screen_csv,
     )
     write_array_recommendations(paths.array_recommendations_json, array_rows)
     n_actionable = sum(1 for r in array_rows if r["action"] == "clean")
     typer.echo(f"  array_recommendations → {paths.array_recommendations_json} ({n_actionable}/{len(array_rows)} arrays to clean)")
+    n_inspect = sum(1 for r in array_rows if r["persistent_soiling_inspection_action"] == "inspect")
+    if paths.persistent_soiling_screen_csv.is_file():
+        typer.echo(f"  persistent screen → {n_inspect}/{len(array_rows)} arrays flagged to inspect")
 
     typer.echo(json.dumps({"rule_fired": payload["rule_fired"], "confidence": payload["confidence"]}))
+
+
+@app.command("screen-persistent")
+def screen_persistent(
+    aoi: str = typer.Option(..., "--aoi"),
+    partner_id: str | None = typer.Option(None, "--partner-id"),
+    top_fraction: float = typer.Option(0.10, "--top-fraction"),
+    tilt_weight: float = typer.Option(0.70, "--tilt-weight"),
+    canopy_weight: float = typer.Option(0.30, "--canopy-weight"),
+    cache_dir: Path = typer.Option(Path(".cache/lidar"), "--cache-dir"),
+) -> None:
+    """Build the lidar Persistent Soiling inspection screen; it never makes a clean call itself."""
+    # Keep lidar/geospatial imports out of ordinary CLI commands and --help.
+    from scripts.analyze.rank_moss_candidates import main as persistent_screen_main
+
+    _, paths = _resolve_aoi(aoi, partner_id)
+    if not paths.arrays_geojson.is_file():
+        raise typer.BadParameter(
+            f"missing {paths.arrays_geojson} — run `solarsoiled detect --aoi …` first"
+        )
+    if not paths.roof_planes_csv.is_file():
+        raise typer.BadParameter(
+            f"missing {paths.roof_planes_csv} — run the roof-plane fit first"
+        )
+    rc = persistent_screen_main([
+        "--arrays", str(paths.arrays_geojson),
+        "--planes", str(paths.roof_planes_csv),
+        "--out", str(paths.persistent_soiling_screen_csv),
+        "--top-fraction", str(top_fraction),
+        "--tilt-weight", str(tilt_weight),
+        "--canopy-weight", str(canopy_weight),
+        "--cache-dir", str(cache_dir),
+    ]) or 0
+    if rc:
+        raise typer.Exit(code=rc)
+    typer.echo(f"persistent screen → {paths.persistent_soiling_screen_csv}")
+
+
+@app.command("fetch-pvwatts-reference")
+def fetch_pvwatts_reference(
+    aoi: str = typer.Option(..., "--aoi"),
+    partner_id: str | None = typer.Option(None, "--partner-id"),
+    api_key: str | None = typer.Option(None, "--api-key", envvar="NREL_API_KEY", hide_input=True),
+) -> None:
+    """Cache one no-soiling PVWatts annual-yield reference; never called by the web API."""
+    from scripts.analyze.fetch_pvwatts_reference import main as fetch_reference_main
+
+    aoi_obj, paths = _resolve_aoi(aoi, partner_id)
+    centroid = aoi_obj.polygon.centroid
+    argv = [
+        "--lat", str(float(centroid.y)), "--lon", str(float(centroid.x)),
+        "--out", str(paths.pvwatts_reference_json),
+    ]
+    if api_key:
+        argv += ["--api-key", api_key]
+    rc = fetch_reference_main(argv) or 0
+    if rc:
+        raise typer.Exit(code=rc)
 
 
 @app.command()
@@ -488,6 +551,10 @@ def _run_full_eval_pipeline(
     report_out: Path | None,
 ) -> None:
     """Chain per_detection_rca → summarize → sahi_threshold_sweep → bucket_overlays → build_report."""
+    from scripts.detect.per_detection_rca import main as rca_main
+    from scripts.detect.sahi_threshold_sweep import main as sahi_sweep_main
+    from scripts.labeling.bucket_overlays import main as bucket_overlays_main
+
     weights_str = str(resolved.path)
     data_args = ["--data", str(data)] if data else []
 
@@ -498,7 +565,7 @@ def _run_full_eval_pipeline(
         run_name = wp.parent.parent.name if wp.parent.name == "weights" else wp.stem
 
     typer.echo(f"[1/5] per_detection_rca (SAHI, conf=0.05, splits=val test) → outputs/eval/{run_name}/")
-    rc = _rca_main(
+    rc = rca_main(
         ["--weights", weights_str, "--sahi", "--conf", "0.05", "--iou", "0.5",
          "--splits", "val", "test", "--run-name", run_name] + data_args
     ) or 0
@@ -508,12 +575,12 @@ def _run_full_eval_pipeline(
     csv_path = REPO_ROOT / "outputs" / "eval" / run_name / "per_detection.csv"
 
     typer.echo("[2/5] per_detection_rca --summarize → failure_modes.json")
-    rc = _rca_main(["--summarize", "--csv", str(csv_path)]) or 0
+    rc = rca_main(["--summarize", "--csv", str(csv_path)]) or 0
     if rc:
         raise typer.Exit(code=rc)
 
     typer.echo("[3/5] sahi_threshold_sweep → sahi_threshold_sweep.csv")
-    rc = _sahi_sweep_main(
+    rc = sahi_sweep_main(
         ["--weights", weights_str, "--run-name", run_name] + data_args
     ) or 0
     if rc:
@@ -521,7 +588,7 @@ def _run_full_eval_pipeline(
 
     typer.echo("[4/5] bucket_overlays (confident_fp + worst_small_fn)")
     for bucket in ("confident_fp", "worst_small_fn"):
-        rc = _bucket_overlays_main(
+        rc = bucket_overlays_main(
             ["--csv", str(csv_path), "--bucket", bucket, "--top", "20"] + data_args
         ) or 0
         if rc:
@@ -566,19 +633,23 @@ def eval(
         return
 
     if threshold_sweep:
+        from scripts.detect.eval_threshold_sweep import main as eval_sweep_main
+
         argv = ["--weights", str(resolved.path)]
         if data:
             argv += ["--data", str(data)]
-        rc = _eval_sweep_main(argv) or 0
+        rc = eval_sweep_main(argv) or 0
         if rc:
             raise typer.Exit(code=rc)
     else:
+        from scripts.detect.evaluate import main as eval_main
+
         argv = ["--weights", str(resolved.path), "--split", split]
         if data:
             argv += ["--data", str(data)]
         if metrics_json:
             argv += ["--metrics-json", str(metrics_json)]
-        _eval_main(argv)
+        eval_main(argv)
 
 
 @app.command()

@@ -220,11 +220,12 @@ Shirakawa's Brazilian 11% figure for want of a local one). Santa Cruz is
 **3.4x** the wetness of Arbuckle, which is the one site where we measured no standing layer,
 so that null explicitly does not transfer.
 
-The facade literature independently confirms the per-surface predictors already in
-`scripts/analyze/rank_moss_candidates.py`: north-facing aspect, shading, and slow drying
-after wetting are the recognised drivers of algal growth on buildings. Our weights
-(0.60 canopy / 0.25 low tilt / 0.15 north) are unvalidated in magnitude but correct in
-direction and in ordering.
+The facade literature independently confirms shading and slow drying after wetting as
+recognised drivers of algal growth on buildings. The current
+`scripts/analyze/rank_moss_candidates.py` screen uses a stated 70% low-tilt / 30% canopy
+policy blend; it deliberately excludes north-facing aspect until it can be validated in
+this setting. The weights are unvalidated in magnitude and are an inspection-ordering
+policy, not a persistent-loss model.
 
 **The gap this sits in:** biofilm on PV has measured power loss in the tropics (São Paulo,
 11% at 18 months, 58% coverage) and confirmed presence in coastal California, but **nobody

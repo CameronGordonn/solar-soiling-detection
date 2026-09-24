@@ -222,6 +222,57 @@ def test_low_risk_site_reports_the_risk_rule_as_its_source(tmp_path: Path):
     assert "below threshold" in rows[0]["action_reason"]
 
 
+def test_persistent_candidate_is_inspected_without_changing_regular_soiling_decision(tmp_path: Path):
+    """The unlabeled Persistent Soiling screen must not masquerade as a fitted loss model."""
+    import pandas as pd
+    from solarsoiled.recommend import recommend_per_array
+
+    risk = _write_sites_geojson(tmp_path, [(0.10, 40.0, 4.7)])
+    screen = tmp_path / "persistent_soiling_screen.csv"
+    pd.DataFrame([{
+        "array_id": 0,
+        "persistent_soiling_score": 0.91,
+        "persistent_soiling_rank": 1,
+        "persistent_soiling_top_decile": True,
+        "low_tilt_score": 1.0,
+        "canopy_exposure_score": 0.7,
+        "nearest_canopy_m": 2.0,
+        "canopy_frac": 0.3,
+        "tilt_weight": 0.7,
+        "canopy_weight": 0.3,
+        "canopy_radius_m": 9.0,
+        "inspection_fraction": 0.1,
+    }]).to_csv(screen, index=False)
+
+    row = recommend_per_array(risk, _OPEN_WINDOW, persistent_screen_csv=screen)[0]
+    assert row["action"] == "monitor"  # unchanged Regular Soiling action
+    assert row["persistent_soiling_status"] == "inspection_candidate"
+    assert row["persistent_soiling_inspection_action"] == "inspect"
+    assert row["persistent_soiling_dollars_at_risk"] is not None
+    from risk.economics import system_kw_from_area
+    assert row["persistent_soiling_group_kw"] == pytest.approx(system_kw_from_area(40.0), abs=0.01)
+    assert row["persistent_soiling_loss_threshold_pct"] == 3.0
+    assert row["persistent_soiling_two_year_loss_threshold_pct"] == 3.0
+    assert row["persistent_soiling_two_year_horizon_years"] == 2
+    assert row["persistent_soiling_two_year_dollars_at_risk"] is not None
+    assert row["persistent_soiling_value_usd_per_kwh"] == pytest.approx(0.4284, abs=0.001)
+    assert row["persistent_soiling_tilt_weight"] == pytest.approx(0.7)
+    assert row["persistent_soiling_canopy_weight"] == pytest.approx(0.3)
+    assert row["persistent_soiling_canopy_radius_m"] == pytest.approx(9.0)
+    assert row["persistent_soiling_top_fraction"] == pytest.approx(0.1)
+
+
+def test_missing_persistent_sidecar_is_not_treated_as_low_risk(tmp_path: Path):
+    from solarsoiled.recommend import recommend_per_array
+
+    risk = _write_sites_geojson(tmp_path, [(0.10, 40.0, 4.7)])
+    row = recommend_per_array(risk, _OPEN_WINDOW, persistent_screen_csv=tmp_path / "missing.csv")[0]
+    assert row["persistent_soiling_status"] == "not_assessed"
+    assert row["persistent_soiling_inspection_action"] == "none"
+    assert row["persistent_soiling_dollars_at_risk"] is None
+    assert row["persistent_soiling_two_year_dollars_at_risk"] is None
+
+
 def test_site_economics_charges_one_trip_per_parcel(tmp_path: Path):
     """Four fragments of one roof must not be billed four minimum service charges."""
     from solarsoiled.recommend import _site_economics
@@ -240,3 +291,17 @@ def test_site_economics_charges_one_trip_per_parcel(tmp_path: Path):
     assert site["site_area_m2"] == pytest.approx(90.0, rel=0.02)
     # exactly one row is the site primary, so AOI totals never double-count
     assert sum(1 for v in per_array.values() if v["site_primary"]) == 1
+
+
+def test_pvwatts_reference_yield_overrides_flat_sun_hour_fallback(tmp_path: Path):
+    """A cached annual AC yield must win without changing the clean/monitor logic."""
+    from solarsoiled.recommend import _site_economics
+
+    gdf = gpd.read_file(_write_sites_geojson(tmp_path, [(0.10, 40.0, 4.7)]))
+    _, per_site = _site_economics(
+        gdf, sun_hours=5.5, elec_rate=0.42836, monte_carlo=False,
+        pvwatts_reference_kwh_per_kwdc=1700.0,
+    )
+    row = next(iter(per_site.values()))
+    assert row["annual_yield_kwh_per_kwdc"] == 1700.0
+    assert row["sun_hours_source"] == "pvwatts_reference"

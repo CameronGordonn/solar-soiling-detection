@@ -21,7 +21,7 @@ metrics whose provenance nobody recorded — `map50_test=0.263`, the "0.396" SAH
 | [TEAM.md](TEAM.md) | Lanes, ownership, conventions, what is and is not a team source of truth. |
 | [CODEX_QUICKSTART_MAC.md](CODEX_QUICKSTART_MAC.md) | **Reading this repo with a coding agent** (macOS, VS Code, Codex). Why "no sandbox access" happens on a first session and why Read Only is the right mode. For understanding the project, not changing it. |
 | [ONBOARDING.md](ONBOARDING.md) | **Start here if you are new.** §1 is a runnable setup path, validated in a throwaway clone 2026-08-26; three verification tiers and three lane quickstarts, each ending in a number you should see. |
-| [../DATA.md](../DATA.md) | Every artifact that is not in git: R2 custody, the `rclone` pull, what is regenerable and with which command. |
+| [../DATA.md](../DATA.md) | Every artifact that is not in git: custody via the `handoff-v1` GitHub Release, the `gh release download` pull, what is regenerable and with which command. |
 | [COLD_START_AUDIT_20260823.md](COLD_START_AUDIT_20260823.md) | **Part B is the trap list** — the failure modes that produce plausible wrong numbers instead of errors. Part A is a fixed cold-start defect list, kept for the record. |
 | [ONBOARDING_OVERHAUL_PLAN.md](ONBOARDING_OVERHAUL_PLAN.md) | What was wrong with onboarding, what was fixed, and the four steps only Cameron can do (R2 bucket, upload, restore test, credentials). |
 | [MEETING_BRIEF_2026-06.md](MEETING_BRIEF_2026-06.md) | The 2026-06 wedge decision (residential funnel → consumer→cleaner marketplace, BBF integration). |
@@ -31,7 +31,7 @@ metrics whose provenance nobody recorded — `map50_test=0.263`, the "0.396" SAH
 
 | Doc | Canonical for |
 |---|---|
-| [ECONOMICS_GROUNDING_20260809.md](ECONOMICS_GROUNDING_20260809.md) | **The audit.** Every constant in the net-$ chain, sourced or explicitly marked UNSOURCED. Where `recovery_frac = 0.90` (measured 0.045) and `RISK_TO_LOSS_PCT = 8.0` came from and why they were wrong. |
+| [ECONOMICS_GROUNDING_20260809.md](ECONOMICS_GROUNDING_20260809.md) | **The audit.** Every constant in the net-$ chain, sourced or explicitly marked UNSOURCED. Documents the historical weather-trajectory `recovery_frac = 0.045` sensitivity, the retired 0.90 default, and why `RISK_TO_LOSS_PCT = 8.0` was removed. |
 | [AOI_CLEANING_TARGETING_PLAN.md](AOI_CLEANING_TARGETING_PLAN.md) | **The moss/lichen thesis and the ground-truth plan.** Substring shade physics, breakeven bars, the ranked experiment list, and the written stop rule that would kill the thesis. |
 | [SOILING_LEVEL_INVESTIGATION.md](SOILING_LEVEL_INVESTIGATION.md) | Why the risk model cannot rank homes *within* an AOI — station-level labels, 58.1% of importance on features that are constant across the AOI. Structural, not a plumbing gap. |
 | [HANDOFF_roof_geometry_for_paper.md](HANDOFF_roof_geometry_for_paper.md) | Roof tilt/azimuth from 3DEP lidar: method, validation, and the deliberate negative result on tilt-as-a-feature. Written for the paper. |
@@ -52,6 +52,7 @@ metrics whose provenance nobody recorded — `map50_test=0.263`, the "0.396" SAH
 | Doc | Canonical for |
 |---|---|
 | [SOILING_STAGE2_GUIDE.md](SOILING_STAGE2_GUIDE.md) | XGBoost risk model + physics scorers (SOMOSclean/Kimber): training, features, validation. Gates cleared 2026-07-05. |
+| [TILT_SOILING_EVIDENCE.md](TILT_SOILING_EVIDENCE.md) | Evidence review for using lidar-derived racking angle in the Persistent Soiling inspection screen. |
 | [PVDAQ_LANE_HANDOFF_20260831.md](PVDAQ_LANE_HANDOFF_20260831.md) | **Read before touching the soiling model.** The regional holdout: it scores **0.5313 on an unseen region** against 0.7569 for a random holdout of the same size, so "works in any region" is not supportable. Plus where the fleet extraction stopped and how to resume it. |
 | [GAMMA_RESOLUTION_20260827.md](GAMMA_RESOLUTION_20260827.md) | How a hardcoded module temperature coefficient moved a label more than the signal, what resolving it per system did to the noise budget (S/N 1.95x → 1.76x), and the two estimator bugs found on the way. |
 
