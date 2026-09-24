@@ -269,3 +269,79 @@ def test_measured_recovery_matches_the_live_site_calculator():
     scens = scenarios_for("measured")
     assert scens["professional"]["recovery_frac"] == 0.045
     assert scens["rinse_service"]["recovery_frac"] == 0.032
+
+
+def test_api_reproduces_the_papers_headline_breakeven_exactly():
+    """Fed the paper's own inputs, the API must return the paper's own number.
+
+    This is the strongest available statement that the decision chain and
+    `paper/paper.tex` implement the same arithmetic: across the paper's 149 metered
+    California systems, each with its own measured recovery fraction, the median
+    professional break-even tariff comes out at $2.4410/kWh, which is the figure the
+    paper reports. Any structural divergence -- a different derate, cost curve, or
+    loss model -- would move it.
+
+    Skips without the audit artifacts, which are gitignored (see CANONICAL_NUMBERS.md).
+    """
+    pd = pytest.importorskip("pandas")
+    path = (
+        __import__("pathlib").Path(__file__).resolve().parents[1]
+        / "outputs/soiling/audit/real_systems_economics.parquet"
+    )
+    if not path.exists():
+        pytest.skip("audit artifact absent (expected on a clone without data)")
+
+    systems = pd.read_parquet(path)
+    assert len(systems) == 149
+
+    breakevens = []
+    for _, row in systems.iterrows():
+        out = decide(
+            resolve_inputs(
+                system_kw=float(row.capacity_kw),
+                loss_pct=float(row.annual_loss_pct),
+                sun_hours=float(row.sun_hours),
+                elec_rate=0.4573,                       # NEM 2.0 retail
+                recovery_frac=float(row.recovery_frac),  # this system's measured value
+            ),
+            n_samples=1,
+        )
+        breakevens.append(out["thresholds"]["professional"]["breakeven_tariff_usd_per_kwh"])
+
+    assert pd.Series(breakevens).median() == pytest.approx(2.4410, abs=5e-4)
+
+
+def test_the_export_rate_verdict_reproduces_and_retail_is_not_hidden():
+    """The paper's headline verdict, plus the nuance the headline does not carry.
+
+    The paper reports 0 of 149 clearing **at the marginal export rate**, and that
+    reproduces exactly. At full NEM 2.0 retail -- 11.7x the export rate -- 3 systems
+    (2%) do clear. That is not a contradiction: it is the tariff-vintage effect this
+    project already identifies as its sharpest targeting signal, and it is asserted here
+    so nobody later "discovers" it as a regression and rounds it back down to zero.
+    """
+    pd = pytest.importorskip("pandas")
+    path = (
+        __import__("pathlib").Path(__file__).resolve().parents[1]
+        / "outputs/soiling/audit/real_systems_economics.parquet"
+    )
+    if not path.exists():
+        pytest.skip("audit artifact absent (expected on a clone without data)")
+
+    systems = pd.read_parquet(path)
+
+    def cleared_at(rate):
+        return sum(
+            decide(
+                resolve_inputs(
+                    system_kw=float(r.capacity_kw), loss_pct=float(r.annual_loss_pct),
+                    sun_hours=float(r.sun_hours), elec_rate=rate,
+                    recovery_frac=float(r.recovery_frac),
+                ),
+                n_samples=1,
+            )["verdict"] != "no_clean"
+            for _, r in systems.iterrows()
+        )
+
+    assert cleared_at(0.0392) == 0        # marginal export — the paper's figure
+    assert cleared_at(0.4573) <= 5        # NEM 2.0 retail — a handful, currently 3

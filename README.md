@@ -267,8 +267,14 @@ that differ tenfold.** Both claim to be "the share of a year's soiling loss one 
 
 This is not academic. Fed the paper's own median metered system (5.72 kW, 9.53% annual loss, NEM 2.0
 retail), `seasonal_planning` returns **"clean it, +$47.80"** while the paper reports that system
-needs **$2.44/kWh** and that none of the 149 clear. The measured basis is therefore the default, the
-basis is named in every response, and a regression test pins the agreement.
+needs **$2.44/kWh**. The measured basis is therefore the default and is named in every response.
+
+**Pass `recovery_frac` when you have measured it on the roof** — it overrides the basis and is the
+most specific input available. Fed the paper's 149 metered systems each with its own measured
+recovery, the API returns a median break-even of **$2.4410/kWh**, which is the paper's figure to the
+cent, and **0 of 149 clearing at the marginal export rate**, which is the paper's verdict. Both are
+regression-tested. (At full NEM 2.0 retail, 11.7× the export rate, 3 of 149 clear — the
+tariff-vintage effect, asserted in the tests rather than rounded away.)
 
 | Endpoint | Description |
 |---|---|

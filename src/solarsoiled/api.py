@@ -180,6 +180,10 @@ class DecisionRequest(BaseModel):
     # "measured" (default) or "seasonal_planning". The two differ tenfold and this is
     # the field most able to move the verdict, so it is explicit rather than implied.
     recovery_basis: str = "measured"
+    #: Overrides the basis entirely. Pass it when recovery has been MEASURED on this
+    #: roof; it is the most specific basis available and reproduces the paper's
+    #: per-system figures exactly.
+    recovery_frac: float | None = None
     n_samples: int = 2000
     seed: int = 42
 
@@ -533,6 +537,7 @@ async def get_decision(
     regime: str | None = None,
     install_date: str | None = None,
     recovery_basis: str = "measured",
+    recovery_frac: float | None = None,
     n_samples: int = 2000,
     seed: int = 42,
 ):
@@ -540,7 +545,8 @@ async def get_decision(
     return _decide_or_422(
         system_kw=system_kw, area_m2=area_m2, loss_pct=loss_pct, sun_hours=sun_hours,
         elec_rate=elec_rate, regime=regime, install_date=install_date,
-        recovery_basis=recovery_basis, n_samples=n_samples, seed=seed,
+        recovery_basis=recovery_basis, recovery_frac=recovery_frac,
+        n_samples=n_samples, seed=seed,
     )
 
 
@@ -554,6 +560,7 @@ async def get_breakeven(
     regime: str | None = None,
     install_date: str | None = None,
     recovery_basis: str = "measured",
+    recovery_frac: float | None = None,
 ):
     """What would have to be true for cleaning to pay.
 
@@ -564,7 +571,7 @@ async def get_breakeven(
     out = _decide_or_422(
         system_kw=system_kw, area_m2=area_m2, loss_pct=loss_pct, sun_hours=sun_hours,
         elec_rate=elec_rate, regime=regime, install_date=install_date,
-        recovery_basis=recovery_basis, n_samples=1,
+        recovery_basis=recovery_basis, recovery_frac=recovery_frac, n_samples=1,
     )
     return {
         "verdict": out["verdict"],

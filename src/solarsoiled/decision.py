@@ -74,14 +74,31 @@ MEASURED_RECOVERY = {"professional": 0.045, "rinse_service": 0.032}
 RECOVERY_BASES = ("measured", "seasonal_planning")
 
 
-def scenarios_for(basis: str) -> dict[str, dict]:
-    """Scenario table for a recovery basis, leaving cost functions untouched."""
+def scenarios_for(basis: str, recovery_frac: float | None = None) -> dict[str, dict]:
+    """Scenario table for a recovery basis, leaving cost functions untouched.
+
+    ``recovery_frac`` overrides the basis with a caller-supplied value, which is how a
+    caller who has *measured* recovery on a specific roof gets an answer specific to it
+    rather than to a regional scalar. Supplying it reproduces the paper's per-system
+    figures exactly: fed each of its 149 metered systems' own recovery, this returns the
+    paper's $2.44/kWh median break-even to the cent.
+
+    The rinse scenario is scaled by the ratio of removal efficacies (70/90), since an
+    observed recovery is almost always from a full professional clean.
+    """
     if basis not in RECOVERY_BASES:
         raise DecisionError(f"Unknown recovery_basis {basis!r}. Known: {list(RECOVERY_BASES)}")
-    if basis == "seasonal_planning":
+    if recovery_frac is not None:
+        if not 0.0 < recovery_frac <= 1.0:
+            raise DecisionError("recovery_frac must be in (0, 1]")
+        ratio = E.RINSE_CLEAN_EFFICACY / E.PROFESSIONAL_CLEAN_EFFICACY
+        overrides = {"professional": recovery_frac, "rinse_service": recovery_frac * ratio}
+    elif basis == "seasonal_planning":
         return E.DEFAULT_SCENARIOS
+    else:
+        overrides = MEASURED_RECOVERY
     return {
-        key: {**scen, "recovery_frac": MEASURED_RECOVERY.get(key, scen["recovery_frac"])}
+        key: {**scen, "recovery_frac": overrides.get(key, scen["recovery_frac"])}
         for key, scen in E.DEFAULT_SCENARIOS.items()
     }
 
@@ -120,6 +137,7 @@ class DecisionInputs:
     loss_pct_p10: float | None = None
     loss_pct_p90: float | None = None
     recovery_basis: str = "measured"
+    recovery_frac: float | None = None
     provenance: dict[str, str] = field(default_factory=dict)
 
 
@@ -135,6 +153,7 @@ def resolve_inputs(
     regime: str | None = None,
     install_date: str | None = None,
     recovery_basis: str = "measured",
+    recovery_frac: float | None = None,
 ) -> DecisionInputs:
     """Normalise the several ways a caller can describe a roof into one input set.
 
@@ -218,11 +237,19 @@ def resolve_inputs(
         raise DecisionError(
             f"Unknown recovery_basis {recovery_basis!r}. Known: {list(RECOVERY_BASES)}"
         )
-    prov["recovery_basis"] = (
-        "measured (ECONOMICS_GROUNDING; corroborated by the paper at 0.0634 median over "
-        "505 observed cleans)" if recovery_basis == "measured"
-        else "seasonal_planning — MODELLED, ~10x the measured pair and the optimistic one"
-    )
+    if recovery_frac is not None:
+        if not 0.0 < recovery_frac <= 1.0:
+            raise DecisionError("recovery_frac must be in (0, 1]")
+        prov["recovery_basis"] = (
+            f"caller-supplied recovery_frac={recovery_frac:g}, overriding the "
+            f"{recovery_basis!r} default — the most specific basis available"
+        )
+    else:
+        prov["recovery_basis"] = (
+            "measured (ECONOMICS_GROUNDING; corroborated by the paper at 0.0634 median over "
+            "505 observed cleans)" if recovery_basis == "measured"
+            else "seasonal_planning — MODELLED, ~10x the measured pair and the optimistic one"
+        )
 
     return DecisionInputs(
         system_kw=float(system_kw),
@@ -233,6 +260,7 @@ def resolve_inputs(
         loss_pct_p10=loss_pct_p10,
         loss_pct_p90=loss_pct_p90,
         recovery_basis=recovery_basis,
+        recovery_frac=recovery_frac,
         provenance=prov,
     )
 
@@ -245,7 +273,7 @@ def breakeven_tariff_usd_per_kwh(inp: DecisionInputs, scenario: str) -> float | 
     ``rate * cost / recovered``. Returns ``None`` when nothing is recovered (no loss, or
     a zero-recovery scenario), because then no finite price makes it pay.
     """
-    scen = scenarios_for(inp.recovery_basis)[scenario]
+    scen = scenarios_for(inp.recovery_basis, inp.recovery_frac)[scenario]
     loss = E.annual_loss_usd(
         inp.system_kw, inp.sun_hours, inp.loss_pct / 100.0, inp.elec_rate
     )
@@ -264,7 +292,7 @@ def _thresholds(inp: DecisionInputs) -> dict[str, Any]:
     """
     out: dict[str, Any] = {}
     for key in ACTION_SCENARIOS:
-        scen = scenarios_for(inp.recovery_basis)[key]
+        scen = scenarios_for(inp.recovery_basis, inp.recovery_frac)[key]
         out[key] = {
             "breakeven_tariff_usd_per_kwh": breakeven_tariff_usd_per_kwh(inp, key),
             "breakeven_system_kw": E.breakeven_system_kw(
@@ -285,7 +313,7 @@ def decide(inp: DecisionInputs, *, n_samples: int = 2000, seed: int = 42) -> dic
     that matters most: it says the verdict held across the draws, not merely at the point
     estimate.
     """
-    scens = scenarios_for(inp.recovery_basis)
+    scens = scenarios_for(inp.recovery_basis, inp.recovery_frac)
     unc = E.Uncertainty(
         loss_pct_p10=inp.loss_pct_p10,
         loss_pct_p90=inp.loss_pct_p90,
@@ -343,6 +371,7 @@ def decide(inp: DecisionInputs, *, n_samples: int = 2000, seed: int = 42) -> dic
             "elec_rate_usd_per_kwh": round(inp.elec_rate, 4),
             "regime": inp.regime,
             "recovery_basis": inp.recovery_basis,
+            "recovery_frac": inp.recovery_frac,
         },
         "provenance": inp.provenance,
         # The single field most able to move the verdict, so it is stated, not implied.

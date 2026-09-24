@@ -129,7 +129,7 @@ Non-technical does not mean unable to verify. Three checks, in order of effort:
 2. **`make test-fast`.** If it was green before a change and red after, the change broke
    something. This is the single most useful button you have, with one caveat you should read in
    section 10: on a clone without the data bundle, 18 of the number guards skip rather than run,
-   and a skip looks identical to a pass. The `546 passed, 3 skipped, 2 deselected` figure in
+   and a skip looks identical to a pass. The `548 passed, 3 skipped, 2 deselected` figure in
    CLAUDE.md is the count *with* the data present; expect more skips than that without it.
 3. **Reproduce a number.** `PYTHONPATH=. conda run -n solar-soiling python scripts/predict/holdout_ci.py`
    prints pooled out-of-year AUC 0.7095 in about a minute. If that still matches, the Stage 2 model
