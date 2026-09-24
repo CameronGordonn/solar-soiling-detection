@@ -38,7 +38,10 @@ Everything below turns on a distinction that is easy to miss and expensive to mi
 | we have | **this, and it works** | **this is what we propose to build** |
 
 The model we operate today is Box A. It answers its own question well: spatial-CV AUC 0.712,
-pooled out-of-year AUC 0.710, calibration retained out-of-year. It cannot answer Box B's
+pooled out-of-year AUC 0.710, calibration retained out-of-year. ⚠️ **Do not use that 0.710 in a
+submitted proposal: its fold leaks (found 2026-09-22) and the honest joint out-of-station-and-year
+value is 0.622 [0.571, 0.670], below the 0.70 bar, with lat/lon alone at 0.644. Calibration still
+holds. See CANONICAL_NUMBERS.md.** It cannot answer Box B's
 question, and **no amount of additional features will make it**, for a structural reason
 given in §3.
 

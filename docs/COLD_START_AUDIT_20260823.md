@@ -1,5 +1,15 @@
 # Cold-start audit + traps
 
+> ⚠️ **Stage 2 numbers in this document are superseded (2026-09-22).** The validation folds behind
+> them leaked: the 10 km spatial fold and leave-one-year-out each hold out one axis and not the
+> other, leaving the held-out year's stations in training for **88.7%** of rows. The honest joint
+> out-of-station-and-year AUC is **0.622** (95% CI [0.571, 0.670]), not **0.710**; **lat/lon alone
+> score 0.644**; the regional figures are **0.655** pooled / **0.527** largest region, not
+> 0.677/0.548. Calibration is unaffected. Corrected numbers and artifacts:
+> [CANONICAL_NUMBERS.md](CANONICAL_NUMBERS.md); full argument: `paper/paper.tex` §4.4.
+> This document is kept as the record of what was believed at the time.
+
+
 **2026-08-23.** Findings from cloning this repo to an empty directory and following
 `docs/ONBOARDING.md` literally, plus the set of traps that silently produce *plausible wrong
 numbers* rather than errors. Written because as of 2026-08-31 nobody left on the project has

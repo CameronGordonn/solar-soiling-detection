@@ -16,11 +16,30 @@ YOLOv11 polygon segmentation pipeline for detecting solar arrays in NAIP aerial 
 
 **Stage 2:** per-array soiling risk (XGBoost on weather + location + structural features). Active label source: `nrel_merged` — **1,002 rows**: 891 annual panel rows (146 stations, panel years 2008–2022) + **111** summary-only censored rows, 257 stations, 15 states.
 
-**Quote 0.712 spatial-CV AUC**, not 0.728. 0.712 (`abl_full40`) is the 40-feature production set re-measured 2026-08-06 under the current `model.yaml`; 0.728 is `run_optionb`'s stored figure and **does not reproduce**. The margin over the 0.70 gate is ~1 point, so Stage 2 is *at* its gate, not comfortably over. All three Phase-2 gates clear: spatial-CV ≥ 0.70, pooled out-of-year AUC **0.710** (CI [0.676, 0.742]), calibration retained. **Registry flipped to GA on 2026-09-02** (`run_optionb`, `beta: false`) — GA means it cleared its gates, not that it travels; the regional limit below is unchanged.
+> ### ⚠️ The Stage 2 gates were measured on leaking folds (found 2026-09-22)
+>
+> **This supersedes every Stage 2 validation number published before that date.** Both production
+> folds hold out one axis and not the other: the 10 km spatial fold holds out *place* but keeps the
+> station's other years in training, and leave-one-year-out holds out *year* but keeps the same
+> station — for **88.7%** of rows. Neither ever scored a station the model had not seen.
+>
+> Under a **jointly out-of-station-and-out-of-year** fold the 40-feature model scores **0.622**
+> (95% CI [0.571, 0.670], P(AUC ≥ 0.70) = **0.001**), not 0.710. **Latitude and longitude alone
+> score 0.644** — they beat all 40 features. An unfitted Kimber (2006) model scores 0.610. A
+> size-matched control puts **83%** of the fall on leakage (95% CI [52, 99]).
+>
+> **The older numbers are not fabrications**: matched on reporting basis, every one reproduces to
+> within 0.012. It was a fold-construction error, not a measurement error.
+>
+> **What to say now.** Stage 2 estimates soiling **level** within the training geography. It is
+> **not** validated for ranking roofs. Do not quote 0.710 as a passing gate. Full argument:
+> `paper/paper.tex` §4.4; numbers + artifacts: [docs/CANONICAL_NUMBERS.md](docs/CANONICAL_NUMBERS.md).
+
+**Quote 0.712 spatial-CV AUC**, not 0.728 — and always name the fold, because that fold is one of the two leaking ones. 0.712 (`abl_full40`) is the 40-feature production set re-measured 2026-08-06 under the current `model.yaml`; 0.728 is `run_optionb`'s stored figure and **does not reproduce**. **The registry still reads `beta: false`** from the 2026-09-02 GA flip; that flag has not been revisited since the leak was found, and its "all three Phase-2 gates cleared" note is stale. GA there means it cleared the gates as they were then computed — not that the model travels, and not that those gates hold.
 
 > The old "holdout gate 2.1 pts short" line is **retired**. That single-year-2022 gate was replaced on 2026-07-05 because at n=97 it was measurement noise (SE 0.061), not a shortfall. Do not reinstate it.
 
-> **Known limit, measured 2026-08-30:** the model does **not** generalize to an unseen region — pooled out-of-region AUC **0.677**, worst region 0.548 against a random-split ~0.73. 81% of NREL rows sit west of -114. Never claim it works "in any region". See [docs/PVDAQ_LANE_HANDOFF_20260831.md](docs/PVDAQ_LANE_HANDOFF_20260831.md).
+> **Known limit, corrected 2026-09-22:** the model does **not** generalize to an unseen region — pooled out-of-region AUC **0.655**, worst region **0.527**. (The 2026-08-30 figures, 0.677 / 0.548, came from a fold with no year axis whose script read hyperparameters from a config key that does not exist, so it silently fitted a stock model. Correcting both moved the number *down*.) 81% of NREL rows sit west of -114. Never claim it works "in any region". See [docs/PVDAQ_LANE_HANDOFF_20260831.md](docs/PVDAQ_LANE_HANDOFF_20260831.md).
 
 **Every headline number in this repo, with its artifact and reproduce command, is in [docs/CANONICAL_NUMBERS.md](docs/CANONICAL_NUMBERS.md). When a doc disagrees with it, the doc is stale.**
 

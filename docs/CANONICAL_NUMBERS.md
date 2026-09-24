@@ -40,6 +40,47 @@ val 385 / test 636. A tile-level F1 quoted against 636 is wrong by construction.
 
 ## Stage 2 — soiling risk
 
+> ### ⚠️ Read this before quoting anything in Stage 2
+>
+> **The folds that produced every Stage 2 gate figure below were leaking.** Found 2026-09-22 while
+> writing `paper/paper.tex`; it supersedes every Stage 2 validation number published before that
+> date, including the ones in the tables that follow.
+>
+> Both production folds hold out **one axis and not the other**. The 10 km spatial fold holds out
+> *place* but lets a station's other years into training; the leave-one-year-out fold holds out
+> *year* but lets the same station in through its other years — for **88.7%** of rows, measured.
+> Neither fold ever asked the model to score a station it had not already seen.
+>
+> Under a fold that is **jointly out-of-station and out-of-year**, the 40-feature production model
+> scores **0.622** (95% CI [0.571, 0.670], P(AUC ≥ 0.70) = 0.001) — not the 0.710 the gate recorded.
+>
+> | Under the joint fold | AUC | What it means |
+> |---|---|---|
+> | production, 40 features | **0.6222** | the honest number |
+> | **latitude + longitude alone** | **0.6439** | *beats* all 40 features |
+> | unfitted Kimber (2006) | 0.6096 | no training at all |
+> | unfitted SOMOSclean | 0.5440 | no training at all |
+> | 7-seed robustness | 0.620 ± 0.0047 | not a seed artefact |
+>
+> **How much of the fall is leakage, not fold size?** A size-matched control isolates it: the
+> control scores **0.6986** against a leave-one-year-out reference of **0.7144**, putting **83%**
+> of the drop on leakage (95% CI [52, 99]).
+>
+> **Nothing below is a fabrication, and the older numbers still reproduce.** Matched on reporting
+> basis — pooled vs mean-of-folds, 1,002 rows vs 891 panel rows, plain fit vs calibrated pipeline —
+> every previously published figure reproduces to within **0.012**. This was a fold-construction
+> error, not a measurement error, which is why the tables below are corrected in place rather than
+> deleted.
+>
+> **Artifacts:** `outputs/soiling/audit/{reconciliation,validation_audit,trainsize_control,robustness,physics_baselines}.json`.
+> ⚠️ These are **gitignored and not committed**; they are produced by the standalone
+> `soiling-validation-audit` repo, not by anything in `scripts/`. `paper/verify_numbers.py` reads
+> them and will fail on a clone without them. Full argument: `paper/paper.tex` §4.4.
+>
+> **Practical rule.** Stage 2 is valid for estimating soiling **level** in the training geography.
+> It is **not** validated for ranking roofs against each other, and the registry's "all three
+> Phase-2 gates cleared" note is stale.
+
 ### The three spatial-CV AUCs, and which one to quote
 
 This is the single biggest source of cross-doc disagreement in the repo. **All three numbers below
@@ -51,10 +92,15 @@ are real and on disk.** They measure different things, and quoting one as anothe
 | **0.712** (0.7118) | `abl_full40` | **The honest current figure.** The same 40-feature set re-measured 2026-08-06 on the cached matrix under today's `model.yaml`. 0.721 ± 0.006 over 7 seeds. | `runs/soiling/abl_full40/metrics.json:mean_auc` |
 | **0.746** (0.7459) | `run_regularized2022` | The regularized default-config reference (`max_depth=4, reg_lambda=5`). | `runs/soiling/run_regularized2022/metrics.json:mean_auc` |
 
-**Quote 0.712 for "how good is the model today."** 0.728 is the stored artifact of a specific past
-run and does not reproduce under the current config. The margin over the 0.70 gate is therefore
-about 1 point, not 3: describe Stage 2 as *at* its gate, not comfortably over it. Reasoning in
-[SOILING_STAGE2_GUIDE.md](SOILING_STAGE2_GUIDE.md).
+**Quote 0.712 for "how good is the model today" *under the 10 km spatial fold*** — and say which
+fold, because that fold is one of the two leaking ones. 0.728 is the stored artifact of a specific
+past run and does not reproduce under the current config. The margin over the 0.70 gate is about
+1 point, not 3.
+
+⚠️ **All three values above share the same defect**: holding out place does not hold out the
+station, whose other years remain in training. Under the joint fold the same 40 features score
+**0.622**. Treat 0.712 as "spatial-CV as historically computed", never as evidence the model
+generalizes. Reasoning in [SOILING_STAGE2_GUIDE.md](SOILING_STAGE2_GUIDE.md).
 
 ### Single-year 2022 holdout — two values, two runs
 
@@ -74,12 +120,12 @@ weather refetch, ~60s).
 
 | Quantity | Value |
 |---|---|
-| pooled out-of-year AUC | **0.7095** (quote as 0.710) |
+| pooled out-of-year AUC | **0.7095** — ⚠️ **leaking fold; do not quote as a gate result.** Reproduces exactly, but see the verdict row |
 | n pooled / pos / neg | 891 / 440 / 451 |
 | Hanley-McNeil SE | 0.01725 |
 | bootstrap 95% CI | [0.676, 0.742] |
 | P(AUC ≥ 0.70) | 0.70 |
-| verdict | **STRADDLES** the gate: point clears, CI contains it |
+| verdict | ⚠️ **RETIRED — leaking fold.** 88.7% of rows keep their station in training through its other years. Corrected joint-fold value: **0.622** [0.571, 0.670] |
 | Brier / base-rate ref | 0.2177 / 0.2500 |
 | ECE / MCE | 0.0457 / 0.1259 |
 | calibration retained | **True** |
@@ -87,7 +133,12 @@ weather refetch, ~60s).
 **The single-year-2022 gate was replaced on 2026-07-05, not failed.** At n=97 its SE was 0.061 and
 the gate sat 0.32 SE from the point estimate, so it could not adjudicate 0.68 vs 0.70. Any doc still
 saying the holdout gate is "2.1 points short" is quoting a retired framing of a measurement that was
-noise. The replacement pooled gate **clears at 0.710**.
+noise.
+
+⚠️ **The replacement did not clear either, and the 0.710 above is the leaking figure.** Its fold
+holds out the year but not the station. The honest replacement is the joint station-and-year fold:
+**0.622**, 95% CI [0.571, 0.670], P(AUC ≥ 0.70) = **0.001**. Do not quote 0.710 as a passing gate.
+The calibration rows in the table remain valid — calibration was never the leaking quantity.
 
 ### Label set
 
@@ -113,18 +164,37 @@ NREL CSVs; the matrix carries 257.
 Source of truth: `outputs/soiling/regional_holdout.json`. Reproduce with
 `PYTHONPATH=. conda run -n solar-soiling python scripts/predict/regional_holdout.py --regions 8 --seeds 3 --out-json outputs/soiling/regional_holdout.json`.
 
+⚠️ **The table below is the superseded 2026-08-30 measurement.** It carried two defects, both found
+2026-09-22: the fold has **no year axis**, and `regional_holdout.py` read hyperparameters from a
+config key that does not exist, so it had always silently fitted a **stock** model rather than the
+production one. Corrected figures are in the block underneath; quote those.
+
 | Feature set | Pooled out-of-region AUC | Per-region range |
 |---|---|---|
-| **production (40)** | **0.6774** | 0.406 – 0.912 |
+| **production (40)** — ⚠️ superseded | **0.6774** | 0.406 – 0.912 |
 | trim: −tilt −deadAQ (33) | 0.6759 | 0.469 – 0.900 |
 | weather+physics (27) | 0.6374 | 0.559 – 0.930 |
 | +location (30) | 0.6623 | — |
 
-Regions are k-means clusters on (lat, lon), 8 of them, 992 rows scored. The largest region (n=677)
-scores **0.548**, near chance. **The conclusion is sound and load-bearing: the model does not
-generalize to a region unlike its training geography.**
+Regions are k-means clusters on (lat, lon), 8 of them, 992 rows scored.
 
-**Benchmark future work against 0.6774 pooled / 0.548 worst region, not against 0.5313.** The
+**Corrected (2026-09-22), and these are the numbers to quote.** Source:
+`outputs/soiling/audit/regional_holdout_audit.json` (⚠️ gitignored, see the Stage 2 banner).
+
+| Fold | Params | Pooled | Largest region (n=677) |
+|---|---|---|---|
+| region only | stock — *reproduces the published 0.6774/0.548* | 0.6748 | 0.5504 |
+| region only | production | 0.6900 | 0.5582 |
+| **region + year** | **production** | **0.6550** | **0.5272** |
+
+Fixing the params *raised* the number and adding the year axis lowered it further; the two defects
+were pulling in opposite directions, which is why the error survived review. **The conclusion is
+unchanged and is strengthened, not weakened: the model does not generalize to a region unlike its
+training geography** — the largest region scores 0.527, nearer chance than the 0.548 previously
+reported.
+
+**Benchmark future work against 0.655 pooled / 0.527 worst region** (not 0.6774/0.548, and not
+0.5313). The
 "hold out Arizona = 0.5313" block in [PVDAQ_LANE_HANDOFF_20260831.md](PVDAQ_LANE_HANDOFF_20260831.md)
 §1 does not reproduce from anything committed: the script has no Arizona-by-name mode and no
 349-row mode. See §4b there for the full note.

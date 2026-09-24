@@ -1,5 +1,15 @@
 # White paper — Section 2 (Methods) draft + review notes
 
+> ⚠️ **Stage 2 numbers in this document are superseded (2026-09-22).** The validation folds behind
+> them leaked: the 10 km spatial fold and leave-one-year-out each hold out one axis and not the
+> other, leaving the held-out year's stations in training for **88.7%** of rows. The honest joint
+> out-of-station-and-year AUC is **0.622** (95% CI [0.571, 0.670]), not **0.710**; **lat/lon alone
+> score 0.644**; the regional figures are **0.655** pooled / **0.527** largest region, not
+> 0.677/0.548. Calibration is unaffected. Corrected numbers and artifacts:
+> [CANONICAL_NUMBERS.md](CANONICAL_NUMBERS.md); full argument: `paper/paper.tex` §4.4.
+> This document is kept as the record of what was believed at the time.
+
+
 For Josh's draft "Flagging Soiled PVs Through Public Data for Rooftop Array Detection and Soiling Risk".
 Written 2026-07-29. Every number below is traceable to a repo artifact — see §C.
 

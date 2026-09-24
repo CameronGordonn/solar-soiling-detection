@@ -1,5 +1,15 @@
 # Stage 2 — Soiling Risk Model (XGBoost) Partner Guide
 
+> ⚠️ **Stage 2 numbers in this document are superseded (2026-09-22).** The validation folds behind
+> them leaked: the 10 km spatial fold and leave-one-year-out each hold out one axis and not the
+> other, leaving the held-out year's stations in training for **88.7%** of rows. The honest joint
+> out-of-station-and-year AUC is **0.622** (95% CI [0.571, 0.670]), not **0.710**; **lat/lon alone
+> score 0.644**; the regional figures are **0.655** pooled / **0.527** largest region, not
+> 0.677/0.548. Calibration is unaffected. Corrected numbers and artifacts:
+> [CANONICAL_NUMBERS.md](CANONICAL_NUMBERS.md); full argument: `paper/paper.tex` §4.4.
+> This document is kept as the record of what was believed at the time.
+
+
 **Goal:** per-array soiling risk score in `[0, 1]` from weather + location + structural features. Complements Stage 1 detection: Stage 1 tells us *where* arrays are, Stage 2 tells us *how likely each is soiled right now* without needing visual soiling detection (too coarse at 0.6 m GSD).
 
 **Status:** v2 pipeline — real NREL annual-IWSR panel labels (255 stations × up to ~15 years of per-year observations), physics-prior Kimber IWSR as a feature, ESA WorldCover land-cover + OSM distance features pre-computed per station, isotonic-calibrated XGBoost with spatial CV and optional temporal holdout. The Kimber physics-proxy path remains available as a bootstrap/ablation.

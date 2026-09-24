@@ -187,22 +187,45 @@ soiling_models:
     # and are correct as that — neither is the number to quote today. Spatial-CV
     # re-measured under the current model.yaml is 0.712 (`abl_full40`, 2026-08-06);
     # 0.728 does not reproduce. `holdout_auc` names the RETIRED single-year-2022 gate;
-    # the live temporal gate is the pooled leave-one-year-out AUC 0.710, 95% CI
-    # [0.676, 0.742], at runs/soiling/run_optionb/holdout_ci.json. Numbers of record:
-    # docs/CANONICAL_NUMBERS.md.
+    # `holdout_auc` names the RETIRED single-year-2022 gate. The pooled
+    # leave-one-year-out AUC 0.710 that replaced it is ALSO retired as a gate: found
+    # 2026-09-22, its fold holds out the year but not the station, leaving the held-out
+    # year's stations in training for 88.7% of rows. Under a jointly out-of-station-and-
+    # year fold this model scores 0.622, 95% CI [0.571, 0.670], P(AUC >= 0.70) = 0.001,
+    # and lat/lon alone score 0.644. `beta: false` above predates that finding and has
+    # NOT been revisited; it is retained deliberately pending a product decision, so do
+    # not read it as evidence the gates hold. Numbers of record: docs/CANONICAL_NUMBERS.md.
     notes: >-
       nrel_merged national labels (1,002 rows, 257 stations, 15 states); lat/lon +
-      month_of_year features; 10 km spatial CV; isotonic calibrated. All three Phase-2
-      gates cleared 2026-07-05 — spatial-CV 0.712 (re-measured) >= 0.70, pooled
-      out-of-year AUC 0.710 >= 0.70, calibration retained out-of-year (Brier 0.218 vs
-      base-rate 0.250, ECE 0.046). Stays beta pending a deliberate registry flip.
+      month_of_year features; 10 km spatial CV; isotonic calibrated. The three Phase-2
+      gates were recorded as cleared 2026-07-05 (spatial-CV 0.712, pooled out-of-year
+      0.710, calibration retained). TWO OF THE THREE DO NOT SURVIVE REVIEW: both AUC
+      folds hold out one axis and not the other, and under a jointly out-of-station-and-
+      year fold the model scores 0.622 (95% CI [0.571, 0.670]), below the 0.70 bar, with
+      lat/lon alone scoring 0.644. Calibration is unaffected and still holds (Brier 0.218
+      vs base-rate 0.250, ECE 0.046). Valid for estimating soiling LEVEL in the training
+      geography; NOT validated for ranking roofs against each other.
     known_limitations:
       - >-
-        Does not generalise to an unseen region. Pooled out-of-region AUC 0.677 and the
-        largest region (n=677) scores 0.548, against ~0.73 for a random split (measured
-        2026-08-30, outputs/soiling/regional_holdout.json). 81% of NREL rows sit west of
-        -114 degrees. Never claim it works "in any region"; adding features does not fix it.
-      - Margin over the 0.70 spatial-CV gate is ~1 point, not 3 — the model is AT its gate.
+        Validation folds leaked (found 2026-09-22). Spatial-CV and leave-one-year-out each
+        hold out one axis only; 88.7% of rows keep their station in training. Joint
+        out-of-station-and-year AUC is 0.622 (95% CI [0.571, 0.670], P(AUC >= 0.70) =
+        0.001) against the 0.710 recorded. Lat/lon alone score 0.644 and an unfitted 2006
+        Kimber model scores 0.610. A size-matched control puts 83% of the fall on leakage
+        (95% CI [52, 99]). Matched on reporting basis the older figures still reproduce to
+        within 0.012 — a fold-construction error, not a measurement error.
+      - >-
+        NOT validated for ranking roofs against each other. Labels are measured at
+        STATIONS, so every roof in a catchment inherits one. Use for soiling level, not
+        for ordering homes.
+      - >-
+        Does not generalise to an unseen region. Pooled out-of-region AUC 0.655 and the
+        largest region (n=677) scores 0.527 (corrected 2026-09-22; the earlier 0.677/0.548
+        came from a fold with no year axis whose script read hyperparameters from a
+        nonexistent config key and silently fitted a stock model). 81% of NREL rows sit
+        west of -114 degrees. Never claim it works "in any region"; adding features does
+        not fix it.
+      - Margin over the 0.70 spatial-CV gate is ~1 point, not 3 — and that gate leaks.
       - >-
         MERRA-2 AQ was tried (`run_merged_merra2`) and hurt performance (0.716 CV /
         0.666 holdout). Do not retry; the 1.3 GB cache is exhausted, not pending.

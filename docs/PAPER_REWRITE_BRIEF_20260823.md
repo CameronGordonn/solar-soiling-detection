@@ -1,5 +1,15 @@
 # White paper — rewrite brief for Josh and Akshitha
 
+> ⚠️ **Stage 2 numbers in this document are superseded (2026-09-22).** The validation folds behind
+> them leaked: the 10 km spatial fold and leave-one-year-out each hold out one axis and not the
+> other, leaving the held-out year's stations in training for **88.7%** of rows. The honest joint
+> out-of-station-and-year AUC is **0.622** (95% CI [0.571, 0.670]), not **0.710**; **lat/lon alone
+> score 0.644**; the regional figures are **0.655** pooled / **0.527** largest region, not
+> 0.677/0.548. Calibration is unaffected. Corrected numbers and artifacts:
+> [CANONICAL_NUMBERS.md](CANONICAL_NUMBERS.md); full argument: `paper/paper.tex` §4.4.
+> This document is kept as the record of what was believed at the time.
+
+
 **2026-08-23, Cameron.** Supersedes the review notes in
 [`PAPER_METHODS_DRAFT.md`](PAPER_METHODS_DRAFT.md) (written 2026-07-29), which is now itself
 partly stale: its Part A prose describes a detection stack that no longer exists, and its §2.3

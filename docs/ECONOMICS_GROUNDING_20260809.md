@@ -1,5 +1,25 @@
 # Economics grounding pass — 2026-08-09
 
+> ⚠️ **Stage 2 numbers in this document are superseded (2026-09-22).** The validation folds behind
+> them leaked: the 10 km spatial fold and leave-one-year-out each hold out one axis and not the
+> other, leaving the held-out year's stations in training for **88.7%** of rows. The honest joint
+> out-of-station-and-year AUC is **0.622** (95% CI [0.571, 0.670]), not **0.710**; **lat/lon alone
+> score 0.644**; the regional figures are **0.655** pooled / **0.527** largest region, not
+> 0.677/0.548. Calibration is unaffected. Corrected numbers and artifacts:
+> [CANONICAL_NUMBERS.md](CANONICAL_NUMBERS.md); full argument: `paper/paper.tex` §4.4.
+> This document is kept as the record of what was believed at the time.
+
+> **Also superseded here specifically: the single `recovery_frac = 0.045`.** The paper measures
+> recovery empirically from **505 observed cleaning events on 149 metered California systems** and
+> finds the fraction is **denominator-dependent**, spanning **0.031 / 0.063 / 0.217** under the
+> `random_clean` / `half_norm_clean` / `perfect_clean` labelling assumptions. So a single value
+> cannot be quoted. The robust quantity is the **dollars**, because annual loss cancels between the
+> value of a clean and the recovery fraction's denominator: **$28.10 recovered per wash at retail**
+> ($10.14 at export) against a **$150** service, and a median break-even tariff of **$2.44/kWh**.
+> That dollar figure is **identical under all three assumptions** while the fraction moves eightfold
+> — which is what makes this document's verdict survive its own weakest input.
+
+
 Grounding the SolarSoiled soiling-loss and cleaning-economics model in measured data.
 Every constant in the dollar chain (`detected area → system_kw → annual_loss_usd →
 clean/no-clean`) was audited, sourced, or explicitly marked unsourced.

@@ -16,7 +16,7 @@ its machine-readable half. Change both together or PR review routes to the wrong
 | Stage-1 permissive-stack migration (RF-DETR + SAM + the port) | **Akshitha** | The AGPL-escape workstream — CV research + infra. Runbook: [`PERMISSIVE_STACK_MIGRATION.md`](PERMISSIVE_STACK_MIGRATION.md). |
 | Product surface — API, dashboard, outreach funnel, A/B | **Akshitha** | FastAPI backend, BBF dashboard, conversion experiments. |
 | Reusable infra / faster ramp-up | **Akshitha** | Codifying what we've learned into tooling future projects reuse. |
-| Stage-2 soiling-risk model | **Akshitha** | GA as of 2026-09-02 and frozen. It does **not** generalise to an unseen region (out-of-region AUC 0.677); the open work is a geographically balanced label set, not tuning. See [`PVDAQ_LANE_HANDOFF_20260831.md`](PVDAQ_LANE_HANDOFF_20260831.md). |
+| Stage-2 soiling-risk model | **Akshitha** | Registry reads GA as of 2026-09-02 and frozen — but ⚠️ **the gates behind that flip were measured on leaking folds (found 2026-09-22): joint-fold AUC 0.622, not 0.710.** It does **not** generalise to an unseen region (out-of-region AUC **0.655**, corrected); the open work is a geographically balanced label set, not tuning. See [`PVDAQ_LANE_HANDOFF_20260831.md`](PVDAQ_LANE_HANDOFF_20260831.md). |
 | White paper | **Josh** (methods/results), **Hunter** (giving-experiment data) | Not blocking anything in this repo. |
 
 The intent is still **non-overlapping lanes**: Craig sets direction and holds the shipping
