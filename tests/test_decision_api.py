@@ -345,3 +345,21 @@ def test_the_export_rate_verdict_reproduces_and_retail_is_not_hidden():
 
     assert cleared_at(0.0392) == 0        # marginal export — the paper's figure
     assert cleared_at(0.4573) <= 5        # NEM 2.0 retail — a handful, currently 3
+
+
+def test_monte_carlo_agrees_with_the_point_estimate():
+    """The interval and the point estimate must describe the same world.
+
+    Regression for a real defect: `array_recommendation_mc` scaled each scenario's
+    recovery by `scen["recovery_frac"] / DEFAULT_RECOVERY_PRO`, using the MODULE
+    constant rather than the active scenario table. Because the sampled recovery band is
+    itself derived from that table, the scaling was applied twice, understating recovery
+    about tenfold. It was invisible while every caller used DEFAULT_SCENARIOS, where the
+    two are equal, and appeared the moment a caller supplied measured recovery.
+    """
+    for basis in ("measured", "seasonal_planning"):
+        out = decide(resolve_inputs(system_kw=6.0, recovery_basis=basis), n_samples=4000)
+        best_key = out["best_action"]
+        point = out["per_scenario"][best_key]["net_usd"]
+        mc = out["uncertainty"]["expected_net_usd_p50"]
+        assert abs(mc - point) < 2.0, f"{basis}: MC {mc} vs point {point}"

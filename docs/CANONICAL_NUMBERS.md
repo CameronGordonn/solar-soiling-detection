@@ -172,10 +172,15 @@ headline — but supply a **measured** per-roof loss into that path and the verd
 0.63 points of annual output. **Quote the dollars, not the fraction** — $28.10 per wash at retail,
 $10.14 at export, against a $150 service.
 
-**Open decision, not resolved here.** Aligning `economics.py` on the measured pair would change
-published dashboard figures, so it is deliberately left to a product call. The API defaults to
-`measured` and names the basis in every response; `seasonal_planning` remains available to
-reproduce the AOI pipeline.
+⚠️ **Corrected 2026-09-24: the modelled value is a REGRESSION, not a standing choice.** Commit
+`187161f` (2026-09-04, on `origin/main`) replaced the measured `DEFAULT_RECOVERY_PRO = 0.045` with
+the modelled `0.4944 × 0.90 = 0.445` in a commit with an empty body. The published AOI run
+(2026-08-30) predates it and records `recovery_frac_professional: 0.045`, so **the dashboard is
+right and the code is wrong**. Re-running the AOI on today's code would report **80 of 1,865**
+sites worth cleaning (398 at the p90 loss) instead of zero — it reverses the headline finding.
+`tests/test_economics.py` currently asserts the modelled derivation, so the suite is defending the
+regression. Plan and evidence: [RECOVERY_RECONCILIATION_PLAN.md](RECOVERY_RECONCILIATION_PLAN.md).
+The API (`src/solarsoiled/decision.py`) already defaults to the measured pair and is unaffected.
 
 ### Label set
 

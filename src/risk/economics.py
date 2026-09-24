@@ -613,9 +613,19 @@ def array_recommendation_mc(
             if key == "no_clean":
                 nets[key].append(0.0)
                 continue
-            # Sample between the disclosed basic-rinse and professional-scrub planning
-            # cases, keeping their ratio fixed across the two paid strategies.
-            ratio = (scen["recovery_frac"] / DEFAULT_RECOVERY_PRO) if DEFAULT_RECOVERY_PRO else 1.0
+            # Sample between the basic-rinse and professional-scrub cases, keeping their
+            # ratio fixed across the two paid strategies.
+            #
+            # The denominator must be the ACTIVE table's professional recovery, not the
+            # module constant. ``s_recov`` is drawn from the band the caller supplied,
+            # and that band is derived from this same table, so dividing by a different
+            # table's constant applies the scaling twice. It was invisible while every
+            # caller used DEFAULT_SCENARIOS (the two are equal there, ratio 1.0) and
+            # appeared as soon as a caller passed a table with a different recovery:
+            # measured recovery (0.045) against DEFAULT_RECOVERY_PRO (0.445) understated
+            # the sampled recovery ~10x, so the MC and the point estimate disagreed.
+            _pro = scens.get("professional", {}).get("recovery_frac") or DEFAULT_RECOVERY_PRO
+            ratio = (scen["recovery_frac"] / _pro) if _pro else 1.0
             rec = loss_usd * s_recov * ratio
             net = rec - scen["cost_fn"](s_kw)
             nets[key].append(net)
