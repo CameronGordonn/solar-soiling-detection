@@ -154,17 +154,21 @@ def test_small_coastal_residential_not_worth_cleaning():
     assert rec["per_scenario"]["professional"]["net_usd"] < 0
 
 
-def test_midseason_recovery_matches_the_disclosed_dry_season_model():
-    """An early-July clean protects the final three output-weighted dry-season months."""
+def test_dry_season_reset_recovery_derivation_still_reproduces():
+    """The modelled dry-season figure, checked as the quantity it actually is.
+
+    0.4944 is the share of DRY-SEASON accumulated cost avoided by a perfect early-July
+    reset. It is a sound derivation and is kept. What it is NOT is the share of ANNUAL
+    loss one wash recovers -- see the test below, which is the one that matters for the
+    dollar chain.
+    """
     import pandas as pd
 
     from risk.recovery import clearsky_daily_weight
     from risk.economics import (
-        PROFESSIONAL_CLEAN_EFFICACY,
+        DRY_SEASON_RESET_RECOVERY,
         REGULAR_SOILING_DRY_SEASON_DAYS,
-        REGULAR_SOILING_FULL_RESET_RECOVERY,
         REGULAR_SOILING_MIDSEASON_CLEAN_DAY,
-        RINSE_CLEAN_EFFICACY,
     )
 
     assert REGULAR_SOILING_DRY_SEASON_DAYS == 180
@@ -178,15 +182,45 @@ def test_midseason_recovery_matches_the_disclosed_dry_season_model():
     )
 
     assert expected_full_reset == pytest.approx(0.4944, abs=0.0001)
-    assert REGULAR_SOILING_FULL_RESET_RECOVERY == pytest.approx(expected_full_reset, abs=0.0001)
-    assert DEFAULT_RECOVERY_PRO == pytest.approx(
-        REGULAR_SOILING_FULL_RESET_RECOVERY * PROFESSIONAL_CLEAN_EFFICACY,
-        abs=0.0001,
+    assert DRY_SEASON_RESET_RECOVERY == pytest.approx(expected_full_reset, abs=0.0001)
+
+
+def test_the_default_recovery_is_the_measured_annual_value():
+    """The constant that has been wrong twice, pinned.
+
+    HISTORY, so that changing this fails loudly and with context:
+
+      0.90    original guess; overstated recovery ~20x.
+      0.045   63fcbfc 2026-08-09, MEASURED. Produced the published "zero of 1,865".
+      0.445   187161f 2026-09-04, empty commit body. Silently substituted
+              DRY_SEASON_RESET_RECOVERY * efficacy -- a DRY-SEASON share used as an
+              ANNUAL one, 9.9x too large. Re-running the AOI on it would have reported
+              80 of 1,865 sites worth cleaning instead of zero.
+      0.045   restored 2026-09-24.
+
+    The earlier version of this test asserted the 0.445 derivation, so the suite was
+    defending the regression instead of catching it. It now asserts the measured value
+    and, separately, that the two quantities have not been collapsed back together.
+    """
+    from risk.economics import (
+        DEFAULT_RECOVERY_PRO,
+        DEFAULT_RECOVERY_RINSE,
+        DRY_SEASON_RESET_RECOVERY,
+        PROFESSIONAL_CLEAN_EFFICACY,
     )
-    assert DEFAULT_SCENARIOS["rinse_service"]["recovery_frac"] == pytest.approx(
-        REGULAR_SOILING_FULL_RESET_RECOVERY * RINSE_CLEAN_EFFICACY,
-        abs=0.0001,
-    )
+
+    assert DEFAULT_RECOVERY_PRO == pytest.approx(0.045, abs=1e-6)
+    assert DEFAULT_RECOVERY_RINSE == pytest.approx(0.032, abs=1e-6)
+    assert DEFAULT_SCENARIOS["professional"]["recovery_frac"] == pytest.approx(0.045, abs=1e-6)
+    assert DEFAULT_SCENARIOS["rinse_service"]["recovery_frac"] == pytest.approx(0.032, abs=1e-6)
+
+    # The regression was exactly this substitution. Assert it cannot recur silently.
+    assert DEFAULT_RECOVERY_PRO != pytest.approx(
+        DRY_SEASON_RESET_RECOVERY * PROFESSIONAL_CLEAN_EFFICACY, abs=1e-6
+    ), "annual default has been set to the dry-season figure again"
+
+    # Corroboration: the paper measures 0.0634 over 505 observed cleans. Same order.
+    assert 0.02 < DEFAULT_RECOVERY_PRO < 0.10
 
 
 def test_average_regular_soiling_still_does_not_clear_a_small_residential_visit():
@@ -196,14 +230,40 @@ def test_average_regular_soiling_still_does_not_clear_a_small_residential_visit(
     assert rec["per_scenario"]["rinse_service"]["net_usd"] < 0
 
 
-def test_heavy_regular_soiling_can_clear_a_basic_cleaning_visit():
-    """The model must retain the high-seasonal-soiling tail it was built to flag."""
-    be = breakeven_soiling_pct(DEFAULT_SCENARIOS["professional"], 20, 5.5, 0.4573,
-                               pct_max=30.0)
-    assert be is not None and be < 22.9
+def test_no_residential_system_clears_at_any_plausible_soiling_level():
+    """What the measured recovery actually implies, replacing a claim it does not support.
+
+    The previous version of this test asserted that a 20 kW system clears below 22.9%
+    soiling. That held only under the 0.445 regression; at the measured 0.045 it is false,
+    and asserting it would have silently re-justified the wrong constant.
+
+    The true shape, at NEM 2.0 retail and 5.5 peak sun hours:
+
+        6 kW   needs 72.1% annual soiling   (physically absurd)
+       20 kW   needs 35.7%
+       50 kW   needs 26.3%
+      100 kW   needs 19.7%
+
+    So the "heavy soiler" tail this project was built to flag does not pay at residential
+    scale -- which is the finding, not a gap. Only large commercial arrays under extreme,
+    unrecovered soiling get close, and nothing in the Santa Cruz AOI is in that regime.
+    """
+    # Residential: no plausible soiling level clears.
+    assert breakeven_soiling_pct(DEFAULT_SCENARIOS["professional"], 6, 5.5, 0.4573,
+                                 pct_max=30.0) is None
+    # Even a 20 kW array needs more than the 30-point ceiling.
+    assert breakeven_soiling_pct(DEFAULT_SCENARIOS["professional"], 20, 5.5, 0.4573,
+                                 pct_max=30.0) is None
+    # The threshold falls with size but stays far outside anything measured here.
+    big = breakeven_soiling_pct(DEFAULT_SCENARIOS["professional"], 100, 5.5, 0.4573,
+                                pct_max=100.0)
+    assert big is not None and 15.0 < big < 25.0
+
+    # And at the AOI's own average soiling, no system size clears at all.
+    assert breakeven_system_kw(DEFAULT_SCENARIOS["professional"], 5.5,
+                               BASE_SOILING_PCT / 100.0, 0.4573) is None
 
 
-# ── sourced constants ─────────────────────────────────────────────────────────
 def test_base_rate_comes_from_the_sourced_rate_model():
     from risk import rates
 

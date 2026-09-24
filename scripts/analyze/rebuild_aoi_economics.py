@@ -8,6 +8,14 @@ April-September dry-season production; the weather-trajectory ``0.045`` result r
 a historical sensitivity, not the public planning default. This regenerates the dollar
 layer so what is served matches the code.
 
+.. note:: **Corrected 2026-09-24.** The two sentences above described the state between
+   2026-09-04 and 2026-09-24, when ``DEFAULT_RECOVERY_PRO`` had been silently set to the
+   modelled dry-season figure (0.445). That was a regression: it is a DRY-SEASON share
+   being multiplied by an ANNUAL loss, and re-running this script on it would have
+   reported 80 of 1,865 sites worth cleaning instead of zero. The measured 0.045 is the
+   default again and is what this script records. See
+   ``docs/RECOVERY_RECONCILIATION_PLAN.md``.
+
     PYTHONPATH=. python scripts/analyze/rebuild_aoi_economics.py --aoi santa-cruz-w2-21cm
 
 **It does not renumber anything.** ``array_id`` is carried through untouched, because 97
@@ -363,9 +371,12 @@ def main(argv=None) -> int:
             "with it: 881 of NREL's 891 rows came from the same class of method PVDAQ "
             "uses, so both inherit its systematic error. Re-measure with "
             "scripts/analyze/aoi_level_check.py.",
-            "The public Regular Soiling recovery is a disclosed April-September planning "
-            "scenario with a July clean. The 0.045 SOMOSclean weather-trajectory result "
-            "remains a separate sensitivity; neither quantity estimates Persistent Soiling.",
+            "Recovery is the MEASURED 0.045 (professional) / 0.032 (rinse): the share of "
+            "a year's soiling loss one wash recovers on the real-weather SOMOSclean "
+            "trajectory for coastal Santa Cruz, corroborated by 0.0634 median over 505 "
+            "observed cleans on 149 metered systems. The modelled April-September "
+            "planning figure (0.4944 x efficacy = 0.445) is a DRY-SEASON share and is NOT "
+            "interchangeable with this one. Neither quantity estimates Persistent Soiling.",
             "ACC export table is SDG&E's standing in for PG&E's.",
         ],
         "beta": True,

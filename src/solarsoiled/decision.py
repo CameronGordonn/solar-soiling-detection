@@ -71,6 +71,15 @@ ACTION_SCENARIOS = ("rinse_service", "professional")
 # returns a break-even tariff of $2.44/kWh and no action that pays. The default is
 # therefore the measured pair: an API must not contradict the project's own measurement.
 MEASURED_RECOVERY = {"professional": 0.045, "rinse_service": 0.032}
+
+#: The modelled alternative, derived explicitly rather than read from DEFAULT_SCENARIOS.
+#: Reading the module default was a latent trap: when the default was restored to the
+#: measured pair on 2026-09-24 this basis silently became identical to `measured`, and
+#: only a test comparing the two caught it. Deriving it here keeps the contrast real.
+SEASONAL_PLANNING_RECOVERY = {
+    "professional": E.DRY_SEASON_RESET_RECOVERY * E.PROFESSIONAL_CLEAN_EFFICACY,
+    "rinse_service": E.DRY_SEASON_RESET_RECOVERY * E.RINSE_CLEAN_EFFICACY,
+}
 RECOVERY_BASES = ("measured", "seasonal_planning")
 
 
@@ -94,7 +103,7 @@ def scenarios_for(basis: str, recovery_frac: float | None = None) -> dict[str, d
         ratio = E.RINSE_CLEAN_EFFICACY / E.PROFESSIONAL_CLEAN_EFFICACY
         overrides = {"professional": recovery_frac, "rinse_service": recovery_frac * ratio}
     elif basis == "seasonal_planning":
-        return E.DEFAULT_SCENARIOS
+        overrides = SEASONAL_PLANNING_RECOVERY
     else:
         overrides = MEASURED_RECOVERY
     return {

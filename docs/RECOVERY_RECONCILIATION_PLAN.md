@@ -1,6 +1,18 @@
 # Recovery fraction — reconciliation plan
 
-**Status: open. Proposed 2026-09-24, awaiting Cameron's decision on Step 3.**
+**Status: DONE, 2026-09-24. Cameron chose option A (align on 0.045); all five steps executed.**
+
+> **Outcome.** `DEFAULT_RECOVERY_PRO` is back to the measured **0.045** / **0.032**. The AOI was
+> rebuilt and reproduces the published result exactly — **0 of 1,865** sites worth cleaning, max
+> P(net>0) = 0.0000, all 3,362 `array_id`s preserved. The only movement in `site_economics.csv` is
+> a clean causal chain from 25 days of calendar time (`age_years` +0.1 → `degradation_factor`
+> −0.0004 → `sun_hours` −0.003 → dollars), largest on the three largest systems and at most 2.2% of
+> one site's annual loss. Nothing moved from the constant itself, because the published run already
+> used 0.045.
+>
+> Per Cameron: **the paper may discuss the modelled case; the code and the website do not change
+> for it.** `DRY_SEASON_RESET_RECOVERY = 0.4944` is kept, renamed and documented as a dry-season
+> quantity, and remains reachable through the API's `recovery_basis="seasonal_planning"`.
 
 `recovery_frac` is the share of a year's soiling loss that one wash gets back. It is the
 constant that has twice carried this product, and it is wrong again. This document is the
@@ -101,14 +113,14 @@ Its recovery being ~20× the dust channel's is the physics, not a bug. The code 
 
 ## 6. Plan
 
-### Step 1 — stop the bleeding (no decision needed)
+### Step 1 — stop the bleeding ✅ done
 
 Add a regression test asserting `DEFAULT_RECOVERY_PRO ≈ 0.045`, with the git archaeology
 above in its docstring, so the constant cannot be changed again without a commit that
 explains itself. Today `tests/test_economics.py` asserts the *modelled* derivation, which
 means the test suite is currently **defending the regression**.
 
-### Step 2 — separate the two quantities in code (no decision needed)
+### Step 2 — separate the two quantities in code ✅ done
 
 Keep the 0.4944 derivation, but stop it being the default. Name it for what it is:
 
@@ -120,7 +132,7 @@ DEFAULT_RECOVERY_PRO      = 0.045        # share of ANNUAL cost recovered, MEASU
 Both remain available; only the default changes back. `risk/decision.py` already carries
 this split as `recovery_basis`, so the API needs no change.
 
-### Step 3 — the decision I need from you
+### Step 3 — the decision ✅ resolved: option A (0.045)
 
 **Which measured value becomes the default?**
 
@@ -134,7 +146,7 @@ this split as `recovery_basis`, so the API needs no change.
 A is a revert; B is a new claim that needs its own re-issue of the dashboard. Do the revert
 first so the code, the site and the paper agree, then argue about the second decimal.
 
-### Step 4 — re-run and diff (after Step 3)
+### Step 4 — re-run and diff ✅ done, gate passed
 
 ```bash
 PYTHONPATH=. conda run -n solar-soiling python scripts/analyze/rebuild_aoi_economics.py \
@@ -145,7 +157,7 @@ Expect `n_sites_worth_cleaning: 0` and `recovery_frac_professional: 0.045` — i
 agreement with the 2026-08-30 artifact. **If anything else moves, stop**: something other
 than this constant has drifted too.
 
-### Step 5 — close the drift channel
+### Step 5 — close the drift channel ✅ done
 
 The site's JS and `economics.py` are two implementations of one model. I verified their
 cost functions agree to the cent across 24 system sizes, but **nothing enforces it** and
@@ -165,3 +177,35 @@ when the site repo is not checked out beside this one.
 - The API reproduces the paper exactly when given per-system recovery: median break-even
   **$2.4410/kWh** against the paper's **$2.4410**, and **0 of 149** clearing at the
   marginal export rate.
+
+
+---
+
+## 8. What landed
+
+| Step | Change |
+|---|---|
+| 1 | `test_the_default_recovery_is_the_measured_annual_value` pins 0.045 and carries the archaeology. The old test asserted the *modelled* derivation, so the suite had been defending the regression. |
+| 2 | `REGULAR_SOILING_FULL_RESET_RECOVERY` → **`DRY_SEASON_RESET_RECOVERY`**, with a comment block recording all four values this constant has held and why. `test_dry_season_reset_recovery_derivation_still_reproduces` keeps the 0.4944 derivation checked as the dry-season quantity it is. |
+| 3 | `DEFAULT_RECOVERY_PRO = 0.045`, `DEFAULT_RECOVERY_RINSE = 0.032`. |
+| 4 | AOI rebuilt: `recovery=0.045`, **0 / 1,865** worth cleaning, `array_id` set preserved exactly. `rebuild_aoi_economics.py`'s docstring and its hardcoded `known_limitations` entry both asserted the regression's framing and are corrected. |
+| 5 | **`tests/test_site_js_parity.py`** parses the constants out of `breakeven.html` and asserts them against Python — recovery, cost floors, panel size, derate, the per-panel ladder and the removal efficacies. Verified to fail when the 0.445 drift is reinjected. Skips when the site repo is not checked out beside this one. |
+
+**One latent trap found while doing Step 3.** `decision.py`'s `seasonal_planning` basis read
+`E.DEFAULT_SCENARIOS`, so the moment the default was restored to the measured pair it silently
+became identical to `measured`. Only a test comparing the two bases caught it. It now derives from
+`DRY_SEASON_RESET_RECOVERY` explicitly, so the contrast cannot collapse again.
+
+**Still true and unchanged:** `band_soiling.bio_recovery_fraction ≈ 1.0` is the wash-only moss
+channel and is correct. The API reproduces the paper exactly when given per-system recovery
+(**$2.4410/kWh** median break-even, **0 of 149** clearing at the marginal export rate).
+
+## 9. Follow-ups this leaves open
+
+- **The paper's 0.0634 vs the code's 0.045.** Both measured, same order, different methods (505
+  observed cleans against a real-weather trajectory). Per Cameron the paper can carry its own
+  number; the code and site stay at 0.045. If the AOI is ever re-issued deliberately, revisit.
+- **Per-roof recovery (option C).** Only 149 systems have a measured value and none are in the
+  AOI. The API already accepts `recovery_frac`, so the plumbing exists whenever the data does.
+- **The regression is still on `origin/main`.** This fix lives on `paper/draft-and-aq-ablation`
+  and in the public mirror. BBF's `main` still carries `187161f`.

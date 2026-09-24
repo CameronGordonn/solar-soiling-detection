@@ -289,11 +289,46 @@ _RATE_USD = (8.0, 7.0, 5.5, 4.0, 3.0, 2.5, 2.0, 1.5)
 # saturation assumptions) for comparison and future calibration.
 REGULAR_SOILING_DRY_SEASON_DAYS = 180
 REGULAR_SOILING_MIDSEASON_CLEAN_DAY = 91
-REGULAR_SOILING_FULL_RESET_RECOVERY = 0.4944
 PROFESSIONAL_CLEAN_EFFICACY = 0.90
 RINSE_CLEAN_EFFICACY = 0.70
-DEFAULT_RECOVERY_PRO = REGULAR_SOILING_FULL_RESET_RECOVERY * PROFESSIONAL_CLEAN_EFFICACY
-DEFAULT_RECOVERY_RINSE = REGULAR_SOILING_FULL_RESET_RECOVERY * RINSE_CLEAN_EFFICACY
+
+#: Share of DRY-SEASON accumulated soiling cost avoided by a perfect early-July reset.
+#: Derived from ``risk.recovery.clearsky_daily_weight`` and reproduced to four decimals by
+#: ``tests/test_economics.py``. Renamed from DRY_SEASON_RESET_RECOVERY on
+#: 2026-09-24 (see the block below): the old name did not say which denominator it used,
+#: and it was being multiplied by an ANNUAL loss.
+DRY_SEASON_RESET_RECOVERY = 0.4944
+
+# ── the default recovery: MEASURED, against ANNUAL loss ──────────────────────────────
+#
+# 0.045 is the share of a YEAR's soiling loss that one professional clean gets back,
+# measured on the real-weather SOMOSclean trajectory for coastal Santa Cruz
+# (docs/ECONOMICS_GROUNDING_20260809.md). It is small because rain already resets the
+# array ~25 times a year here, so a wash buys roughly one array-month out of twelve.
+#
+# THIS CONSTANT HAS NOW BEEN WRONG TWICE, IN THE SAME DIRECTION. Do not change it without
+# a commit message that explains the measurement behind the new value.
+#
+#   0.90    the original guess. Assumed one clean captured 90% of annual loss, which is
+#           only true with no rain reset and no re-soiling. Overstated recovery ~20x and
+#           made 44.8-95.4% of the AOI look worth cleaning.
+#   0.045   63fcbfc, 2026-08-09. Measured. Produced the "zero of 1,865" result that the
+#           dashboard still publishes, and the AOI run of 2026-08-30 records it.
+#   0.445   187161f, 2026-09-04, subject "soiling: model seasonal and persistent cleaning
+#           value", EMPTY BODY. Silently replaced the measured value with
+#           DRY_SEASON_RESET_RECOVERY * efficacy -- a 9.9x increase, and a different
+#           quantity: a dry-season share used as an annual one. Re-running the AOI on it
+#           would have reported 80 of 1,865 sites worth cleaning (398 at the p90 loss),
+#           reversing the project's headline finding. Never shipped: the AOI was not
+#           rebuilt in between.
+#   0.045   RESTORED 2026-09-24, Cameron's call. Independently corroborated by the paper,
+#           which measures 0.0634 (median, half-norm basis) from 505 observed cleaning
+#           events on 149 metered California systems, and matches what the live BBF
+#           calculator ships (breakeven.html CLEAN.professional.recovery).
+#
+# Full argument: docs/RECOVERY_RECONCILIATION_PLAN.md.
+DEFAULT_RECOVERY_PRO = 0.045
+DEFAULT_RECOVERY_RINSE = 0.032
 
 #: Set True to restore the pre-2026-08-09 behaviour for A/B comparison only.
 LEGACY_RECOVERY_PRO = 0.90
