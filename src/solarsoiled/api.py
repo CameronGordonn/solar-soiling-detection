@@ -25,6 +25,7 @@ from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel
 
 from solarsoiled.aoi import parse_aoi, write_aoi_geojson
+from solarsoiled.decision import DecisionError, decide, resolve_inputs
 from solarsoiled.jobs import JobRecord, create_job, get_job, submit
 from solarsoiled.paths import AoiPaths, REPO_ROOT
 from solarsoiled.recommend import (
@@ -150,6 +151,32 @@ class FeedbackRequest(BaseModel):
     pre_clean_kwh_7d: float
     post_clean_kwh_7d: float
     notes: str | None = None
+
+
+class DecisionRequest(BaseModel):
+    """A roof, described in any of the ways a caller might have it.
+
+    Exactly one of ``system_kw``/``area_m2`` is required. Electricity value comes from
+    ``elec_rate``, or ``install_date`` (which resolves the tariff vintage), or ``regime``
+    — in that order of precedence; omitting all three takes the default regime and says
+    so in ``provenance``.
+
+    There is deliberately no ``risk_score`` field. The mapping from a calibrated
+    classification probability to a loss percentage was removed as unsound and is not
+    reconstructed here.
+    """
+
+    system_kw: float | None = None
+    area_m2: float | None = None
+    loss_pct: float | None = None
+    loss_pct_p10: float | None = None
+    loss_pct_p90: float | None = None
+    sun_hours: float | None = None
+    elec_rate: float | None = None
+    regime: str | None = None
+    install_date: str | None = None
+    n_samples: int = 2000
+    seed: int = 42
 
 
 class RunRequest(BaseModel):
@@ -293,14 +320,47 @@ async def health_live():
 
 @app.get("/health/ready")
 async def health_ready():
+    """Readiness per capability, not one verdict for the whole service.
+
+    A single "degraded" was actively misleading here: it fired because the soiling model
+    file is absent, while the endpoint most callers want — the cleaning decision — needs
+    no model weights and was fully available the whole time. Report each capability so a
+    caller can tell what they can actually use.
+    """
     notes = []
     if not _API_KEY:
         notes.append("SOLARSOILED_API_KEY unset — auth disabled")
+
+    caps: dict[str, dict] = {}
+
+    # The decision chain is pure arithmetic over sourced constants. If it imports, it works.
+    try:
+        decide(resolve_inputs(system_kw=5.0), n_samples=16)
+        caps["decision"] = {"ready": True}
+    except Exception as exc:  # pragma: no cover - defensive
+        caps["decision"] = {"ready": False, "detail": str(exc)}
+
     try:
         resolve_soiling("soiling_production")
+        caps["risk_scoring"] = {"ready": True}
     except Exception as exc:
-        notes.append(f"soiling registry: {exc}")
-    return {"status": "ok" if not any("registry" in n for n in notes) else "degraded", "notes": notes}
+        caps["risk_scoring"] = {"ready": False, "detail": str(exc)}
+
+    try:
+        resolve_weights("production")
+        caps["detection"] = {"ready": True}
+    except Exception as exc:
+        caps["detection"] = {"ready": False, "detail": str(exc)}
+
+    ready = [k for k, v in caps.items() if v["ready"]]
+    if len(ready) == len(caps):
+        status = "ok"
+    elif "decision" in ready:
+        # The capability this service exists to serve is up; the rest are optional.
+        status = "partial"
+    else:
+        status = "degraded"
+    return {"status": status, "capabilities": caps, "notes": notes}
 
 
 @app.post("/jobs")
@@ -415,6 +475,85 @@ async def get_recommendations(partner_id: str, x_api_key: str = Header(default="
     if not p.exists():
         raise HTTPException(status_code=404, detail="Recommendations not yet generated")
     return FileResponse(str(p), media_type="application/json")
+
+
+# ---------- the cleaning decision (no model weights) ----------
+#
+# These are the endpoints this service exists for. They answer "is it worth cleaning this
+# array?" from arithmetic over sourced constants, which is the one result in this project
+# that survives its own validation problems: annual loss cancels between the value of a
+# clean and the recovery fraction's denominator, so the answer is stable under labelling
+# assumptions that move the fraction eightfold.
+#
+# They load no weights and read no artifacts, so they stay up when the registry does not
+# resolve, and they are safe to leave unauthenticated: they expose arithmetic, not data.
+
+
+def _decide_or_422(**kwargs):
+    n_samples = kwargs.pop("n_samples", 2000)
+    seed = kwargs.pop("seed", 42)
+    if not 1 <= n_samples <= 20000:
+        raise HTTPException(status_code=422, detail="n_samples must be 1..20000")
+    try:
+        inputs = resolve_inputs(**kwargs)
+    except DecisionError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    return decide(inputs, n_samples=n_samples, seed=seed)
+
+
+@app.post("/decision")
+async def post_decision(req: DecisionRequest):
+    """Full cleaning decision with uncertainty, thresholds and stated limits."""
+    return _decide_or_422(**req.model_dump())
+
+
+@app.get("/decision")
+async def get_decision(
+    system_kw: float | None = None,
+    area_m2: float | None = None,
+    loss_pct: float | None = None,
+    sun_hours: float | None = None,
+    elec_rate: float | None = None,
+    regime: str | None = None,
+    install_date: str | None = None,
+    n_samples: int = 2000,
+    seed: int = 42,
+):
+    """Query-parameter form of ``POST /decision``, for links and browser calls."""
+    return _decide_or_422(
+        system_kw=system_kw, area_m2=area_m2, loss_pct=loss_pct, sun_hours=sun_hours,
+        elec_rate=elec_rate, regime=regime, install_date=install_date,
+        n_samples=n_samples, seed=seed,
+    )
+
+
+@app.get("/breakeven")
+async def get_breakeven(
+    system_kw: float | None = None,
+    area_m2: float | None = None,
+    loss_pct: float | None = None,
+    sun_hours: float | None = None,
+    elec_rate: float | None = None,
+    regime: str | None = None,
+    install_date: str | None = None,
+):
+    """What would have to be true for cleaning to pay.
+
+    The thresholds half of the decision on its own. A bare "no" is not actionable; the
+    tariff, system size and soiling level that would flip it tell the caller how far
+    outside the paying region this roof sits.
+    """
+    out = _decide_or_422(
+        system_kw=system_kw, area_m2=area_m2, loss_pct=loss_pct, sun_hours=sun_hours,
+        elec_rate=elec_rate, regime=regime, install_date=install_date, n_samples=1,
+    )
+    return {
+        "verdict": out["verdict"],
+        "thresholds": out["thresholds"],
+        "inputs": out["inputs"],
+        "provenance": out["provenance"],
+        "limitations": out["limitations"],
+    }
 
 
 @app.get("/recommend-quick")

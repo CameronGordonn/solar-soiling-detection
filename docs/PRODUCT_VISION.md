@@ -34,7 +34,7 @@ Three workstreams run concurrently. **Track C does not wait on Track A** — we 
 |---|---|---|---|
 | **A — Model quality** | Stage 1 joint training (Duke 160px + NAIP), pseudo-labeling round, Stage 2 year-holdout validation | mAP50 ≥70% for Stage 1; year-holdout pass for Stage 2 | Sets the GA bar |
 | **B — Visibility surface** | BBF site Tools section (`../BBF-Website/public/tools/`): homeowner dashboard, breakeven calculator, 3-model comparison | Live site + dashboard with working QR deep-link | `shipped` (built); live at the DNS cutover |
-| **C — Beta API** | `/jobs`, `/health`, `/feedback`, `/results`, `/recommend-quick`, SSE streaming; deployed on Render | Reachable beta endpoints behind an API key | `shipped` — deployed at `https://solarsoiled-api.onrender.com` |
+| **C — Decision API** | `POST /decision`, `GET /breakeven` (arithmetic, no model weights), plus `/jobs`, `/feedback`, `/results`, SSE; deployed on Render | Reachable endpoints; decision path available even when the model registry is not | `shipped` — `https://solarsoiled-api.onrender.com`. **Nothing calls it**: the dashboard is self-contained by design |
 | **D — Physical outreach** | Top-50 postcards with QR codes → personalized dashboard; close the physical-to-digital loop | 50 cards in homeowners' hands | `in progress` — scripts 20–23 built; dry-run validated; awaiting send go/no-go |
 
 ### Beta/GA honesty model
@@ -70,12 +70,25 @@ Contract sketches, not final specs. Every response carries the metadata block de
 - Returns `{window_start, window_end, expected_recovery_pct: [low, high], confidence, rule_fired, model_version, beta}`.
 - v1 is rule-based (see next section). v2 is ML-based.
 
-### `GET /recommend-quick` — sync, dashboard-facing (shipped)
+### `POST /decision` and `GET /breakeven` — sync, the API's reason to exist
+
+- Input: a roof (`system_kw` **or** `area_m2`), electricity value (`elec_rate`, `install_date` or
+  `regime`), and optionally a measured `loss_pct` with a p10/p90 interval.
+- Output: verdict, annual loss in dollars, per-scenario net, Monte Carlo uncertainty
+  (`prob_net_positive`, `decision_robust`), the break-even tariff / system size / soiling level, and
+  `provenance` + `limitations` on every response.
+- **Loads no model weights**, so it is the one capability that cannot be taken down by a missing
+  artifact. It serves the project's most robust finding: the dollar answer is invariant to the
+  labelling assumptions that move the recovery fraction eightfold.
+- **No `risk_score` input.** The risk-score → loss-percent mapping was removed as unsound.
+
+### `GET /recommend-quick` — legacy, dashboard-facing
 
 - Input: `array_id`, `last_cleaned` (date), `partner_id`.
-- Loads cached `risk.geojson` for the partner, re-runs `recommend_cleaning()`, returns updated `window_start`, `confidence`, `rule_fired`.
-- Used by the homeowner dashboard when a user adjusts "when did you last clean?" without a full re-score.
-- Deployed at `https://solarsoiled-api.onrender.com/recommend-quick`.
+- Loads cached `risk.geojson` for the partner, re-runs `recommend_cleaning()`.
+- ⚠️ **Superseded and currently unusable in production**: it requires a scored AOI on disk, and the
+  deployed container has none, so the default partner returns 404. The dashboard no longer calls it.
+  Prefer `/decision`.
 
 ### `GET /health/live` and `GET /health/ready`
 
@@ -123,7 +136,7 @@ under `/tools/` and live at `betterbehaviorfoundation.com` after the DNS cutover
 Leaflet map, static GeoJSON embedding, no backend required on load. Features:
 - **Three-model tab switcher**: XGBoost ML (0.712 CV AUC) | SOMOSclean physics (ENEL exponential accumulation model) | Kimber 2007 (linear PM2.5 deposition + rain reset)
 - **QR deep-link**: physical postcard → `dashboard.html?id=<array_id>` → auto-select + highlight array with pulse animation
-- **Array detail panel**: risk score gauge, area/tilt/confidence stats, "Compare all models" table, "Recalculate" form calling `/recommend-quick`
+- **Array detail panel**: risk score gauge, area/tilt/confidence stats, "Compare all models" table. (The "Recalculate" form that called `/recommend-quick` was **removed** — the dashboard is fully client-side.)
 - **Energy calculator**: client-side JS; inputs system_kw + electricity_rate + sun_hours → outputs annual kWh loss + dollar loss + "recover $X/year if cleaned today"
 
 ---

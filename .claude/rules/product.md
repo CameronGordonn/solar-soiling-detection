@@ -10,7 +10,7 @@ solarsoiled-api                            # registered entrypoint
 uvicorn solarsoiled.api:app --reload
 ```
 
-Deployed at `https://solarsoiled-api.onrender.com`. Endpoints: `/jobs`, `/health`, `/feedback`, `/results`, `/recommend-quick`, SSE streaming. Auth via `SOLARSOILED_API_KEY` env var (optional for local dev). Source: `src/solarsoiled/api.py`, job queue in `src/solarsoiled/jobs.py`.
+Deployed at `https://solarsoiled-api.onrender.com`. **The live dashboard does not call it** — it is self-contained by design. The API's reason to exist is `POST /decision` / `GET /breakeven`: the cleaning decision as arithmetic over sourced constants, loading **no model weights**, so it stays up when the soiling registry does not resolve. Other endpoints: `/jobs`, `/jobs/{id}/events` (SSE), `/feedback`, `/results/{partner_id}/...`, and the legacy `/recommend-quick`. Health is `/health/live` and `/health/ready` (**per-capability**: `decision` / `risk_scoring` / `detection`) — there is no bare `/health`. Auth via `SOLARSOILED_API_KEY` env var (optional for local dev). Source: `src/solarsoiled/api.py`, job queue in `src/solarsoiled/jobs.py`.
 
 ## `src/solarsoiled/` package
 
@@ -24,6 +24,7 @@ Deployed at `https://solarsoiled-api.onrender.com`. Endpoints: `/jobs`, `/health
 | `aoi.py` | AOI parsing (bbox or GeoJSON) + WGS84 validation |
 | `paths.py` | `AoiPaths` — per-AOI artifact namespace under `outputs/aoi/<partner_id>/` |
 | `recommend.py` | v1 rule-based cleaning recommendation engine |
+| `decision.py` | The cleaning decision as arithmetic — backs `/decision` and `/breakeven`; no model weights, carries provenance + limitations in every response |
 | `viz.py` | Folium HTML risk map from `risk.geojson` |
 | `eval_report.py` | Single-file HTML eval report (PR curve, F1 table, overlay PNGs) |
 
@@ -43,7 +44,7 @@ Output paths: `outputs/outreach/{santa_cruz_top50.csv, alt_scores.json, mailers/
 Live at `https://betterbehaviorfoundation.com/tools/dashboard` (Cloudflare, served from the
 `Better-Behavior-Foundation/BBF-Website` repo, `public/tools/`). The old GitHub Pages URLs are dead
 — Pages was never wanted and is disabled as of 2026-08-17. Static GeoJSON embedded in
-`solarsoiled-landing/arrays_data.js`. Features: 3-model tab switcher (XGBoost / SOMOSclean / Kimber), QR deep-link (`?id=<array_id>`), energy calculator, `/recommend-quick` Recalculate button.
+`solarsoiled-landing/arrays_data.js`. Features: 3-model tab switcher (XGBoost / SOMOSclean / Kimber), QR deep-link (`?id=<array_id>`), energy calculator. **No backend call** — the former Recalculate button and background fetch to Render were removed; everything is computed client-side from the embedded `arrays_data.js`.
 
 ## Partner AOI output namespace
 

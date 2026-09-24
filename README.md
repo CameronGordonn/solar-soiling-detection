@@ -222,22 +222,58 @@ Interactive Leaflet map of **3,362 Santa Cruz array polygons (1,865 sites)** wit
 - **QR deep-link**: physical postcard → `dashboard.html?id=<array_id>` → auto-select array with pulse animation
 - **Array detail panel**: risk score gauge, area/tilt/confidence stats, per-model comparison table
 - **Energy calculator**: client-side JS; inputs system_kw + electricity_rate + sun_hours → annual kWh loss + dollar loss
-- **Recalculate**: calls `/recommend-quick` on Render backend to update cleaning window when homeowner adjusts last-cleaned date
 
-### API (beta)
+### API
 
-All responses carry `{model_version, beta, known_limitations}`.
+Deployed at `https://solarsoiled-api.onrender.com`. **The dashboard does not call it** — the
+dashboard is fully self-contained, which deliberately removed a single point of failure. The API's
+reason to exist is the decision endpoints below.
+
+**`POST /decision` is the one that matters.** It answers *is it worth paying to clean this array?*
+from arithmetic over sourced constants, loading **no model weights**. That is not a limitation, it
+is the point: the dollar answer is the one result here that survives the Stage 2 validation
+problems, because annual loss cancels between the value of a clean and the recovery fraction's
+denominator. It therefore stays available when the soiling registry does not resolve.
+
+```bash
+curl -s "https://solarsoiled-api.onrender.com/decision?system_kw=6&install_date=2015-06-01"
+```
+
+```jsonc
+{ "verdict": "no_clean", "annual_loss_usd": 129.56,
+  "best_action": "rinse_service", "best_action_net_usd": -45.16,
+  "thresholds": { "professional": { "breakeven_tariff_usd_per_kwh": 1.1899,
+                                    "breakeven_system_kw": 46.0,
+                                    "breakeven_soiling_pct": 7.3 } },
+  "uncertainty": { "prob_net_positive": 0.0755, "decision_robust": true },
+  "provenance": { "loss_pct": "BASE_SOILING_PCT default (2.8%) - NOT a measurement of this roof" },
+  "limitations": [ "Estimates soiling LEVEL, not a ranking between roofs...", "..." ] }
+```
+
+Three things it does on purpose. **`provenance`** names how every input was obtained, because the
+most dangerous field here is a default the caller did not realise they accepted. **`thresholds`**
+says what would have to be true — a bare "no" is not actionable, "no, and you would need $1.19/kWh
+or a 46 kW array" is. **There is no `risk_score` input**: the risk-score → loss-percent mapping was
+removed as unsound and is deliberately not reconstructed.
 
 | Endpoint | Description |
 |---|---|
+| `POST /decision` | Cleaning decision: dollars, Monte Carlo uncertainty, thresholds, stated limits |
+| `GET /decision` | Same, as query parameters, for links and browser calls |
+| `GET /breakeven` | The thresholds alone — what would have to be true for cleaning to pay |
 | `GET /health/live` | Process up |
-| `GET /health/ready` | Models loaded, API keys present |
+| `GET /health/ready` | Readiness **per capability** (`decision` / `risk_scoring` / `detection`) |
 | `POST /jobs` | Submit async AOI detect + score job |
 | `GET /jobs/{id}` | Poll job status + result URL |
-| `GET /results/{partner_id}` | Fetch cached AOI results |
-| `POST /feedback` | Submit post-clean energy reading (free; feeds model retraining) |
-| `GET /recommend-quick` | Re-run cleaning recommendation from cached risk scores |
-| `GET /events/{job_id}` | SSE stream for real-time job progress |
+| `GET /jobs/{id}/events` | SSE stream for real-time job progress |
+| `GET /results/{partner_id}/{arrays,map,recommendations}` | Fetch cached AOI results (auth) |
+| `POST /feedback` | Submit post-clean energy reading |
+| `GET /recommend-quick` | Legacy dashboard endpoint; requires a scored AOI on disk |
+
+`/health/ready` reports each capability separately rather than one verdict for the whole service. A
+single "degraded" was actively misleading: it fired because the soiling model file is absent from
+the deployed container, while the decision endpoint needs no weights and was available the whole
+time.
 
 ### Outreach pipeline (Santa Cruz pilot)
 

@@ -76,6 +76,37 @@ CASES = [
     ("regional_production", "outputs/soiling/regional_holdout.json",
      lambda d: round(d["results"]["production (40)"]["pooled_auc"], 4), 0.6774, "0.6774"),
 
+    # ---- Stage 2: the 2026-09-22 fold-leak correction ----
+    # These come from outputs/soiling/audit/, which is GITIGNORED and produced by the
+    # standalone soiling-validation-audit repo. Every case skips without it, per the
+    # no-data-required rule above, but where the artifacts exist these are the numbers
+    # that now carry the Stage 2 story and so are exactly the ones that must not drift.
+    ("joint_fold_auc", "outputs/soiling/audit/reconciliation.json",
+     lambda d: round(d["results"]["joint_station_and_year_out|full_40"]["pooled_panel_only"], 4),
+     0.6222, "0.622"),
+    ("joint_fold_latlon", "outputs/soiling/audit/reconciliation.json",
+     lambda d: round(d["results"]["joint_station_and_year_out|latlon_only"]["pooled_panel_only"], 4),
+     0.6439, "0.6439"),
+    ("joint_fold_ci_lo", "outputs/soiling/audit/reconciliation.json",
+     lambda d: round(d["bootstrap"]["joint_station_and_year_out|full_40"]["ci95"][0], 3),
+     0.571, "0.571"),
+    ("joint_fold_ci_hi", "outputs/soiling/audit/reconciliation.json",
+     lambda d: round(d["bootstrap"]["joint_station_and_year_out|full_40"]["ci95"][1], 2),
+     0.67, "0.670"),
+    ("station_leak_pct", "outputs/soiling/audit/validation_audit.json",
+     lambda d: round(d["results"]["leave_year_out|xgb|full_40"]["station_leak_pct"], 1),
+     88.7, "88.7"),
+    ("size_matched_control", "outputs/soiling/audit/trainsize_control.json",
+     lambda d: round(d["control"]["mean"], 4), 0.6986, "0.6986"),
+    ("kimber_unfitted", "outputs/soiling/audit/physics_baselines.json",
+     lambda d: round(d["Kimber, instantaneous"]["auc"], 4), 0.6096, "0.6096"),
+    # The regional holdout's own correction: year axis + production params.
+    ("regional_corrected_pooled", "outputs/soiling/audit/regional_holdout_audit.json",
+     lambda d: round(d["results"]["region_year|production"]["pooled_auc"], 3), 0.655, "0.655"),
+    ("regional_corrected_largest", "outputs/soiling/audit/regional_holdout_audit.json",
+     lambda d: round(d["results"]["region_year|production"]["per_region"]["0"]["auc"], 4),
+     0.5272, "0.527"),
+
     # ---- Product: polygons vs sites, which are not the same number ----
     ("aoi_polygons", "../BBF-Website/public/tools/arrays_data.manifest.json",
      lambda d: d["n_arrays"], 3362, "3,362"),
