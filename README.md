@@ -1,5 +1,21 @@
 # SolarSoiled
 
+> ### 📦 This is a public mirror
+>
+> A curated snapshot of a private working repository, published so the work can be read.
+> It carries the full pipeline, the docs and the paper. Two things it does **not** carry:
+>
+> - **Outreach records.** Six files naming real homes, companies or correspondence are
+>   held back. Doc links to them are marked *(not in the public mirror)*.
+> - **The data bundle.** Weights, imagery, tiles and the label sets live in a release on
+>   the private repo. Commands below that `gh release download` from
+>   `Better-Behavior-Foundation/solar-soiling-ml` **will not work here**, and neither will
+>   anything needing that data — including `paper/verify_numbers.py`, which reads
+>   `outputs/soiling/audit/*.json`. The checked-in PDFs are the readable evidence.
+>
+> Everything else — the code, the tests, the numbers and their provenance — is complete
+> and internally consistent. `make test-fast` passes from a clean clone with no data.
+
 **How far does rooftop-solar soiling targeting get on public data alone?** This repo is the full
 attempt and the honest answer. It detects rooftop arrays in public aerial imagery (RF-DETR + SAM2),
 scores per-array soiling risk (XGBoost on weather, air quality, land use and roof geometry), and

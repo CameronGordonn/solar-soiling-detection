@@ -1,5 +1,7 @@
 # Onboarding — solar-soiling-ml
 
+> ⚠️ **Public mirror.** The clone URL and data-bundle steps below point at the private repository and will not work here. `make test-fast` does pass from a clean clone with no data. See [../MIRROR.md](../MIRROR.md).
+
 > ⚠️ **Stage 2 numbers in this document are superseded (2026-09-22).** The validation folds behind
 > them leaked: the 10 km spatial fold and leave-one-year-out each hold out one axis and not the
 > other, leaving the held-out year's stations in training for **88.7%** of rows. The honest joint

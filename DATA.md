@@ -1,5 +1,7 @@
 # DATA.md — data artifacts, custody, and provenance
 
+> ⚠️ **Not reachable from the public mirror.** The release this page describes lives on the private repository, so the `gh release download` commands below will fail here. Everything that does not need the bundle — the code, the tests, the docs and the built papers — is present. See [MIRROR.md](MIRROR.md).
+
 A fresh clone has **code only**. Nothing below is in git: it is large, license-restricted, or
 PII-adjacent. This file is the whole story of how you get it.
 

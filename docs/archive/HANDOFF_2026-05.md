@@ -81,7 +81,7 @@ python scripts/detect/ramp_eval.py --run R1 \
 
 **Step 4 — Update registry when any new weights beat `r2-cameron-20260509`**
 
-Add an entry to [models/registry.yaml](../models/registry.yaml) and bump `aliases.production`. Include `sahi_f1_val` and `sahi_conf_val` fields so the CLI manifest is accurate.
+Add an entry to [models/registry.yaml](../../models/registry.yaml) and bump `aliases.production`. Include `sahi_f1_val` and `sahi_conf_val` fields so the CLI manifest is accurate.
 
 ---
 
@@ -149,7 +149,7 @@ The strategic pivot (2026-05-04) away from joint training toward diagnose-first 
 | Active Stage 1 runbook | [docs/PHASE1_HANDOFF.md](../PHASE1_HANDOFF.md) |
 | Quarter priorities | [docs/Q2_PLAN.md](../Q2_PLAN.md) |
 | Stage 2 guide | [docs/SOILING_STAGE2_GUIDE.md](../SOILING_STAGE2_GUIDE.md) |
-| Model registry | [models/registry.yaml](../models/registry.yaml) |
+| Model registry | [models/registry.yaml](../../models/registry.yaml) |
 | CLI entrypoint | `src/solarsoiled/cli.py` |
 | Eval harness | `scripts/detect/per_detection_rca.py`, `scripts/detect/sahi_threshold_sweep.py`, `scripts/detect/ramp_eval.py` |
 | Per-detection RCA output | `outputs/eval/<run_name>/per_detection.csv` |

@@ -71,8 +71,8 @@ measurement resolution.
 ### outreach/ — things being sent to real people and agencies
 | Doc | Canonical for |
 |---|---|
-| [outreach/CPRA_CITY_OF_SANTA_CRUZ_SOLAR_PERMITS.md](outreach/CPRA_CITY_OF_SANTA_CRUZ_SOLAR_PERMITS.md) | City records request for solar permit vintage — routing, what the public eTRAKiT portal does and does not give, and the send-ready draft. **Not yet sent.** |
-| [outreach/CLEANING_QUOTE_CALL_SHEET.md](outreach/CLEANING_QUOTE_CALL_SHEET.md) | Three real cleaning companies, the six questions that source `MIN_PRO_SERVICE`, and the bound on what the answers can change. **Not yet called.** |
+| outreach/CPRA_CITY_OF_SANTA_CRUZ_SOLAR_PERMITS.md *(not in the public mirror)* | City records request for solar permit vintage — routing, what the public eTRAKiT portal does and does not give, and the send-ready draft. **Not yet sent.** |
+| outreach/CLEANING_QUOTE_CALL_SHEET.md *(not in the public mirror)* | Three real cleaning companies, the six questions that source `MIN_PRO_SERVICE`, and the bound on what the answers can change. **Not yet called.** |
 
 ## Writing
 | Doc | Canonical for |

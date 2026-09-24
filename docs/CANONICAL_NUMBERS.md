@@ -184,8 +184,9 @@ Python so the two implementations cannot drift again, and `tests/test_economics.
 constant with its full history. Full account:
 [RECOVERY_RECONCILIATION_PLAN.md](RECOVERY_RECONCILIATION_PLAN.md).
 
-⚠️ **The regression is still on BBF `origin/main`** (`187161f`). This fix lives on
-`paper/draft-and-aq-ablation` and the public mirror only.
+⚠️ **The regression is still on the `Better-Behavior-Foundation/solar-soiling-ml` `main` branch**
+(`187161f`). This fix lives on the `paper/draft-and-aq-ablation` branch and in the public mirror
+(`CameronGordonn/solar-soiling-detection`), whose `main` **does** carry it.
 
 ### Label set
 

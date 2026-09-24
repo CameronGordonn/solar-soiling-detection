@@ -18,7 +18,7 @@
 constant that has twice carried this product, and it is wrong again. This document is the
 diagnosis, the evidence, and a sequence for fixing it.
 
-> **One-line version.** Commit `187161f` (2026-09-04, on `origin/main`) replaced the
+> **One-line version.** Commit `187161f` (2026-09-04, on `Better-Behavior-Foundation/solar-soiling-ml` `main`) replaced the
 > **measured** `DEFAULT_RECOVERY_PRO = 0.045` with a **modelled** `0.4944 × 0.90 = 0.445`,
 > a 9.9× increase, in a commit whose subject is "soiling: model seasonal and persistent
 > cleaning value" and whose body is **empty**. Re-running the AOI on today's code would
@@ -211,5 +211,6 @@ channel and is correct. The API reproduces the paper exactly when given per-syst
   number; the code and site stay at 0.045. If the AOI is ever re-issued deliberately, revisit.
 - **Per-roof recovery (option C).** Only 149 systems have a measured value and none are in the
   AOI. The API already accepts `recovery_frac`, so the plumbing exists whenever the data does.
-- **The regression is still on `origin/main`.** This fix lives on `paper/draft-and-aq-ablation`
-  and in the public mirror. BBF's `main` still carries `187161f`.
+- **The regression is still on `Better-Behavior-Foundation/solar-soiling-ml` `main`** (`187161f`).
+  This fix lives on the `paper/draft-and-aq-ablation` branch and in the public mirror
+  (`CameronGordonn/solar-soiling-detection`), whose `main` does carry it.
