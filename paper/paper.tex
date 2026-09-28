@@ -124,8 +124,8 @@ generalises is the fold geometry, the label-unit diagnosis and the arithmetic.
 \section{Introduction}
 \label{sec:intro}
 
-Global photovoltaic capacity reached roughly \SI{2383}{\giga\watt} by the end of 2025
-after a record \SI{510}{\giga\watt} single-year addition \cite{irena2026}, and solar now
+Global solar capacity reached \SI{2392}{\giga\watt} by the end of 2025 after a record
+\SI{511}{\giga\watt} added in the year, almost all of it photovoltaic \cite{irena2026}, and solar now
 supplies more than 8\% of world electricity \cite{iea2026}. US small-scale systems were
 projected to generate about 83\,TWh in 2024 \cite{eia2023}, and the
 country passed six million individual installations in early 2026 \cite{seia2026}.
@@ -178,7 +178,7 @@ put it last only because it takes the most machinery to establish.
 We ask what a system built \emph{entirely} on public data can and cannot establish.
 
 \begin{enumerate}\itemsep2pt
-\item \textbf{A gated detection stage} (\S\ref{sec:methods-inputs}; full protocol in~\cite{gordon2026detection}) on public county
+\item \textbf{A gated detection stage} (\S\ref{sec:methods-inputs}; full protocol in the companion detection draft distributed with the code\footnote{\url{https://github.com/CameronGordonn/solar-soiling-detection}}) on public county
 orthoimagery at \SI{0.204}{\metre} ground sample distance, using only permissively
 licensed models, with an executable gate definition, confidence frozen on validation,
 tile-level bootstrap intervals, and an independent permit-based recall probe
@@ -253,7 +253,7 @@ variant~\cite{carion2020detr}, with an optional SAM2~\cite{ravi2024sam2,kirillov
 mask stage, both Apache-2.0; the licence matters because the widely used YOLO
 implementations are AGPL-3.0, which obstructs reuse by exactly the municipalities and
 nonprofits a public-data pipeline is for. Two requirements differ from the prior work and
-are specified in~\cite{gordon2026detection}: downstream stages consume \emph{area}, so we
+are specified in the companion draft: downstream stages consume \emph{area}, so we
 need instance polygons rather than image-level labels, and the gate is evaluated at the
 tile level through the production inference path rather than on crops. Detection is an
 input here, not a contribution.
@@ -267,10 +267,10 @@ where the comparison appears rather than presenting the weaker design as equival
 
 \paragraph{Soiling measurement and modelling.}
 Soiling loss is extracted from yield directly by \citet{deceglie2018}, and NREL publishes a
-station-level US soiling map~\cite{nrel_soiling_map,micheli2021} reporting an
+station-level US soiling map~\cite{nrel_soiling_map,skomedal2020} reporting an
 insolation-weighted soiling ratio (IWSR). Empirical models include
-Kimber~\cite{kimber2006}, which accumulates loss with particulate concentration and resets
-on rain, and SOMOSclean~\cite{micheli2021}, an exponential approach to a saturation
+Kimber~\cite{kimber2006}, which accumulates loss linearly between rains and resets on
+rain (our variant scales the daily rate by PM2.5 with a fixed constant), and SOMOSclean~\cite{redondo2023somosclean}, an exponential approach to a saturation
 ceiling with rain-proportional cleaning. We use both as \emph{features} under measured
 IWSR labels, and report in \S\ref{sec:risk} why the converse configuration is a leakage
 trap we fell into and discarded. \citet{porcar2018} confirmed biofilm colonisation on
@@ -292,7 +292,7 @@ Bishop diode model~\cite{bishop1988} via pvlib~\cite{holmgren2018pvlib}.
 \label{sec:methods-inputs}
 
 The pipeline's first two stages supply the units this paper analyses: array
-polygons and their tilt. Both are specified in full in~\cite{gordon2026detection}. Every
+polygons and their tilt. Both are specified in full in the companion draft. Every
 number this paper relies on is stated here, so nothing below depends on reading that
 report; it is cited for protocol detail, not for evidence.
 
@@ -339,7 +339,7 @@ features, consecutive dry-day streak and days since the last \SI{5}{\milli\metre
 event; \emph{location and structure}, latitude, longitude, month, tilt, elevation,
 land-cover class, distance to nearest highway and to nearest agricultural parcel, and five
 ESA WorldCover~\cite{zanaga2022worldcover} fractional covers; and \emph{physics proxies}
-from Kimber~\cite{kimber2006} and SOMOSclean~\cite{micheli2021}, each as an instantaneous
+from Kimber~\cite{kimber2006} and SOMOSclean~\cite{redondo2023somosclean}, each as an instantaneous
 value plus 7/30/90-day means, with SOMOSclean's saturation and rate re-fit to coastal
 California stations ($s_{\text{sat}}=0.08$, $k=15$).
 
@@ -479,8 +479,8 @@ no per-roof feature has anything to fit.
 \paragraph{What the prior literature gets, scored the same way.}
 The natural next question is what a published soiling model achieves on this task. Two are
 already computed over our rows---Kimber~\cite{kimber2006} and
-SOMOSclean~\cite{micheli2021}. Kimber is used exactly as published, with no parameter
-estimated on our data, so it needs no fold: there is nothing fitted to leak. SOMOSclean is
+SOMOSclean~\cite{redondo2023somosclean}. Our Kimber variant keeps the published structure and scales its
+daily rate by PM2.5 with a fixed constant; no parameter is estimated on our data, so it needs no fold: there is nothing fitted to leak. SOMOSclean is
 \emph{not} in that position, and we flag it rather than lean on it---its saturation and
 rate were re-fit to coastal-California stations (\S\ref{sec:risk}), some of which are rows
 scored here, so its 0.544 should be read as an optimistic bound on an unfitted SOMOSclean

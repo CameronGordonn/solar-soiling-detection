@@ -18,17 +18,6 @@
   doi       = {10.1109/WCPEC.2006.279690}
 }
 
-@article{micheli2021,
-  author  = {Micheli, Leonardo and Deceglie, Michael G. and Muller, Matthew},
-  title   = {Predicting photovoltaic soiling losses using environmental parameters:
-             An update},
-  journal = {Progress in Photovoltaics: Research and Applications},
-  volume  = {29},
-  number  = {2},
-  pages   = {230--240},
-  year    = {2021},
-  doi     = {10.1002/pip.3352}
-}
 
 @article{deceglie2018,
   author  = {Deceglie, Michael G. and Micheli, Leonardo and Muller, Matthew},
@@ -41,12 +30,12 @@
   doi     = {10.1109/JPHOTOV.2017.2784682}
 }
 
-@techreport{nrel_soiling_map,
-  author      = {Micheli, Leonardo and Deceglie, Michael G. and Muller, Matthew},
-  title       = {{PV} Soiling Map of the {United States}},
-  institution = {National Renewable Energy Laboratory},
-  year        = {2023},
-  note        = {\url{https://www.nrel.gov/pv/soiling.html}}
+@misc{nrel_soiling_map,
+  author = {{National Renewable Energy Laboratory}},
+  title  = {{PV} Soiling Map},
+  year   = {2026},
+  note   = {255 US locations. Now hosted by the National Laboratory of the Rockies:
+            \url{https://www.nlr.gov/pv/soiling}. Accessed September 2026}
 }
 
 @inproceedings{chen2016xgboost,
@@ -90,26 +79,21 @@
   year    = {2024}
 }
 
-@article{kirillov2023sam,
-  author  = {Kirillov, Alexander and Mintun, Eric and Ravi, Nikhila and others},
-  title   = {Segment Anything},
-  journal = {arXiv preprint arXiv:2304.02643},
-  year    = {2023}
+@inproceedings{kirillov2023sam,
+  author    = {Kirillov, Alexander and Mintun, Eric and Ravi, Nikhila and others},
+  title     = {Segment Anything},
+  booktitle = {Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV)},
+  pages     = {3992--4003},
+  year      = {2023},
+  doi       = {10.1109/ICCV51070.2023.00371}
 }
 
-@article{akyurek2022sahi,
-  author  = {Akyon, Fatih Cagatay and Altinuc, Sinan Onur and Temizel, Alptekin},
-  title   = {Slicing Aided Hyper Inference and Fine-Tuning for Small Object Detection},
-  journal = {IEEE International Conference on Image Processing (ICIP)},
-  pages   = {966--970},
-  year    = {2022}
-}
 
-@inproceedings{bradbury2016duke,
+@article{bradbury2016duke,
   author    = {Bradbury, Kyle and Saboo, Raghav and Johnson, Timothy L. and others},
   title     = {Distributed solar photovoltaic array location and extent dataset
                for remote sensing object identification},
-  booktitle = {Scientific Data},
+  journal   = {Scientific Data},
   volume    = {3},
   pages     = {160106},
   year      = {2016},
@@ -128,9 +112,10 @@
   doi     = {10.1016/j.joule.2018.11.021}
 }
 
-@article{zanaga2022worldcover,
+@misc{zanaga2022worldcover,
   author = {Zanaga, Daniele and Van De Kerchove, Ruben and Daems, Dirk and others},
   title  = {{ESA WorldCover} 10 m 2021 v200},
+  howpublished = {Zenodo dataset},
   year   = {2022},
   doi    = {10.5281/zenodo.7254221}
 }
@@ -172,14 +157,14 @@
   author = {Deceglie, Michael G. and Jordan, Dirk and Anderson, Kevin and others},
   title  = {{RdTools}: An Open Source Python Library for {PV} Degradation Analysis},
   year   = {2023},
-  note   = {\url{https://github.com/NREL/rdtools}}
+  note   = {\url{https://github.com/NatLabRockies/rdtools}}
 }
 
 @misc{pvdaq,
   author = {{National Renewable Energy Laboratory}},
   title  = {{PVDAQ}: Photovoltaic Data Acquisition, {OEDI} Data Lake},
   year   = {2024},
-  note   = {\url{https://openei.org/wiki/PVDAQ}}
+  note   = {\url{https://data.openei.org/submissions/4568}}
 }
 
 @misc{naip,
@@ -213,25 +198,29 @@
 @misc{irena2026,
   author = {{International Renewable Energy Agency}},
   title  = {Renewable Capacity Statistics 2026},
-  year   = {2026}
+  year   = {2026},
+  note   = {\url{https://www.irena.org/Publications/2026/Mar/Renewable-capacity-statistics-2026}}
 }
 
 @misc{iea2026,
   author = {{International Energy Agency}},
-  title  = {Electricity 2026: Analysis and Forecast to 2028},
-  year   = {2026}
+  title  = {Electricity 2026},
+  year   = {2026},
+  note   = {\url{https://www.iea.org/reports/electricity-2026}}
 }
 
 @misc{eia2023,
   author = {{U.S. Energy Information Administration}},
-  title  = {Short-Term Energy Outlook: Small-Scale Solar Generation},
-  year   = {2023}
+  title  = {Short-Term Energy Outlook, {September} 2023: Small-Scale Solar},
+  year   = {2023},
+  note   = {\url{https://www.eia.gov/outlooks/steo/report/BTL/2023/09-smallscalesolar/article.php}}
 }
 
 @misc{seia2026,
   author = {{Solar Energy Industries Association}},
-  title  = {Solar Market Insight Report},
-  year   = {2026}
+  title  = {6 Million Solar Installations: Powering {American} Communities},
+  year   = {2026},
+  note   = {\url{https://seia.org/research-resources/6-million-solar-installations/}}
 }
 
 @misc{cpuc_nbt,
@@ -252,11 +241,25 @@
   doi     = {10.1016/j.apenergy.2021.118469}
 }
 
-@misc{gordon2026detection,
-  title  = {Permissively Licensed Rooftop Array Detection at 21\,cm, with an Executable
-            Gate, and Per-Array Roof Geometry from Public Lidar},
-  author = {Gordon, Cameron},
-  year   = {2026},
-  note   = {Technical report; detection and geometry stages of the pipeline evaluated here.
-            Code and artifacts: \url{https://github.com/CameronGordonn/solar-soiling-detection}}
+@article{skomedal2020,
+  author  = {Skomedal, {\AA}smund and Deceglie, Michael G.},
+  title   = {Combined Estimation of Degradation and Soiling Losses in Photovoltaic Systems},
+  journal = {IEEE Journal of Photovoltaics},
+  volume  = {10},
+  number  = {6},
+  pages   = {1788--1796},
+  year    = {2020},
+  doi     = {10.1109/JPHOTOV.2020.3018219}
+}
+
+@article{redondo2023somosclean,
+  author  = {Redondo, Marta and Platero, Carlos A. and Moset, Antonio and
+             Rodr\'{i}guez, Fernando and Donate, Vicente},
+  title   = {Soiling Modelling in Large Grid-Connected {PV} Plants for Cleaning Optimization},
+  journal = {Energies},
+  volume  = {16},
+  number  = {2},
+  pages   = {904},
+  year    = {2023},
+  doi     = {10.3390/en16020904}
 }

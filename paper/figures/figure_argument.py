@@ -27,7 +27,9 @@ STAGES = [
 def main() -> None:
     apply_style()
     fig, ax = plt.subplots(figsize=(7.1, 2.55))
-    ax.set_xlim(0, 100); ax.set_ylim(8, 100); ax.axis("off")
+    # Boxes span x = 0.4 to 100.2 once their rounding pad is included, so the axes must
+    # reach past 100 or the right-hand box is clipped. Equal margin on both sides.
+    ax.set_xlim(-0.5, 101.1); ax.set_ylim(8, 100); ax.axis("off")
 
     w, gap = 21.5, 4.2
     x0, ytop, h = 1.0, 92.0, 46.0
