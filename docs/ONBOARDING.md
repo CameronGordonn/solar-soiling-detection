@@ -156,7 +156,7 @@ These are the "don't learn this the hard way" items.
 6. [`docs/COLD_START_AUDIT_20260823.md`](COLD_START_AUDIT_20260823.md) — **Part B is the trap
    list**: the failure modes that produce plausible wrong numbers instead of errors. Read it once
    now and again the first time a number surprises you.
-7. Your lane's runbook in [`.claude/rules/`](../.claude/rules/).
+7. Your lane's runbook in `.claude/rules/` *(not in the public mirror)*.
 
 When a doc and the code disagree, the **code and `Q2_PLAN.md` win** — and please fix the doc in
 the same PR.
@@ -193,7 +193,7 @@ PYTHONPATH=. conda run -n solar-soiling python scripts/detect/eval_tile_f1.py \
 
 **You should see** `conf*=0.50` tuned on val, then test **P 0.850 / R 0.803 / F1 0.826**, 95% CI
 [0.798, 0.853], n_gt 585, **gate: PASS**. About 5–6 minutes on CPU for 74 tiles. If you reproduce
-that, you own Stage 1. Then: [`.claude/rules/stage1-detect.md`](../.claude/rules/stage1-detect.md)
+that, you own Stage 1. Then: `.claude/rules/stage1-detect.md` *(not in the public mirror)*
 and [`PERMISSIVE_STACK_MIGRATION.md`](PERMISSIVE_STACK_MIGRATION.md).
 
 To **retrain** rather than evaluate, also pull `handoff-stage1-train.tar` (809 MB) and rebuild the
@@ -223,7 +223,7 @@ auto-routing in `run` and is stale.
 Two things you will see in the log and should not chase: MERRA-2 fetches returning `410 Gone` (the
 backfill is optional and deliberately not rebuilt), and "Inference matrix missing 5 features;
 imputing from training medians" (a known Stage-2 limitation, written up in
-[`.claude/rules/stage2-risk.md`](../.claude/rules/stage2-risk.md)).
+`.claude/rules/stage2-risk.md` *(not in the public mirror)*).
 
 The live surface is the BBF dashboard (`betterbehaviorfoundation.com/tools/dashboard`), served
 from the `BBF-Website` repo. The FastAPI/Render API is deprecated and the dashboard does not use

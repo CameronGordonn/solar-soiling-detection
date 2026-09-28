@@ -39,7 +39,7 @@ Reference for which Ultralytics training knobs we've already evaluated, which ar
 **Default:** `0.0` (off).
 **What it does:** Vertical flip with 50% probability.
 **Why it's high-EV:** Aerial imagery has no "up". Solar arrays are rotation-invariant by class definition. This is free 2× data variety with zero downside on orthophotos.
-**Caveat:** Confirm Duke labels are stored as polygons (they are — see [.claude/rules/data-pipeline.md](../.claude/rules/data-pipeline.md)) so vertical flip transforms them correctly. YOLO handles polygon flips natively.
+**Caveat:** Confirm Duke labels are stored as polygons (they are — see .claude/rules/data-pipeline.md *(not in the public mirror)*) so vertical flip transforms them correctly. YOLO handles polygon flips natively.
 
 ### Priority 2 — Duke-chip color stress
 

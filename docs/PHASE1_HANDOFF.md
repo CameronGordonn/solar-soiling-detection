@@ -15,7 +15,7 @@
 >   `stage1-60cm-legacy`.
 >
 > **Current Stage 1 runbook:** [PERMISSIVE_STACK_MIGRATION.md](PERMISSIVE_STACK_MIGRATION.md) for
-> the stack, [`.claude/rules/stage1-detect.md`](../.claude/rules/stage1-detect.md) for the gate and
+> the stack, `.claude/rules/stage1-detect.md` *(not in the public mirror)* for the gate and
 > operating rules, [CANONICAL_NUMBERS.md](CANONICAL_NUMBERS.md) for the numbers.
 >
 > Kept unedited below because the relabel-loop *method* is still the right method, and because the

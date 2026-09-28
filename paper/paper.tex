@@ -8,6 +8,7 @@
 \usepackage{times}
 \usepackage{graphicx}
 \usepackage{booktabs}
+\usepackage{array}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{siunitx}
@@ -49,13 +50,8 @@
 Why Public-Data Soiling Models Do Not Transfer,\\
 and What Cleaning Is Actually Worth}
 
-\author{
-  Cameron Gordon \quad Joshua Ramirez \quad Akshitha Nagaraj \quad Craig Fellers\\[2pt]
-  {\normalsize Better Behavior Foundation}\\[2pt]
-  {\small\texttt{betterbehaviorfoundation@gmail.com} \quad
-   \url{https://betterbehaviorfoundation.com}}
-}
-\date{}
+\author{Cameron Gordon}
+\date{\normalsize\textbf{Working draft, not peer reviewed} \quad September 2026}
 
 % Added when the abstract sat inline in column one, where twocolumn's default
 % \flushbottom stretched the glue under it into a two-inch gap. The standalone title page
@@ -172,8 +168,8 @@ minority on ranking. The repair is necessary and not yet sufficient.
 
 Then the result that reorders the others. We measured what a cleaning is worth on 149
 metered rooftops, and one wash on the median system recovers \textbf{\$28.10} of
-electricity at the retail offset most of them earn, or \$10.14 at the marginal export
-rate, against a \$150 service. The median roof would need electricity at
+electricity at the retail offset most of them earn, or \$10.14 at the net-billing
+blended rate, against a \$150 service. The median roof would need electricity at
 \textbf{\$2.44}/kWh to break even, about five times California retail. That is not a
 targeting failure and no better model repairs it. It is the more useful finding, and we
 put it last only because it takes the most machinery to establish.
@@ -399,7 +395,12 @@ The rate had been a flat \$0.25/kWh. We replace it with a
 bill-reconciled PG\&E E-TOU-C plus community-choice stack, validated to
 $\pm$\$0.22/month over 11 consecutive real bills, giving a production-weighted
 retail offset of \$0.4573/kWh and a net-billing export credit of
-\$0.0392/kWh~\cite{cpuc_nbt}. Only 5.5\% of a south-facing array's
+\$0.0392/kWh~\cite{cpuc_nbt}. A soiling-lost kWh is worth the retail offset only if the
+home would have consumed it and the export credit otherwise, so for a net-billing customer
+without a battery we value it at the \emph{net-billing blended rate}, weighting the two by a
+midday self-consumption share of 0.30: $0.30 \times 0.4573 + 0.70 \times 0.0392 =
+\$0.165$/kWh. Every ``blended'' figure below uses this rate, and the retail offset is the
+upper case. Only 5.5\% of a south-facing array's
 annual output lands in the 4--9\,pm peak, so roughly 94\% of soiling-lost kWh are
 off-peak. Site tariff vintage is joined from public interconnection
 filings~\cite{dgstats}.
@@ -670,13 +671,15 @@ two further cleaning assumptions, and on 146 California residential systems wher
 fits are non-degenerate they disagree about both the level and the ordering:
 
 \begin{center}\small
+\setlength{\tabcolsep}{4pt}
 \begin{tabular}{@{}lrrr@{}}
 \toprule
-assumption & median loss & IQR & median CI width \\
+ & median & & median \\
+assumption & loss (\%) & IQR (\%) & CI width (pts) \\
 \midrule
-\texttt{perfect\_clean}   & \SI{2.72}{\percent} & [1.95, 3.74]  & 0.63 \\
-\texttt{half\_norm\_clean} & \SI{9.80}{\percent} & [8.53, 11.98] & 6.92 \\
-\texttt{random\_clean}    & \SI{20.93}{\percent} & [17.34, 24.33] & 19.84 \\
+\texttt{perfect}   & 2.72  & [1.95, 3.74]   & 0.63 \\
+\texttt{half\_norm} & 9.80  & [8.53, 11.98]  & 6.92 \\
+\texttt{random}    & 20.93 & [17.34, 24.33] & 19.84 \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -781,7 +784,7 @@ in dry windows, separated from rain resets by daily precipitation---together wit
 system's own annual soiling loss, its observed heavy-rain frequency, and its nameplate
 capacity. \emph{What we measure is the value of a clean, not a recovery fraction.} One
 wash recovers a median \textbf{241 point-days} of performance (IQR [160, 340]), worth
-\textbf{\$28.10} at the retail offset and \$10.14 at the export rate (IQR [17.32, 43.70]
+\textbf{\$28.10} at the retail offset and \$10.14 at the blended rate (IQR [17.32, 43.70]
 and [6.25, 15.77]), against a median \$150 service. Those are assumption-free: they depend
 on the observed step and its duration, not on any model of unobserved cleaning.
 
@@ -833,7 +836,7 @@ modelled 0.045 is \emph{not} below all three---\texttt{random\_clean} implies 0.
 falls inside the measured range rather than beneath it, and we cannot claim the simulation
 is conservative against every denominator. Anyone recomputing from the published fleet label file obtains 0.217, that
 file carrying \texttt{perfect\_clean}.
-At the marginal export rate of \$0.165/kWh, \textbf{zero of 149} systems clear; at the
+At the net-billing blended rate of \$0.165/kWh, \textbf{zero of 149} systems clear; at the
 full retail offset of \$0.4573/kWh, two do. The median system requires
 \textbf{\$2.44/kWh}, roughly five times California retail (Figure~\ref{fig:value}, left).
 Peak-sun-hours are measured per site from the cached irradiance record rather than held at
@@ -845,9 +848,9 @@ conservative.
 The obvious objection is our \$150 service floor, which is unsourced and which 135 of the
 149 systems price at. It is not load-bearing, because what a wash returns is
 too small for any cost structure to reach. One wash on the median system recovers
-\textbf{\$28.10} at the retail offset and \$10.14 at the export rate
+\textbf{\$28.10} at the retail offset and \$10.14 at the blended rate
 (Figure~\ref{fig:value}, right). A wash would have to cost under \$10 before half of these
-systems cleared at the export rate; at \$25, below any plausible service price, 9.4\%
+systems cleared at the blended rate; at \$25, below any plausible service price, 9.4\%
 clear.
 
 \emph{This comparison is per-wash on both sides, which is what makes it robust.} A
@@ -880,9 +883,9 @@ never soils enough to be worth cleaning. Coastal California sits at $k=\SI{15}{\
   \includegraphics[width=0.98\textwidth]{fig_cleaning_value.pdf}
   \caption{The cleaning-value verdict on 149 measured rooftops, with recovery measured
   rather than modelled. \emph{Left:} the electricity price each system would need for one
-  professional clean to break even; the median needs \$2.44/kWh against a \$0.165
-  marginal export rate. \emph{Right:} what one wash returns per system at both the export
-  rate and the full retail offset, against the cost of the service. Both sides of that
+  professional clean to break even; the median needs \$2.44/kWh against the \$0.165
+  net-billing blended rate. \emph{Right:} what one wash returns per system at both the
+  blended rate and the full retail offset, against the cost of the service. Both sides of that
   comparison are per-wash, and the left-hand quantity carries no cleaning assumption. What
   a wash returns is smaller than any plausible price under either tariff.}
   \label{fig:value}
@@ -1018,7 +1021,7 @@ together.
   of. Limits are stated here rather than distributed through the text so that a reader can
   audit the paper's confidence in one place.}
   \label{tab:claims}
-  \begin{tabular}{p{4.6cm}p{3.3cm}p{7.4cm}}
+  \begin{tabular}{p{4.6cm}>{\raggedright\arraybackslash}p{3.3cm}p{7.4cm}}
     \toprule
     \textbf{Claim} & \textbf{Number} & \textbf{Strongest limit we know of} \\
     \midrule
@@ -1067,7 +1070,8 @@ together.
         circular: NREL's IWSR is itself a perfect-clean construction. \\
     \addlinespace
     The dollar verdict is label-invariant
-      & \$27.14 under all three assumptions
+      & median \$28.10 per wash under each assumption, all 149 systems (max deviation
+        \$$4\times10^{-14}$)
       & Algebraic, not empirical: annual loss cancels between the dollar figure and the
         recovery fraction's denominator. Holds only because we measure the step directly
         rather than inferring it from a modelled annual loss. \\
@@ -1080,8 +1084,8 @@ together.
         cleaning assumption, which is why we report dollars. \\
     \addlinespace
     Cleaning does not clear
-      & 0 of 149 at \$0.165/kWh, 2 of 149 at retail; median needs \$2.44/kWh; one wash
-        returns \$28.10 at retail, \$10.14 at export
+      & 0 of 149 at the \$0.165 blended rate, 2 of 149 at retail; median needs \$2.44/kWh; one wash
+        returns \$28.10 at retail, \$10.14 at the blended rate
       & Recoverable soiling only; a permanent wash-only layer is excluded by construction.
         All 149 systems are Californian. Survives the \$150 service floor because the prize
         is smaller than any plausible price. \\
@@ -1232,9 +1236,9 @@ one neighbourhood. That is a measurement problem, and it is the one worth workin
 
 Whether any of it would matter is settled separately, and more cheaply. On 149 metered
 rooftops one wash recovers \$28.10 of electricity on the median system at the retail
-offset, \$10.14 at the export rate, against a \$150 service; the median roof needs
+offset, \$10.14 at the net-billing blended rate, against a \$150 service; the median roof needs
 electricity at \$2.44/kWh to break even. A wash must cost under \$10 before half of these
-roofs clear at the export rate. No ranking model, however good, creates
+roofs clear at the blended rate. No ranking model, however good, creates
 value that is not there---which is why we would advise anyone entering this problem to
 compute the arithmetic before building the pipeline, as we did not.
 
@@ -1259,8 +1263,9 @@ The corrected validation results are produced by a standalone audit that imports
 from the pipeline it audits and reads the training matrix read-only, so a reader can
 reproduce the negative results without trusting our code:
 
-\begin{center}\small
-\begin{tabular}{@{}ll@{}}
+\begin{center}\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.40\columnwidth}l@{}}
 \toprule
 Result & Script \\
 \midrule

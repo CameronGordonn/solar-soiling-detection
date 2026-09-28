@@ -8,7 +8,7 @@
 
 YOLOv11 polygon segmentation pipeline for detecting solar arrays in NAIP aerial imagery, plus an XGBoost soiling-risk model that scores each detected array.
 
-**Stage 1 target:** the GA gate is **whatever `scripts/detect/eval_tile_f1.py` prints** — tile-level box-F1 @ IoU 0.50, micro-averaged, through the production chip-grid path, conf tuned on val and reported on test, with a bootstrap CI. Pass = F1 ≥ 0.75 **and** CI-lower ≥ 0.70 **and** recall ≥ 0.70. Full wording + rationale in [.claude/rules/stage1-detect.md](.claude/rules/stage1-detect.md).
+**Stage 1 target:** the GA gate is **whatever `scripts/detect/eval_tile_f1.py` prints** — tile-level box-F1 @ IoU 0.50, micro-averaged, through the production chip-grid path, conf tuned on val and reported on test, with a bootstrap CI. Pass = F1 ≥ 0.75 **and** CI-lower ≥ 0.70 **and** recall ≥ 0.70. Full wording + rationale in .claude/rules/stage1-detect.md *(not in the public mirror)*.
 
 > The old "val SAHI F1 ≥ 0.65" gate is **retired** (2026-08-07). It named a metric that no longer exists on this stack: the 21cm relabel changed the labels (2.1× objects on the same footprint) and the imagery, and the RF-DETR path has no SAHI in it. **Any SAHI F1 number in this repo's history, including R2's 0.570, is not comparable to a current one.**
 
@@ -61,9 +61,9 @@ scripts/research/  — exploratory (pseudo-labels, SAM masks; not in active pipe
 
 **New here?** [docs/ONBOARDING.md](docs/ONBOARDING.md) §1 is a runnable setup path: `bash setup/setup_conda.sh` -> `make bootstrap` -> `make test-fast` (**558 passed, 3 skipped, 2 deselected** as of 2026-09-24; ~3m30s in CI, well under a minute on a warm dev box; needs no data). Data custody and the `gh release download` pull are in [DATA.md](DATA.md).
 
-**How to work here (read first):** [@.claude/rules/working-agreement.md](.claude/rules/working-agreement.md) — use the connected tools instead of handing back manual steps; proceed without asking on routine reversible work; name real blockers precisely.
+**How to work here (read first):** @.claude/rules/working-agreement.md *(not in the public mirror)* — use the connected tools instead of handing back manual steps; proceed without asking on routine reversible work; name real blockers precisely.
 
-Domain runbooks: [@.claude/rules/stage1-detect.md](.claude/rules/stage1-detect.md) | [@.claude/rules/stage2-risk.md](.claude/rules/stage2-risk.md) | [@.claude/rules/product.md](.claude/rules/product.md)
+Domain runbooks: @.claude/rules/stage1-detect.md *(not in the public mirror)* | @.claude/rules/stage2-risk.md *(not in the public mirror)* | @.claude/rules/product.md *(not in the public mirror)*
 
 ---
 
