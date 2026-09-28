@@ -5,7 +5,7 @@ papers in fifteen pages; `SPLIT_PLAN.md` records what moved and why.
 
 ## Which paper is which
 
-**`paper.tex` — the submission.** *Station Labels Cannot Rank Roofs.* 16 pages, one thesis
+**`paper.tex` — the submission.** *Station Labels Cannot Rank Roofs.* 18 pages, one thesis
 with a positive control and a decision consequence. Target: *Solar Energy*, which is
 rolling submission, takes systems-and-economics work, and published Mejia and Kleissl.
 Self-contained: no claim in it depends on reading the other paper.

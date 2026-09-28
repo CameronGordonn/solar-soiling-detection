@@ -46,7 +46,7 @@ Ownership map and the deploy/live-action approval rules are in [`docs/TEAM.md`](
 
 ## Area rules
 
-Operating rules for each part of the pipeline live in [`.claude/rules/`](.claude/rules/) — read the
+Operating rules for each part of the pipeline live in `.claude/rules/` *(not in the public mirror)* — read the
 one matching what you're touching before changing it:
 
 | Working on… | Read |

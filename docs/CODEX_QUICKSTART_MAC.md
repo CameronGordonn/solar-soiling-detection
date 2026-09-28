@@ -81,7 +81,7 @@ Openers that work well:
 
 **Ask it to cite a file and line for every number it gives you.** This is not paranoia. This repo
 has stale metrics scattered through older docs, and an agent will quote them with total confidence.
-The house rule in [.claude/rules/working-agreement.md](../.claude/rules/working-agreement.md) is
+The house rule in .claude/rules/working-agreement.md *(not in the public mirror)* is
 that a number travels with its provenance, and it applies to agents too.
 
 ### Which doc wins when two disagree

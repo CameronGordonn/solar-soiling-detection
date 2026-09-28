@@ -1,5 +1,26 @@
 # SolarSoiled
 
+## 📄 Station Labels Cannot Rank Roofs: Why Public-Data Soiling Models Do Not Transfer, and What Cleaning Is Actually Worth
+
+**Cameron Gordon** · **Working draft, not peer reviewed** · September 2026 ·
+**[Read the PDF (18 pages)](paper/paper.pdf)**
+
+Rooftop solar arrays can be located reliably from public aerial imagery (tile-level F1 0.826,
+95% CI [0.798, 0.853]), but public soiling labels are measured at weather stations, not roofs, and
+cannot rank the arrays found: once validation holds out site *and* year together, AUC falls from a
+leaking 0.710 to **0.622** (95% CI [0.571, 0.670]), below the 0.70 gate and below latitude and
+longitude alone (0.644). A size-matched control attributes **83%** of that fall to leakage rather
+than to lost training data (95% CI [52, 99]). A better ranker would not change the decision: on 149
+metered rooftops one wash recovers a median **$28.10** of electricity against a **$150** service,
+and that figure is the same under all three standard cleaning assumptions.
+
+![Figure 1: four questions a public-data cleaning product must answer, and what each returned](paper/assets/fig1_argument.png)
+
+*Figure 1. The paper's argument in one picture. Question 4 is arithmetic, and in this market it
+settles questions 2 and 3: a perfect ranker cannot create value that is not there.*
+
+---
+
 > ### 📦 This is a public mirror
 >
 > A curated snapshot of a private working repository, published so the work can be read.
@@ -25,10 +46,9 @@ runs on any AOI with public aerial coverage.
 The answer has three parts, and the third one reorders the other two. The full argument, with every
 number checked against the artifact that produced it, is the paper in this repo:
 
-> 📄 **[`paper/paper.pdf`](paper/paper.pdf)** — *Station Labels Cannot Rank Roofs: Why Public-Data
-> Soiling Models Do Not Transfer, and What Cleaning Is Actually Worth.* Cameron Gordon, Joshua
-> Ramirez, Akshitha Nagaraj, Craig Fellers. 16 pages. **This is the canonical account of the
-> project**; where a doc disagrees with it, the doc is stale. See [Paper](#paper).
+> 📄 **[`paper/paper.pdf`](paper/paper.pdf)** (working draft, summarised at the top of this page) is
+> **the canonical account of the project**; where a doc disagrees with it, the doc is stale. See
+> [Paper](#paper).
 
 ### 1. Locating arrays is solved
 
@@ -70,8 +90,8 @@ confident, unreproducible rankings.
 
 ### 3. None of it matters, because the cleaning does not pay
 
-On **149 metered California rooftops**, with recovery measured from **505 observed cleaning
-events**, one wash recovers a median **$28.10** of electricity against a **$150** service call. The
+On **149 metered California rooftops**, with the value of each wash measured from **505
+observed cleaning events**, one wash recovers a median **$28.10** of electricity against a **$150** service call. The
 median roof needs **$2.44/kWh** to break even; California retail is around $0.46.
 
 This is the result that survives everything above. Annual loss **cancels** between the value of a
@@ -171,11 +191,11 @@ County aerial imagery (21cm) / NAIP GeoTIFF (0.6m GSD)
 
 **Warm-start from prior best checkpoint, not COCO weights.** R0 retraining warm-starts from the best available checkpoint rather than COCO pretrained weights. The prior checkpoint learned to detect arrays at 0.6m GSD — a signal that hand labels at source resolution can't teach from scratch reliably (small arrays are frequently under-labeled at 60cm). Warm-starting preserves this prior while labels improve iteratively.
 
-**Kimber IWSR physics prior as a feature, not a label source.** The Kimber 2007 Incident Weighted Soiling Rate model gives a physics-derived soiling estimate per station. Rather than using Kimber rates as training labels (which would cap model accuracy at the physics model's error floor), we include the Kimber-derived rate as one input feature. XGBoost can learn to up-weight this prior where NREL station density is sparse and discount it where empirical data is dense.
+**Kimber IWSR physics prior as a feature, not a label source.** The Kimber (2006) Incident Weighted Soiling Rate model gives a physics-derived soiling estimate per station. Rather than using Kimber rates as training labels (which would cap model accuracy at the physics model's error floor), we include the Kimber-derived rate as one input feature. XGBoost can learn to up-weight this prior where NREL station density is sparse and discount it where empirical data is dense.
 
 **Isotonic calibration for actionable risk scores.** Raw XGBoost predicted probabilities are miscalibrated for sparse geographic data — model confidence doesn't match empirical outcome rates. Isotonic regression (monotone, non-parametric) is fit on a held-out calibration fold post-training. Calibrated probabilities feed directly into the cleaning recommendation engine, where overconfidence would cause systematically early or late recommendations.
 
-**Every constant in the dollar chain is sourced or explicitly marked UNSOURCED.** The chain was audited end to end in 2026-08 after a single unmeasured constant (`recovery_frac = 0.90`, modelled at 0.045 and later measured empirically as a 0.031–0.217 bracket) turned out to be carrying the entire product. `RISK_TO_LOSS_PCT = 8.0`, which multiplied a *calibrated classification probability* by 8, was removed outright and replaced by conformalised XGBoost quantile regression on real loss percentages. Electricity rates are bill-reconciled to ±$0.22/month over 11 real PG&E bills, each component carrying its CPUC sheet citation. What remains unsourced is named in code and in the docs rather than quietly assumed.
+**Every constant in the dollar chain is sourced or explicitly marked UNSOURCED.** The chain was audited end to end in 2026-08 after a single unmeasured constant (`recovery_frac = 0.90`) turned out to be carrying the entire product. A simulation puts it at 0.045, but that is a model output, not a measurement, and on metered systems the fraction has no single value: it spans 0.031–0.217 depending on which cleaning assumption supplies the denominator. The paper therefore reports dollars per wash instead ($28.10 against a $150 service), which do not depend on that assumption. `RISK_TO_LOSS_PCT = 8.0`, which multiplied a *calibrated classification probability* by 8, was removed outright and replaced by conformalised XGBoost quantile regression on real loss percentages. Electricity rates are bill-reconciled to ±$0.22/month over 11 real PG&E bills, each component carrying its CPUC sheet citation. What remains unsourced is named in code and in the docs rather than quietly assumed.
 
 **Per-detection RCA harness for targeted label correction.** Instead of bulk-reviewing tiles, inference runs at low confidence (conf=0.05) and emits one row per TP/FP/FN with size, density, edge-proximity, and confidence metadata. Failure-mode buckets (alone-tile FPs, small FNs, high-confidence errors) drive targeted Roboflow relabeling batches. This approach diagnosed that 65 of 360 FPs were concentrated on 20 GT-empty tiles — likely real arrays the original 60cm labels missed, not model hallucinations — informing relabeling priority without wasted review cycles.
 
@@ -233,7 +253,7 @@ All external data fetches are disk-cached. Weather and air quality data streams 
 
 ### Dashboard
 
-Interactive Leaflet map of **3,362 Santa Cruz array polygons (1,865 sites)** with three-tab model switcher — XGBoost ML (0.712 CV AUC), SOMOSclean physics (ENEL exponential accumulation), and Kimber 2007 (linear PM2.5 deposition + rain reset). Features:
+Interactive Leaflet map of **3,362 Santa Cruz array polygons (1,865 sites)** with three-tab model switcher — XGBoost ML (0.712 CV AUC), SOMOSclean physics (ENEL exponential accumulation), and Kimber (2006) (linear PM2.5 deposition + rain reset). Features:
 
 - **QR deep-link**: physical postcard → `dashboard.html?id=<array_id>` → auto-select array with pulse animation
 - **Array detail panel**: risk score gauge, area/tilt/confidence stats, per-model comparison table
@@ -278,7 +298,7 @@ that differ tenfold.** Both claim to be "the share of a year's soiling loss one 
 
 | basis | professional | source |
 |---|---|---|
-| **`measured`** (default) | **0.045** | [`docs/ECONOMICS_GROUNDING_20260809.md`](docs/ECONOMICS_GROUNDING_20260809.md), and what the live BBF calculator ships. The paper independently measures **0.0634** (median of 505 observed cleans on 149 metered systems) |
+| **`measured`** (default) | **0.045** | Despite the enum name, a **simulation output**, not a measurement: one wash on a modelled SOMOSclean trajectory over Santa Cruz rain ([`docs/ECONOMICS_GROUNDING_20260809.md`](docs/ECONOMICS_GROUNDING_20260809.md)); what the live BBF calculator ships. The paper does not report a single measured fraction (on 149 metered systems it spans 0.031–0.217 by cleaning assumption) and reports **$28.10 per wash** against **$150** instead |
 | `seasonal_planning` | 0.445 | `DRY_SEASON_RESET_RECOVERY` × efficacy — a **modelled** April–September scenario assuming a perfect early-July reset. It is the share of *dry-season* cost avoided, not annual, so the two are not interchangeable. It was wrongly the library default for twenty days in September 2026 |
 
 This is not academic. Fed the paper's own median metered system (5.72 kW, 9.53% annual loss, NEM 2.0
@@ -288,8 +308,8 @@ needs **$2.44/kWh**. The measured basis is therefore the default and is named in
 **Pass `recovery_frac` when you have measured it on the roof** — it overrides the basis and is the
 most specific input available. Fed the paper's 149 metered systems each with its own measured
 recovery, the API returns a median break-even of **$2.4410/kWh**, which is the paper's figure to the
-cent, and **0 of 149 clearing at the marginal export rate**, which is the paper's verdict. Both are
-regression-tested. (At full NEM 2.0 retail, 11.7× the export rate, 3 of 149 clear — the
+cent, and **0 of 149 clearing at the $0.165/kWh net-billing blended rate**, which is the paper's verdict. Both are
+regression-tested. (At full NEM 2.0 retail, 11.7× the $0.0392 export credit, 3 of 149 clear — the
 tariff-vintage effect, asserted in the tests rather than rounded away.)
 
 | Endpoint | Description |
@@ -361,7 +381,7 @@ _Legacy 60cm path, retained for baseline evaluation only and **AGPL, not shippin
 
 - **Tariff vintage for the 1,310 city-jurisdiction sites.** A legacy-NEM home is worth **2.78×** more per lost kWh, which is the sharpest per-home targeting signal in the project, and it comes from a public-records join rather than from modelling. The county archive will never cover these — the split is jurisdictional, not age-related (city APN books: 0.0% county coverage; county books: 62.5%). Records request drafted at [`docs/outreach/`](docs/outreach/).
 - **The moss / lichen channel.** Rain removes dust but not moss, lichen, algae or bird droppings, so that entire loss channel sits **outside** what the NREL labels, `sl_sat`, and the measured recovery bracket describe (0.031–0.217 depending on the cleaning assumption; see the paper, which reports dollars instead because the dollars are assumption-invariant). It is the only remaining route to per-home differentiation and to closing the economics gap. The deciding variable (edge-band thickness, ~30 mm) is **sub-pixel at our best 6cm imagery**, so the next step is ground photography, not more compute. Written stop rule that would kill the thesis: [`docs/AOI_CLEANING_TARGETING_PLAN.md`](docs/AOI_CLEANING_TARGETING_PLAN.md).
-- **Paper — drafted, not yet submitted.** `paper/paper.tex` is complete at 16 pages and targets *Solar Energy*; `paper/paper_detection.tex` is the detection half and is **not** submission-ready (methods and results only, no introduction or discussion — PVSC or an arXiv note is the honest venue). Open items are tracked in [`paper/SPLIT_PLAN.md`](paper/SPLIT_PLAN.md). The roof-geometry hand-off that fed it: [`docs/HANDOFF_roof_geometry_for_paper.md`](docs/HANDOFF_roof_geometry_for_paper.md).
+- **Paper — drafted, not yet submitted.** `paper/paper.tex` is complete at 18 pages and targets *Solar Energy*; `paper/paper_detection.tex` is the detection half and is **not** submission-ready (methods and results only, no introduction or discussion — PVSC or an arXiv note is the honest venue). Open items are tracked in [`paper/SPLIT_PLAN.md`](paper/SPLIT_PLAN.md). The roof-geometry hand-off that fed it: [`docs/HANDOFF_roof_geometry_for_paper.md`](docs/HANDOFF_roof_geometry_for_paper.md).
 
 _(Done and **not to be revisited**: Stage 1 and Stage 2 model work are both finished — further chasing is below measurement resolution in both. **Duke joint-curriculum, MERRA-2, mask containment, and SAM2 negative points were each tried and dropped** — measured as neutral or harmful. The Santa Cruz mailer `mailers_v13` (50 cards) went out live 2026-06-30.)_
 
@@ -460,7 +480,7 @@ PYTHONPATH=. python scripts/detect/eval_tile_f1.py \
 
 # Reproduce the economics verdict
 PYTHONPATH=. python scripts/analyze/rate_sensitivity.py --show-stack
-PYTHONPATH=. python scripts/analyze/recovery_calendar.py        # modelled recovery (0.045)
+PYTHONPATH=. python scripts/analyze/recovery_calendar.py        # simulated recovery fraction (0.045)
 PYTHONPATH=. python scripts/analyze/rebuild_aoi_economics.py --aoi santa-cruz-w2-21cm
 
 # Stage 2
@@ -478,8 +498,8 @@ Model weights are gitignored — place `.pth` / `.pt` files in `models/` manuall
 ## Paper
 
 **[`paper/paper.pdf`](paper/paper.pdf) — *Station Labels Cannot Rank Roofs: Why Public-Data Soiling
-Models Do Not Transfer, and What Cleaning Is Actually Worth.*** Cameron Gordon, Joshua Ramirez,
-Akshitha Nagaraj, Craig Fellers (Better Behavior Foundation). 16 pages. Drafted for *Solar Energy*;
+Models Do Not Transfer, and What Cleaning Is Actually Worth.*** Cameron Gordon.
+**Working draft, not peer reviewed.** 18 pages. Drafted for *Solar Energy*;
 not yet submitted.
 
 It asks how far a soiling-targeting system gets on public data alone, and reports where it fails
