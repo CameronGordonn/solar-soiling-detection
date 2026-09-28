@@ -1,5 +1,5 @@
-% paper.tex — Flagging soiled rooftop PV from public data alone.
-% Build: see README.md. Figures must be generated before compiling.
+% paper_detection.tex — Rooftop array detection and roof geometry from public data.
+% Companion to paper.tex. Build: see README.md. Figures must be generated before compiling.
 \documentclass[10pt,twocolumn]{article}
 
 \usepackage[letterpaper,margin=0.85in]{geometry}
@@ -57,21 +57,102 @@ with an Executable Gate\\
 
 \begin{abstract}
 \noindent
-\textbf{Draft, not a submission.} This is the detection and roof-geometry half of a
-paper split because it was three papers in fifteen pages. The material below is moved
-from that draft and has not been rewritten to stand alone: it still refers forward to a
-soiling model that now lives in the other paper, and the introduction, related work and
-discussion are not written. It is released in this state so that the claims the companion
-paper cites can be checked, not as a finished document. See \texttt{SPLIT\_PLAN.md}.
-
-The contribution here is a detection gate stated as an executable definition rather
-than a number, a mask stage whose failure mode is a prompt-box problem rather than a
-mask problem, an independent recall probe against county building permits the
-detector never saw, and a projection trap in lidar-derived tilt that biases the angle
-by 18.9\% on web-Mercator point clouds.
+Any analysis of rooftop solar that starts from overhead imagery inherits the error of its
+detector, and most of what that error costs is invisible in the headline metric. We report
+a rooftop array detector and a per-array roof-geometry method built entirely on public data
+and permissively licensed models, and evaluate each against evidence the model never saw.
+On 2025 Santa Cruz County orthoimagery at \SI{0.204}{\metre} ground sample distance,
+RF-DETR reaches tile-level box-$F_1$ \textbf{0.826} (95\% CI [0.798, 0.853], recall 0.803)
+under a gate stated as an executable script, with the confidence threshold frozen on
+validation and intervals bootstrapped over tiles rather than objects. Against county
+building permits the detector never trained on, parcel-matched recall is \textbf{73.6\%}
+for installs the imagery could contain. A SAM2 mask stage makes area usable, and its one
+dangerous failure, segmenting the whole roof instead of the array, turns out to be a
+prompt-box problem: shrinking the prompt 15\% moves median mask IoU from 0.509 to
+\textbf{0.844} and whole-roof grabs from 43.3\% to \textbf{0\%}. Plane fits to public 3DEP
+lidar recover tilt for 91.3\% of arrays, with a median that matches 8{,}573 installer
+filings to within \SI{0.03}{\degree}, provided one projection trap is avoided: fitting on
+web-Mercator coordinates reports every tilt \textbf{18.9\%} too shallow while producing a
+plausible distribution. We report each result with the evidence that bounds it.
 \end{abstract}
 
+\section{Introduction}
+\label{sec:intro}
+
+Programmes that target rooftop solar, whether for cleaning, maintenance, incentives or
+grid planning, need to know where the arrays are, how large they are and which way they
+face. Installers and utilities hold that information for their own customers; nobody holds
+it for a whole county in a form a municipality or a small organisation can use. Public
+aerial imagery and public lidar together could supply it, and learned detectors are good
+enough that locating arrays is no longer the hard part.
+
+What remains hard is knowing how far to trust the result. Three gaps recur. First, a
+detector's accuracy is usually reported as a number from a held-out split, scored in a way
+that is easy to make optimistic without noticing: thresholds tuned on the test split,
+intervals computed over correlated objects, crops scored instead of the tiles the system
+actually processes. Second, downstream uses consume \emph{area} and \emph{orientation},
+not detections, and the errors that matter for area, such as a mask spilling across a
+roof, are not visible in a box metric. Third, the widely used detection implementations
+are AGPL-3.0, which obstructs reuse by exactly the public bodies a public-data pipeline is
+for.
+
+This paper reports a detection and geometry stack built to close those gaps, and it is the
+input stage of a companion analysis of rooftop soiling and cleaning
+economics.\footnote{Both drafts are in the code repository:
+\url{https://github.com/CameronGordonn/solar-soiling-detection}.} Its contributions are:
+
+\begin{enumerate}\itemsep2pt
+\item \textbf{A detection gate stated as an executable definition} rather than a number,
+scored at the tile level through the production inference path, with the confidence
+threshold frozen on validation and a bootstrap over tiles (\S\ref{sec:detection}), and a
+paired comparison that detects a real improvement the marginal intervals hide
+(\S\ref{sec:results-detection}).
+\item \textbf{An independent recall probe} against county building permits, matched by
+parcel rather than geocoded point, with the reasons the point method fails and the
+jurisdictional trap that can make permit coverage look like model error
+(\S\ref{sec:permits}).
+\item \textbf{A mask stage whose failure mode is located in the prompt}, with two
+principled alternatives measured and rejected (\S\ref{sec:results-mask}).
+\item \textbf{Per-array tilt and azimuth from public lidar}, a projection trap that biases
+tilt by 18.9\% on web-Mercator point clouds, and a validation against installer filings
+that states what a distributional comparison can and cannot establish
+(\S\ref{sec:geometry}, \S\ref{sec:results-geometry}).
+\end{enumerate}
+
+\section{Related work}
+\label{sec:related}
+
+\paragraph{Rooftop PV detection.}
+Public rooftop-PV detection has an established lineage. The Duke
+dataset~\cite{bradbury2016duke} released \SI{0.3}{\metre} imagery with polygon annotations
+for thousands of arrays, and DeepSolar~\cite{yu2018deepsolar} built a national deployment
+database by image classification with weak localisation. Both answer \emph{whether} and
+\emph{where}; neither was built to deliver per-array area for a downstream calculation.
+We use RF-DETR~\cite{rfdetr2025}, a real-time variant of the detection
+transformer~\cite{carion2020detr}, with a SAM2~\cite{ravi2024sam2,kirillov2023sam} mask
+stage. All three are Apache-2.0. The YOLO implementations common in this literature are
+AGPL-3.0, and an earlier version of this pipeline used one, with slicing-aided
+inference~\cite{akyon2022sahi} for small arrays; it is retained only as an evaluation
+baseline.
+
+\paragraph{Roof geometry.}
+3D-PV-Locator~\cite{mayer2022pvlocator} recovers tilt and azimuth per system from 3D
+building data and validates against a per-system registry, which is the stronger design
+where such a registry exists. We work from USGS 3DEP~\cite{usgs3dep} point clouds, which
+cover much of the United States at no cost, and validate against installer-reported tilt
+from California interconnection filings~\cite{dgstats}. Those filings carry no location
+finer than a service city, so our validation is distributional, and we say so where it
+matters (\S\ref{sec:results-geometry}).
+
+\paragraph{Evaluation practice.}
+Two protocol points in this paper are standard in principle and often skipped in practice:
+tuning an operating threshold on a split other than the one reported, and resampling the
+independent unit (here the tile) rather than correlated objects when computing intervals.
+We state both as parts of the gate rather than as analysis choices, so that they cannot be
+relaxed silently between versions.
+
 \section{Methods}
+\label{sec:methods}
 \subsection{Array detection}
 \label{sec:detection}
 
@@ -157,11 +238,12 @@ magnitude in a unit test, so the correction cannot be removed unnoticed. Anyone
 reproducing this on web-Mercator lidar will hit it.
 
 \paragraph{Failed fits are reported as null.} Arrays without a usable fit keep a flagged
-flat default and are never median-filled---precisely the failure mode
-\S\ref{sec:ranking} is about.
+flat default and are never median-filled. Filling them would hand every unfitted roof the
+typical angle and quietly remove the variation a downstream analysis would test for.
 
 
 \section{Results}
+\label{sec:results}
 \subsection{Detection}
 \label{sec:results-detection}
 
@@ -313,6 +395,85 @@ reports true racking angle where the array predates the flight and roof pitch wh
 does not. The groups are small ($n=37$ and $54$) and only 15.9\% of arrays yield a usable
 standoff.
 
+
+\section{Discussion}
+\label{sec:discussion}
+
+\paragraph{What carries over to other detection work.}
+Most of what this paper contributes is protocol rather than architecture, and protocol is
+what transfers. Stating the gate as a script means a later model is scored by the same
+code, through the same inference path, with the same frozen-threshold rule; a gate stated
+in prose drifts every time someone re-implements it. Scoring whole tiles rather than
+crops keeps the number tied to what the system actually does: the shipped model scores
+0.029 $F_1$ lower at the tile level than on chips, a gap a crop-level number would have
+hidden. And the
+paired bootstrap turned an apparent tie into a measured gain. Reading overlapping marginal
+intervals as ``no difference'' would have discarded the effect of doubling the training
+set.
+
+\paragraph{Treat the prompt as a design variable.}
+The mask result generalises beyond solar. When a promptable segmenter is fed boxes from an
+upstream detector, the box is an input with its own error distribution, and the cheapest
+fix for a segmentation failure may be to change the prompt rather than the mask model or
+its post-processing. Both of the more principled fixes we tried made results worse in the
+regime they targeted, for reasons that follow from how the prompt interacts with box error.
+
+\paragraph{Validation that does not share a failure mode.}
+The two independent checks, permits for recall and installer filings for tilt, are useful
+precisely because they are generated by processes unrelated to the imagery. Each also came
+with a trap that would have produced a wrong answer confidently: geocoded permit points
+that never land inside a polygon, and a permitting jurisdiction whose records the county
+does not hold. Where a public registry is used to validate a public-data model, the
+registry's own coverage has to be measured before its disagreement is read as model error.
+
+\paragraph{Sites, not polygons.}
+At \SI{21}{\centi\metre} the detector splits a roof into 1.80 polygons per site on average,
+against 1.30 for the earlier \SI{0.6}{\metre} stack, so polygon counts are not comparable
+across resolutions and per-polygon downstream calculations overcount. The 3{,}362 detected
+polygons form 1{,}865 sites, and any downstream quantity that is naturally per roof should
+be computed per site.
+
+\subsection{Limitations}
+\label{sec:limitations}
+
+\begin{itemize}\itemsep2pt
+\item \textbf{One county, one imagery vintage.} All detection results are on a
+\SI{14.93}{\kilo\metre\squared} area of Santa Cruz County in 2025 imagery. The gate has
+not been re-run elsewhere, and outside the county's imagery service the shipped model has
+no gated input at this resolution.
+\item \textbf{Resolution left on the table.} The county serves \SI{6.3}{\centi\metre}
+imagery and we requested \SI{21}{\centi\metre}, so these results are not a ceiling for the
+method.
+\item \textbf{The label-noise floor is unmeasured.} Without inter-annotator agreement we
+cannot say whether mask IoU of 0.844 is near what human labels allow.
+\item \textbf{Permit recall is era-restricted.} 73.6\% holds for installs the imagery
+could contain; across all permit years it is 55.3\%. Parcel matching can also credit a
+spurious detection that happens to fall on a permitted parcel; gate precision of 0.850
+bounds that effect without removing it.
+\item \textbf{Tilt validation is distributional.} No filing can be matched to an array, so
+agreement is shown for the median only. The standoff experiment is per-array but rests on
+small groups ($n=37$ and $54$).
+\item \textbf{Two unexplained shifts.} The shipped model's threshold-tuning penalty and
+chip-to-tile gap both grew relative to the earlier checkpoint. Neither affects the gate
+verdict, and neither is yet understood.
+\end{itemize}
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+On public imagery, public lidar and permissively licensed models, rooftop arrays can be
+located, measured and oriented well enough to feed a per-roof analysis: tile-level $F_1$
+0.826 under a gate that cannot be quietly relaxed, 73.6\% recall against permits the model
+never saw, unbiased area once the mask prompt is sized correctly, and tilt whose central
+tendency matches installer records once a projection trap is removed. The detector is not
+the hard part of a public-data rooftop pipeline. The companion paper shows what is: public
+soiling labels are measured at stations, not roofs, and no quality of detection repairs
+that.
+
+\section*{Code and data availability}
+Code, configuration, the gate script and the figure scripts are public in the repository
+named on page~1. The imagery tiles, labels and model weights are not redistributed there;
+the imagery and lidar are public services that the code fetches directly.
 
 \bibliographystyle{plainnat}
 \bibliography{refs}

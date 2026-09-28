@@ -13,8 +13,8 @@ Self-contained: no claim in it depends on reading the other paper.
 **`paper_detection.tex` — not a journal submission.** The detection gate, the prompt-box
 result, the permit-recall probe and the web-Mercator projection trap. These are engineering
 findings rather than research novelty, so the honest venue is PVSC or an arXiv technical
-note, not a companion journal paper. It currently has methods and results but no
-introduction, related work or discussion, and its abstract says so.
+note, not a companion journal paper. It is now a complete working draft (7 pages):
+introduction, related work, methods, results, discussion with limitations, and conclusion.
 
 ## How the submission is meant to be read
 
@@ -37,7 +37,7 @@ audit the paper's confidence in one place instead of eight.
 ```
 paper/
   paper.tex                  the submission
-  paper_detection.tex        the detection half, draft, not submission-ready
+  paper_detection.tex        the detection and roof-geometry companion, working draft
   verify_numbers.py          fails if any headline number drifts from its artifact
   refs.bib
   SPLIT_PLAN.md              what moved in the split, and what is still open
