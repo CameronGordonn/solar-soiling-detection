@@ -178,7 +178,7 @@ put it last only because it takes the most machinery to establish.
 We ask what a system built \emph{entirely} on public data can and cannot establish.
 
 \begin{enumerate}\itemsep2pt
-\item \textbf{A gated detection stage} (\S\ref{sec:methods-inputs}; full protocol in the companion detection draft distributed with the code\footnote{\url{https://github.com/CameronGordonn/solar-soiling-detection}}) on public county
+\item \textbf{A gated detection stage} (\S\ref{sec:methods-inputs}; full protocol in the companion detection paper\footnote{\url{https://github.com/CameronGordonn/solar-soiling-detection/blob/main/paper/paper_detection.pdf}}) on public county
 orthoimagery at \SI{0.204}{\metre} ground sample distance, using only permissively
 licensed models, with an executable gate definition, confidence frozen on validation,
 tile-level bootstrap intervals, and an independent permit-based recall probe
@@ -253,7 +253,7 @@ variant~\cite{carion2020detr}, with an optional SAM2~\cite{ravi2024sam2,kirillov
 mask stage, both Apache-2.0; the licence matters because the widely used YOLO
 implementations are AGPL-3.0, which obstructs reuse by exactly the municipalities and
 nonprofits a public-data pipeline is for. Two requirements differ from the prior work and
-are specified in the companion draft: downstream stages consume \emph{area}, so we
+are specified in the companion detection paper: downstream stages consume \emph{area}, so we
 need instance polygons rather than image-level labels, and the gate is evaluated at the
 tile level through the production inference path rather than on crops. Detection is an
 input here, not a contribution.
@@ -292,7 +292,7 @@ Bishop diode model~\cite{bishop1988} via pvlib~\cite{holmgren2018pvlib}.
 \label{sec:methods-inputs}
 
 The pipeline's first two stages supply the units this paper analyses: array
-polygons and their tilt. Both are specified in full in the companion draft. Every
+polygons and their tilt. Both are specified in full in the companion detection paper. Every
 number this paper relies on is stated here, so nothing below depends on reading that
 report; it is cited for protocol detail, not for evidence.
 

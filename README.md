@@ -25,6 +25,11 @@ call.
 *Figure 1. The whole argument in one picture. Question 4 is simple arithmetic, and in this market
 it settles questions 2 and 3: a perfect ranking can't create value that isn't there.*
 
+**Companion paper:** *Permissively Licensed Rooftop Array Detection at 21 cm, with an Executable
+Gate, and Per-Array Roof Geometry from Public Lidar.* [PDF, 7 pages](paper/paper_detection.pdf).
+Also a working draft. It covers the detection and roof-geometry stages in full: the gate, the
+building-permit recall check, the SAM2 prompt-box result and the lidar tilt method.
+
 ## What I found
 
 The goal was a pipeline that could flag which rooftop arrays in a county are worth cleaning,
@@ -192,8 +197,9 @@ make        # figures -> number check -> build/paper.pdf (needs tectonic)
 build if any number in the paper doesn't match its source file) read the audit outputs that aren't
 included. The checked-in [`paper.pdf`](paper/paper.pdf) and
 [`paper_detection.pdf`](paper/paper_detection.pdf) are built from this source.
-[`paper/README.md`](paper/README.md) explains which paper is which: the detection half is a
-separate, earlier-stage draft.
+The companion paper, [`paper_detection.pdf`](paper/paper_detection.pdf) (7 pages, also a working
+draft), covers the detection gate, the permit recall check, the SAM2 prompt-box result and the
+lidar roof geometry in full. [`paper/README.md`](paper/README.md) explains which paper is which.
 
 ## About this repo
 
