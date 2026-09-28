@@ -1,593 +1,207 @@
-# SolarSoiled
+# Solar Soiling Detection
 
-## 📄 Station Labels Cannot Rank Roofs: Why Public-Data Soiling Models Do Not Transfer, and What Cleaning Is Actually Worth
+Finding rooftop solar arrays in public aerial imagery, estimating how much dirt (soiling) each one
+loses, and working out whether paying to clean them is worth it. Everything runs on public data.
 
-**Cameron Gordon** · **Working draft, not peer reviewed** · September 2026 ·
-**[Read the PDF (18 pages)](paper/paper.pdf)**
+**Author:** Cameron Gordon
 
-Rooftop solar arrays can be located reliably from public aerial imagery (tile-level F1 0.826,
-95% CI [0.798, 0.853]), but public soiling labels are measured at weather stations, not roofs, and
-cannot rank the arrays found: once validation holds out site *and* year together, AUC falls from a
-leaking 0.710 to **0.622** (95% CI [0.571, 0.670]), below the 0.70 gate and below latitude and
-longitude alone (0.644). A size-matched control attributes **83%** of that fall to leakage rather
-than to lost training data (95% CI [52, 99]). A better ranker would not change the decision: on 149
-metered rooftops one wash recovers a median **$28.10** of electricity against a **$150** service,
-and that figure is the same under all three standard cleaning assumptions.
+## Paper (working draft)
 
-![Figure 1: four questions a public-data cleaning product must answer, and what each returned](paper/assets/fig1_argument.png)
+**Station Labels Cannot Rank Roofs: Why Public-Data Soiling Models Do Not Transfer, and What
+Cleaning Is Actually Worth.** [PDF, 18 pages](paper/paper.pdf)
 
-*Figure 1. The paper's argument in one picture. Question 4 is arithmetic, and in this market it
-settles questions 2 and 3: a perfect ranker cannot create value that is not there.*
+This is a working draft. It hasn't been peer reviewed or submitted yet.
 
----
+Finding rooftop arrays in public aerial imagery works well (tile-level F1 0.826, 95% CI [0.798,
+0.853]). Ranking those arrays by how dirty they get does not, because the public soiling labels are
+measured at weather stations, not on roofs: once validation holds out both the site and the year,
+AUC drops from 0.710 to 0.622 (95% CI [0.571, 0.670]), which is below my 0.70 gate and below what
+latitude and longitude get on their own (0.644). And a better ranking wouldn't change the answer:
+on 149 metered rooftops, one wash recovers a median $28.10 of electricity against a $150 service
+call.
 
-> ### 📦 This is a public mirror
->
-> A curated snapshot of a private working repository, published so the work can be read.
-> It carries the full pipeline, the docs and the paper. Two things it does **not** carry:
->
-> - **Outreach records.** Six files naming real homes, companies or correspondence are
->   held back. Doc links to them are marked *(not in the public mirror)*.
-> - **The data bundle.** Weights, imagery, tiles and the label sets live in a release on
->   the private repo. Commands below that `gh release download` from
->   `Better-Behavior-Foundation/solar-soiling-ml` **will not work here**, and neither will
->   anything needing that data — including `paper/verify_numbers.py`, which reads
->   `outputs/soiling/audit/*.json`. The checked-in PDFs are the readable evidence.
->
-> Everything else — the code, the tests, the numbers and their provenance — is complete
-> and internally consistent. `make test-fast` passes from a clean clone with no data.
+![Figure 1: the four questions the paper asks and what each one returned](paper/assets/fig1_argument.png)
 
-**How far does rooftop-solar soiling targeting get on public data alone?** This repo is the full
-attempt and the honest answer. It detects rooftop arrays in public aerial imagery (RF-DETR + SAM2),
-scores per-array soiling risk (XGBoost on weather, air quality, land use and roof geometry), and
-carries the result through a sourced net-dollar chain. It is county-agnostic by construction and
-runs on any AOI with public aerial coverage.
+*Figure 1. The whole argument in one picture. Question 4 is simple arithmetic, and in this market
+it settles questions 2 and 3: a perfect ranking can't create value that isn't there.*
 
-The answer has three parts, and the third one reorders the other two. The full argument, with every
-number checked against the artifact that produced it, is the paper in this repo:
+## What I found
 
-> 📄 **[`paper/paper.pdf`](paper/paper.pdf)** (working draft, summarised at the top of this page) is
-> **the canonical account of the project**; where a doc disagrees with it, the doc is stale. See
-> [Paper](#paper).
+The goal was a pipeline that could flag which rooftop arrays in a county are worth cleaning,
+using only public data. It has three stages: detect the arrays, predict each one's soiling, and
+turn that into a dollar decision. What came out of it:
 
-### 1. Locating arrays is solved
+1. **Detection works.** RF-DETR with a SAM2 mask stage, on Santa Cruz County's 21 cm aerial
+   imagery, gets a tile-level box F1 of 0.826 on the held-out test set (precision 0.850, recall
+   0.803). As an independent check, it finds 73.6% of the arrays in county building permits it
+   never saw.
 
-Tile-level box-F1 **0.8260** on test (P 0.850 / R 0.803, 95% CI [0.798, 0.853], n_gt 585), clearing
-all three GA conditions with confidence tuned on val and **frozen before test was touched**. An
-independent check against building permits the detector never saw gives **73.6%** recall. RF-DETR
-@728 + SAM2, Apache-2.0, on 21cm county imagery. **This part works and is the asset.**
+2. **Ranking roofs by soiling doesn't work, and my own validation hid that for a while.** The two
+   folds I originally used each held out one thing but not the other. The spatial fold held out
+   *place* but kept a station's other years in training, and leave-one-year-out held out the
+   *year* but kept the same station. That was true for 88.7% of rows, so neither fold ever scored
+   a station the model hadn't seen. With a fold that holds out both:
 
-### 2. Ranking them is not — and our own validation hid that for months
+   | | AUC |
+   |---|---|
+   | XGBoost, 40 features | 0.622 (95% CI [0.571, 0.670]) |
+   | latitude + longitude only | 0.644 |
+   | Kimber (2006) physics model, no training | 0.610 |
+   | what the leaking fold reported | 0.710 |
 
-⚠️ **Found 2026-09-22, while writing the paper. It supersedes every Stage 2 validation number this
-project published before that date.**
+   A size-matched control shows 83% of that drop (95% CI [52, 99]) is from the leak rather than
+   from having less training data. The older numbers weren't mismeasured; every one reproduces to
+   within 0.012. The problem was how the folds were built. Out of region it's worse: 0.655 pooled
+   and 0.527 on the largest region.
 
-Both production folds held out *one* axis and not the other. The 10 km spatial fold held out
-**place** but let a station's other years into training; leave-one-year-out held out **year** but
-let the same station back in — for **88.7%** of rows, measured. Neither fold ever asked the model to
-score a station it had not already seen.
+   The deeper problem is the label. Public soiling labels are measured at stations, so every roof
+   near a station gets the same number. Per-system telemetry does carry real per-roof signal (0.573
+   against the 0.5 a station label can't beat), but the three standard ways of estimating a
+   system's soiling disagree with each other (median loss 2.72%, 9.80% or 20.93% on the same
+   systems, rank correlation 0.24 to 0.89). Better labels are needed, but they aren't enough on
+   their own yet.
 
-| Under a jointly out-of-station-and-year fold | AUC |
-|---|---|
-| production model, 40 features | **0.622** (95% CI [0.571, 0.670], P(AUC ≥ 0.70) = 0.001) |
-| **latitude + longitude alone** | **0.644** — *beats all 40 features* |
-| unfitted Kimber (2006), no training at all | 0.610 |
-| *what the leaking gate reported* | *0.710* |
+3. **Cleaning doesn't pay here.** On 149 metered California rooftops, with 505 observed cleaning
+   events, one wash recovers a median $28.10 of electricity, against a $150 service charge (my assumed
+   price, not a market quote). The median roof would need electricity at $2.44/kWh to break even, about five times
+   California retail. That dollar figure is the same under all three soiling estimates, because
+   the annual loss cancels out of the calculation. Across the 1,865 sites detected in Santa Cruz,
+   none come out ahead on a cleaning, at least for the soiling that rain and washing can remove.
 
-A size-matched control puts **83%** of that fall on leakage (95% CI [52, 99]) rather than on having
-less training data. **The older numbers are not fabrications** — matched on reporting basis, every
-previously published figure reproduces to within **0.012**. It was a fold-construction error, not a
-measurement error, which is why the corrections below are made in place rather than by deletion.
-
-**The root cause is the label unit, and it is not fixable with better features.** Public soiling
-labels are measured at **stations**, so every roof in a catchment inherits one number. Per-system
-telemetry does carry real per-array signal — per-array features rank systems sharing weather at
-**0.573**, against the **0.5** a station-label model cannot exceed by construction — but three
-standard cleaning assumptions put those same systems' median annual loss at **2.72%, 9.80% and
-20.93%** and rank them at ρ **0.24–0.89**. Per-system labels are **necessary and not yet
-sufficient**. Scaling a label whose two standard variants disagree at ρ 0.126 would produce
-confident, unreproducible rankings.
-
-### 3. None of it matters, because the cleaning does not pay
-
-On **149 metered California rooftops**, with the value of each wash measured from **505
-observed cleaning events**, one wash recovers a median **$28.10** of electricity against a **$150** service call. The
-median roof needs **$2.44/kWh** to break even; California retail is around $0.46.
-
-This is the result that survives everything above. Annual loss **cancels** between the value of a
-clean and the recovery fraction's denominator, so the dollar figure is **identical under all three
-labelling assumptions** while the fraction itself spans **0.031 to 0.217**. The ranking problem in
-part 2 would not change the decision even if it were solved.
-
-Across the 1,865 detected Santa Cruz sites, **zero** show a positive expected net from a cleaning on
-recoverable soiling, at any rate to $0.70/kWh, any system size, 2,000 Monte Carlo draws each. The
-audit: [`docs/ECONOMICS_GROUNDING_20260809.md`](docs/ECONOMICS_GROUNDING_20260809.md).
-
-### What this project is, therefore
-
-A negative commercial result carried openly rather than buried, plus a detection stack that works
-and is licence-clean. The honest product is a **diagnosis** — "here is what your array loses, and
-no, do not pay to clean it" — not a cleaning lead list. What generalises is the fold geometry, the
-label-unit diagnosis and the arithmetic.
-
-> **New here?** [`docs/ONBOARDING.md`](docs/ONBOARDING.md) — env setup, data/secrets handoff, and a
-> read order that takes under an hour. Ownership and working norms: [`docs/TEAM.md`](docs/TEAM.md).
-> Every headline number with its artifact: [`docs/CANONICAL_NUMBERS.md`](docs/CANONICAL_NUMBERS.md).
-
-**Live product** — dashboard + calculator live in the **BBF site** (Cloudflare Pages):
-- Site → `https://betterbehaviorfoundation.com`
-- Dashboard → `/tools/dashboard` — **3,362 array polygons across 1,865 sites**, 3-model risk comparison, QR deep-link, energy calculator
-- Breakeven calculator → `/tools/calculator`
-- API at `https://solarsoiled-api.onrender.com` (use `/health/live`; root returns 404 by design)
-
-Every output carries `model_version`, `beta`, and `known_limitations` — quality metadata is in the
-output contract, not a footnote.
-
-⚠️ **One contract is knowingly out of step.** `models/registry.yaml` still carries
-`run_optionb` at `beta: false` from a GA flip on 2026-09-02, which predates the leak finding. The
-entry's prose and `known_limitations` now state the 0.622 figure, but the flag itself is unchanged
-pending a product decision. Do not read it as evidence the gates hold.
-
----
-
-## Architecture
-
-```
-County aerial imagery (21cm) / NAIP GeoTIFF (0.6m GSD)
-       │
-       ▼
-  Tiling + CRS preservation          640×640 PNG chips; affine + CRS logged in tile_index.json
-       │
-       ▼
-  Roboflow annotation pipeline        polygon segmentation labels (whole-array convention)
-       │
-       ▼
-  RF-DETR @728 training               Apache-2.0 detector; dataset data/yolo/scc21
-  (permissive stack)                  gate = tile-level box-F1 via eval_tile_f1.py
-       │
-       ▼
-  Production inference                whole tile → 2×2 grid of 640px chips → one pass per
-  scripts/detect/rfdetr_infer.py      chip → NMS seam merge at IoU 0.55
-       │
-       ▼
-  SAM2 mask stage                     prompt box shrunk 15%; area is the product, and this
-  (on by default)                     is what makes area unbiased (median area/GT = 1.01)
-       │
-       ▼
-  Per-detection RCA                   one row per TP/FP/FN with size, density, edge, confidence;
-  scripts/detect/per_detection_rca.py failure-mode buckets → targeted Roboflow relabeling
-       │
-       ▼
-  GeoJSON polygon export              georeferenced array footprints, CRS round-tripped end-to-end
-       │
-       ▼
-  Feature engineering                 ERA5 weather · CAMS PM2.5/PM10 · ESA WorldCover ·
-  scripts/analyze/build_risk_features.py  OSM proximity · Kimber IWSR physics prior (as feature)
-       │
-       ▼
-  XGBoost soiling-risk model          10km spatial GroupKFold · isotonic calibration ·
-  scripts/predict/train_risk_model.py --holdout-year temporal validation
-       │
-       ▼
-  solarsoiled CLI                     tile / detect / score / recommend / run / eval subcommands
-  Per-AOI outputs + manifest.json     model_version + inputs_hash + beta flag on every artifact
-       │
-       ▼
-  Partner dashboard + outreach        Leaflet risk map · 3-model comparison · QR postcards
-  ../BBF-Website/public/tools/        physical-to-digital loop: postcard → dashboard → action
-```
-
----
-
-## Key Engineering Choices
-
-**The gate is an executable script, not a sentence.** `scripts/detect/eval_tile_f1.py` *is* the Stage 1 gate definition: tile-level box-F1 at IoU ≥ 0.50, micro-averaged, measured through the real production path (whole tile → chip grid → NMS seam merge). Three things it fixes that prose gates kept getting wrong: confidence is **tuned on val and frozen** before test is scored (an earlier manifest tuned on test and spent the held-out split); matching is on **boxes, not masks**, so the gate is invariant to whether SAM2 is running and you can tell which stage regressed; and the 95% CI **bootstraps over tiles, not objects**, because arrays within a tile are correlated and object-resampling reports an interval that is too narrow.
-
-**Compare paired models with a paired test.** W2 vs W1 marginal CIs overlap heavily and each point estimate sits inside the other's interval, so eyeballing them says "noise" — and that is the wrong test, because both were scored on the same 49 tiles. Bootstrapping the per-tile *difference* gives +0.0246 F1, 95% CI [+0.0051, +0.0441], P(W2 > W1) = 0.993. Doubling the training set produced a real gain that the naive read would have discarded.
-
-**Prompt-box quality, not mask post-processing, is what makes area correct.** Area feeds the m² → kW → $ chain, so a mask that grabs roof is a pricing error. Shrinking the SAM2 prompt box 15% gives median IoU 0.844 and **0% roof-grab**, against 0.509 and 43.3% for boxes alone. Two more principled alternatives (negative points, mask containment) were implemented, measured, and **rejected** — containment made it worse everywhere. The negative results are kept reproducible behind flags rather than deleted.
-
-**10km spatial GroupKFold — and why it was not enough.** Soiling rate is spatially autocorrelated, so random CV leaks across neighbours and inflates AUC. We cluster the NREL stations (255 in the source CSVs, 257 in the training matrix) into 10km bins via KMeans and hold out whole bins; the gap between spatial-CV (0.712) and random-CV (~0.74) quantifies what naive splitting would mask. ⚠️ **This was the right instinct and still the wrong fold.** Holding out *place* does not hold out the *station*, whose other years stay in training — so the fold never tested generalization to an unseen station at all. Adding the year axis drops the same model to **0.622**. Two further limits follow: 10 km clusters do not test regional transfer (whole-region holdout gives **0.655** pooled, **0.527** on the largest region), and no station-level fold can fix the label unit, which is the actual ceiling. **The lesson worth taking: a fold that holds out one axis of a two-axis dependency measures nothing, and it fails silently and flatteringly.**
-
-**Warm-start from prior best checkpoint, not COCO weights.** R0 retraining warm-starts from the best available checkpoint rather than COCO pretrained weights. The prior checkpoint learned to detect arrays at 0.6m GSD — a signal that hand labels at source resolution can't teach from scratch reliably (small arrays are frequently under-labeled at 60cm). Warm-starting preserves this prior while labels improve iteratively.
-
-**Kimber IWSR physics prior as a feature, not a label source.** The Kimber (2006) Incident Weighted Soiling Rate model gives a physics-derived soiling estimate per station. Rather than using Kimber rates as training labels (which would cap model accuracy at the physics model's error floor), we include the Kimber-derived rate as one input feature. XGBoost can learn to up-weight this prior where NREL station density is sparse and discount it where empirical data is dense.
-
-**Isotonic calibration for actionable risk scores.** Raw XGBoost predicted probabilities are miscalibrated for sparse geographic data — model confidence doesn't match empirical outcome rates. Isotonic regression (monotone, non-parametric) is fit on a held-out calibration fold post-training. Calibrated probabilities feed directly into the cleaning recommendation engine, where overconfidence would cause systematically early or late recommendations.
-
-**Every constant in the dollar chain is sourced or explicitly marked UNSOURCED.** The chain was audited end to end in 2026-08 after a single unmeasured constant (`recovery_frac = 0.90`) turned out to be carrying the entire product. A simulation puts it at 0.045, but that is a model output, not a measurement, and on metered systems the fraction has no single value: it spans 0.031–0.217 depending on which cleaning assumption supplies the denominator. The paper therefore reports dollars per wash instead ($28.10 against a $150 service), which do not depend on that assumption. `RISK_TO_LOSS_PCT = 8.0`, which multiplied a *calibrated classification probability* by 8, was removed outright and replaced by conformalised XGBoost quantile regression on real loss percentages. Electricity rates are bill-reconciled to ±$0.22/month over 11 real PG&E bills, each component carrying its CPUC sheet citation. What remains unsourced is named in code and in the docs rather than quietly assumed.
-
-**Per-detection RCA harness for targeted label correction.** Instead of bulk-reviewing tiles, inference runs at low confidence (conf=0.05) and emits one row per TP/FP/FN with size, density, edge-proximity, and confidence metadata. Failure-mode buckets (alone-tile FPs, small FNs, high-confidence errors) drive targeted Roboflow relabeling batches. This approach diagnosed that 65 of 360 FPs were concentrated on 20 GT-empty tiles — likely real arrays the original 60cm labels missed, not model hallucinations — informing relabeling priority without wasted review cycles.
-
----
-
-## Datasets
-
-| Dataset | Scale | Source | Role |
-|---|---|---|---|
-| **SCC 2025 aerial (21cm)** | 976 chips (680/100/196), 3,894 polygons | Santa Cruz County MapServer | **Primary detection domain** (`data/yolo/scc21`) — all 249 tiles relabeled at full resolution |
-| NAIP Santa Cruz | 248 tiles, ~1,000 labeled arrays, 0.6m GSD | USDA NAIP via Roboflow | Legacy 60cm domain; labels not comparable to the 21cm set |
-| **USGS 3DEP lidar** | per-array tilt + azimuth, 3,068 / 3,362 arrays (91.3%) | USGS 3DEP, free | Roof geometry → per-roof plane-of-array irradiance. Median plane-fit residual 4 cm |
-| **CaliforniaDGStats** | 7,536 AOI interconnections; 8,547 with reported tilt | californiadgstats.ca.gov, free | Tariff vintage (AOI is 90.1% legacy NEM) + independent tilt validation |
-| NREL PVDAQ system 2107 | 893 kW, 8.08 years, revenue-grade meter + class-A pyranometer | OEDI open data lake, free | Persistent-soiling probe and wash-test power analysis |
-| Duke / Bradbury | 601 source images, ~19,400 array polygons, 0.3m GSD | Duke Energy / Figshare | Joint-curriculum experiment — **abandoned** (scale-mixing hurt); R2 is NAIP-only |
-| NREL soiling database | 255 stations, ~15 years panel-level soiling measurements | NREL public API | Stage 2 training labels |
-| Open-Meteo ERA5 reanalysis | Historical weather per station (temp, humidity, wind, precip) | Open-Meteo OPeNDAP (1940–present) | Stage 2 weather features |
-| CAMS global atmosphere | PM2.5, PM10 per station | Copernicus / MERRA-2 OPeNDAP (1980–present) | Stage 2 air quality features |
-| ESA WorldCover 2021 | 10m land cover classification | ESA | Stage 2 land use features |
-| OpenStreetMap | Road network, agricultural land boundaries | Overpass API | Stage 2 proximity features |
-
-All external data fetches are disk-cached. Weather and air quality data streams via OPeNDAP — no bulk download required.
-
----
+So the useful product is a diagnosis ("here's what your array loses, and no, don't pay to clean
+it"), not a list of cleaning leads. I think the parts that carry over to other problems are the
+fold design, the label-unit diagnosis and the arithmetic.
 
 ## Results
 
-| Stage | Metric | Why this metric | Value |
-|---|---|---|---|
-| Stage 1 | **tile-level box-F1 @ IoU 0.50** | The gate. Production path, conf tuned on val and frozen, micro-averaged | **0.8260** ✓ (`rfdetr_w2_20260807`, 95% CI [0.798, 0.853], n_gt 585) |
-| Stage 1 | test precision / recall | Recall is the funnel — a missed array is a missed lead | P **0.850** / R **0.803** ✓ |
-| Stage 1 | SAM2 mask area vs GT | Area feeds the dollar chain, so bias here is a pricing error | median area/GT **1.01**, roof-grab **0%** |
-| Stage 2 | **Spatial-CV AUC** | 10km GroupKFold. Has the mirror defect of the fold below — read it with the row after next | 0.712 (0.728 = `run_optionb` as stored, does not reproduce) |
-| Stage 2 | **Pooled out-of-year AUC** | Rolling leave-one-year-out across 15 panel years (n=891) | 0.710 (95% CI [0.676, 0.742]) — ⚠️ **leaking**, see below |
-| Stage 2 | **Joint out-of-site + out-of-year AUC** | The honest fold. Holds out site *and* year together; the two rows above hold out one or the other | **0.622** ✗ (95% CI [0.571, 0.670], P(AUC ≥ 0.70) = 0.001) |
-| Stage 2 | Reference points for that 0.622 | What the 40-feature model has to beat to be earning its keep | lat/lon alone **0.644**; unfitted Kimber 2006 **0.610** |
-| Stage 2 | Out-of-year calibration | Each training-year isotonic map applied to its held-out year | Brier 0.218 < 0.250 base-rate ✓ |
-
-**Gates**: Stage 1 GA requires **all three** of tile-F1 ≥ 0.75, CI-lower ≥ 0.70, recall ≥ 0.70 — **all clear**, and the paper's permit-recall probe (73.6% against permits the detector never saw) is independent corroboration. Stage 2 GA was recorded as clear on spatial-CV ≥ 0.70 **and** pooled out-of-year ≥ 0.70 **and** calibration retained — **that pass does not survive the fold correction above**, and the registry entry has not yet been un-flipped. Treat Stage 2 as measuring soiling *level*, not as ranking roofs.
-
-`production` resolves to **`rfdetr-w2-20260807`** (RF-DETR + SAM2, Apache-2.0), flipped 2026-08-23. The live dashboard's 1,865 sites were already produced by it, so the alias describes what ships rather than what preceded it. R2 stays registered as `stage1-60cm-legacy` for the 60cm path; it is AGPL and evaluation-only. **The live constraint is geographic, not licensing**: W2 is gated on Santa Cruz County 21cm imagery, and outside that AOI the county service has no coverage. See [`docs/COMMERCIALIZATION.md`](docs/COMMERCIALIZATION.md).
-
----
-
-## Product
-
-### Live surfaces
-
-| Surface | URL | Status |
+| Stage | Metric | Value |
 |---|---|---|
-| BBF site (hosts the tools) | `https://betterbehaviorfoundation.com` | ✅ Live on Cloudflare Pages (2026-06-30) |
-| Homeowner dashboard | `/tools/dashboard` | ✅ Live (in `../BBF-Website/public/tools`) |
-| Breakeven calculator | `/tools/calculator` | ✅ Live |
-| FastAPI backend | `https://solarsoiled-api.onrender.com` | Live (free tier, ~30s cold start) |
+| Detection | tile-level box F1 @ IoU 0.50 (test, confidence tuned on val) | 0.826, 95% CI [0.798, 0.853] |
+| Detection | precision / recall | 0.850 / 0.803 |
+| Detection | recall against unseen building permits | 73.6% |
+| Detection | SAM2 mask area vs ground truth | median ratio 1.01, 0% roof-grab |
+| Soiling | AUC, site and year held out together | 0.622, 95% CI [0.571, 0.670] (gate 0.70, not met) |
+| Soiling | AUC, whole region held out | 0.655 pooled, 0.527 largest region |
+| Soiling | out-of-year calibration | Brier 0.218 vs 0.250 base rate |
+| Economics | value of one wash, median of 149 metered systems | $28.10 at retail, $10.14 at the net-billing blended rate |
+| Economics | break-even electricity price, median system | $2.44/kWh |
 
-### Dashboard
+Every headline number, the file it comes from and how to reproduce it is in
+[`docs/CANONICAL_NUMBERS.md`](docs/CANONICAL_NUMBERS.md). If another doc disagrees with it, that
+doc is out of date.
 
-Interactive Leaflet map of **3,362 Santa Cruz array polygons (1,865 sites)** with three-tab model switcher — XGBoost ML (0.712 CV AUC), SOMOSclean physics (ENEL exponential accumulation), and Kimber (2006) (linear PM2.5 deposition + rain reset). Features:
+## How it works
 
-- **QR deep-link**: physical postcard → `dashboard.html?id=<array_id>` → auto-select array with pulse animation
-- **Array detail panel**: risk score gauge, area/tilt/confidence stats, per-model comparison table
-- **Energy calculator**: client-side JS; inputs system_kw + electricity_rate + sun_hours → annual kWh loss + dollar loss
-
-### API
-
-Deployed at `https://solarsoiled-api.onrender.com`. **The dashboard does not call it** — the
-dashboard is fully self-contained, which deliberately removed a single point of failure. The API's
-reason to exist is the decision endpoints below.
-
-**`POST /decision` is the one that matters.** It answers *is it worth paying to clean this array?*
-from arithmetic over sourced constants, loading **no model weights**. That is not a limitation, it
-is the point: the dollar answer is the one result here that survives the Stage 2 validation
-problems, because annual loss cancels between the value of a clean and the recovery fraction's
-denominator. It therefore stays available when the soiling registry does not resolve.
-
-```bash
-curl -s "https://solarsoiled-api.onrender.com/decision?system_kw=6&install_date=2015-06-01"
+```
+county aerial imagery (21 cm)
+  -> 640 px tiles, CRS and affine transform kept for every tile
+  -> RF-DETR detector (Apache-2.0), whole tile as a 2x2 chip grid, NMS across the seams
+  -> SAM2 masks from a prompt box shrunk 15%
+  -> georeferenced array polygons, plus roof tilt and azimuth from USGS 3DEP lidar
+  -> features: weather (ERA5), air quality (CAMS), land cover (ESA WorldCover), OSM proximity
+  -> XGBoost soiling model with isotonic calibration
+  -> cleaning decision: sourced electricity rates, Monte Carlo over the uncertain inputs
 ```
 
-```jsonc
-{ "verdict": "no_clean", "annual_loss_usd": 129.56,
-  "best_action": "rinse_service", "best_action_net_usd": -85.85,
-  "thresholds": { "professional": { "breakeven_tariff_usd_per_kwh": 11.77,
-                                    "breakeven_system_kw": null,      // no size pays
-                                    "breakeven_soiling_pct": null } },
-  "uncertainty": { "prob_net_positive": 0.0, "decision_robust": true },
-  "inputs": { "recovery_basis": "measured" },
-  "provenance": { "loss_pct": "BASE_SOILING_PCT default (2.8%) - NOT a measurement of this roof" },
-  "limitations": [ "Estimates soiling LEVEL, not a ranking between roofs...", "..." ] }
+A few choices worth explaining:
+
+- **The detection gate is a script, not a sentence.** `scripts/detect/eval_tile_f1.py` defines it:
+  F1 on boxes through the real production path, confidence tuned on val and frozen before test is
+  touched, and a 95% CI from bootstrapping over tiles instead of objects (arrays in the same tile
+  are correlated, so resampling objects gives an interval that's too narrow).
+- **Compare two models with a paired test.** Two detector versions had overlapping confidence
+  intervals, which looks like noise. But they were scored on the same 49 tiles, so the right test
+  is a bootstrap on the per-tile difference: +0.025 F1, 95% CI [+0.005, +0.044]. The gain was real.
+- **Fix the prompt box, not the mask.** Area feeds straight into the dollar calculation, so a mask
+  that spills onto the roof is a pricing error. Shrinking SAM2's prompt box by 15% took median IoU
+  from 0.509 to 0.844 and roof-grab from 43% to 0%. I tried two fancier fixes (negative points and
+  mask containment) and both did worse; they're still behind flags so the results can be
+  reproduced.
+- **Report dollars, not a recovery fraction.** The whole cleaning case used to rest on an assumed
+  recovery fraction of 0.90. A simulation puts it at 0.045, and on real systems it has no single
+  value (0.031 to 0.217 depending on the soiling estimate). The dollars recovered per wash don't
+  depend on that choice, so that's what I report. Every constant in the dollar calculation is
+  either sourced or marked `UNSOURCED` in the code. The audit is in
+  [`docs/ECONOMICS_GROUNDING_20260809.md`](docs/ECONOMICS_GROUNDING_20260809.md).
+- **Keep the licence clean.** The detector is RF-DETR and SAM2, both Apache-2.0. The older YOLO /
+  SAHI path is AGPL-3.0, so it's in an optional `legacy` extra that isn't installed by default.
+
+## Repository layout
+
+```
+src/solarsoiled/   CLI, API, model registry, run manifests
+src/risk/          soiling features, risk model, recovery and electricity-rate math
+src/utils/         detection matching, error analysis, tile metadata
+scripts/           pipeline scripts by stage: data, detect, analyze, predict, labeling
+paper/             both papers: LaTeX source, figure scripts and built PDFs
+configs/           model and experiment configs (hyperparameters live here, not in scripts)
+models/            model registry (weights aren't in git)
+docs/              working notes, method write-ups and audits
+tests/             test suite
 ```
 
-Three things it does on purpose. **`provenance`** names how every input was obtained, because the
-most dangerous field here is a default the caller did not realise they accepted. **`thresholds`**
-says what would have to be true — a bare "no" is not actionable, and `null` here means *no system
-size pays at any price*. **There is no `risk_score` input**: the risk-score → loss-percent mapping
-was removed as unsound and is deliberately not reconstructed.
+## Running it
 
-**`recovery_basis` is the field that decides the answer, and the repo carries two values for it
-that differ tenfold.** Both claim to be "the share of a year's soiling loss one wash recovers":
+The code and tests are all here, but the data isn't. Model weights, imagery, label sets and the
+paper's audit outputs live in a private repository, so anything that needs them (training, the
+detection gate, regenerating the paper's numbers) won't run from this repo. Some docs refer to a
+`gh release download` step; that won't work from here either. [`DATA.md`](DATA.md) lists what the
+data is.
 
-| basis | professional | source |
-|---|---|---|
-| **`measured`** (default) | **0.045** | Despite the enum name, a **simulation output**, not a measurement: one wash on a modelled SOMOSclean trajectory over Santa Cruz rain ([`docs/ECONOMICS_GROUNDING_20260809.md`](docs/ECONOMICS_GROUNDING_20260809.md)); what the live BBF calculator ships. The paper does not report a single measured fraction (on 149 metered systems it spans 0.031–0.217 by cleaning assumption) and reports **$28.10 per wash** against **$150** instead |
-| `seasonal_planning` | 0.445 | `DRY_SEASON_RESET_RECOVERY` × efficacy — a **modelled** April–September scenario assuming a perfect early-July reset. It is the share of *dry-season* cost avoided, not annual, so the two are not interchangeable. It was wrongly the library default for twenty days in September 2026 |
-
-This is not academic. Fed the paper's own median metered system (5.72 kW, 9.53% annual loss, NEM 2.0
-retail), `seasonal_planning` returns **"clean it, +$47.80"** while the paper reports that system
-needs **$2.44/kWh**. The measured basis is therefore the default and is named in every response.
-
-**Pass `recovery_frac` when you have measured it on the roof** — it overrides the basis and is the
-most specific input available. Fed the paper's 149 metered systems each with its own measured
-recovery, the API returns a median break-even of **$2.4410/kWh**, which is the paper's figure to the
-cent, and **0 of 149 clearing at the $0.165/kWh net-billing blended rate**, which is the paper's verdict. Both are
-regression-tested. (At full NEM 2.0 retail, 11.7× the $0.0392 export credit, 3 of 149 clear — the
-tariff-vintage effect, asserted in the tests rather than rounded away.)
-
-| Endpoint | Description |
-|---|---|
-| `POST /decision` | Cleaning decision: dollars, Monte Carlo uncertainty, thresholds, stated limits |
-| `GET /decision` | Same, as query parameters, for links and browser calls |
-| `GET /breakeven` | The thresholds alone — what would have to be true for cleaning to pay |
-| `GET /health/live` | Process up |
-| `GET /health/ready` | Readiness **per capability** (`decision` / `risk_scoring` / `detection`) |
-| `POST /jobs` | Submit async AOI detect + score job |
-| `GET /jobs/{id}` | Poll job status + result URL |
-| `GET /jobs/{id}/events` | SSE stream for real-time job progress |
-| `GET /results/{partner_id}/{arrays,map,recommendations}` | Fetch cached AOI results (auth) |
-| `POST /feedback` | Submit post-clean energy reading |
-| `GET /recommend-quick` | Legacy dashboard endpoint; requires a scored AOI on disk |
-
-`/health/ready` reports each capability separately rather than one verdict for the whole service. A
-single "degraded" was actively misleading: it fired because the soiling model file is absent from
-the deployed container, while the decision endpoint needs no weights and was available the whole
-time.
-
-### Outreach pipeline (Santa Cruz pilot)
-
-Physical-to-digital loop: risk scores → postcard → QR code → personalized dashboard → cleaning action.
-
-- **Target selection** (`scripts/outreach/build_detected_targets.py`) — detected arrays ranked by recoverable net-$ (`expected_net_usd`) with a residential size filter, **owner-occupied only**, situs address via county parcel join. (`select_targets.py` is the older `0.6·risk + 0.4·confidence` path.)
-- **PDF mailers** (`scripts/outreach/generate_mailers.py`) — 6×4" postcard per array with risk stats, dollar loss estimate, QR code → personalized dashboard URL
-- **Lob integration** (`scripts/outreach/mail_via_lob.py`) — print-and-mail API; `--send` commits, with a per-card `Idempotency-Key` so re-runs are deduped (never double-charged). **✅ `mailers_v13` sent live 50/50 on 2026-06-30 — $47.52 total (~$0.95/card), funded via Lob prepaid credits (no Auto Pay card).**
-- **Alt-model scoring** (`scripts/outreach/score_alternative_models.py`) — scores all arrays with SOMOSclean + Kimber from SQLite cache; no API calls required
-
----
-
-## What's Built
-
-**Stage 1 — Detection** (shipping path)
-
-- RF-DETR @728 training on `data/yolo/scc21` (Apache-2.0) — the permissive stack, gate passed at tile-F1 0.8260
-- Production inference (`scripts/detect/rfdetr_infer.py`) — whole tile → 2×2 grid of 640px chips → one pass per chip → NMS seam merge at IoU 0.55. Run **without** `--no-sam` for anything product-facing
-- SAM2 mask stage with a 15%-shrunk prompt box — median mask IoU 0.844, median area/GT 1.01, 0% roof-grab
-- Gate harness (`scripts/detect/eval_tile_f1.py`) — *is* the gate definition; emits `gate.json`, `threshold_sweep.csv`, `detections.json` with a tile-bootstrapped CI
-
-_Legacy 60cm path, retained for baseline evaluation only and **AGPL, not shipping**:_
-
-- YOLOv11 polygon segmentation training with YAML-driven experiment matrix (`scripts/detect/train_experiment_matrix.py`) — named experiment cuts from a single config, results auto-namespaced under `runs/segment/<name>/`
-- Whole-tile inference with optional SAHI supplementary pass (`scripts/detect/infer.py`) — `--sahi` runs whole-tile first then adds non-overlapping SAHI detections for small-panel recovery
-- Per-detection RCA harness (`scripts/detect/per_detection_rca.py`) — one row per TP/FP/FN with size, density, edge-proximity, confidence; `--summarize` produces `failure_modes.json`
-- Failure-mode bucket overlays (`scripts/labeling/bucket_overlays.py`) — renders top-N PNGs per bucket (alone-tile FPs, small FNs, high-conf errors, or arbitrary `--bucket-expr`)
-- Ramp eval helper (`scripts/detect/ramp_eval.py`) — per-curriculum-step eval, appends to `ramp_curve.csv`, prints HALT on NAIP regression exceeding threshold
-- Domain equivalence baseline (`scripts/data/compare_naip_duke_distributions.py`) — KS tests + distribution plots for NAIP vs Duke label conventions
-
-**Stage 2 — Risk Model**
-
-- Feature engineering from five external sources with per-station alignment and disk caching (`scripts/analyze/build_risk_features.py`, `scripts/analyze/build_static_features.py`)
-- XGBoost training with spatial GroupKFold, isotonic calibration, `--holdout-year` temporal validation (`scripts/predict/train_risk_model.py`)
-- Run comparison table (`scripts/analyze/compare_soiling_runs.py`) — side-by-side metrics across named training runs
-- NREL validation (`scripts/predict/validate_against_nrel.py`) — independent check against held-out station measurements
-
-**Product / CLI**
-
-- `solarsoiled` CLI — `tile / detect / score / recommend / run / eval` subcommands; `run --aoi <bbox-or-geojson>` chains all stages; per-AOI output namespace under `outputs/aoi/<partner_id>/`
-- Model registry (`models/registry.yaml`) — resolves named aliases (`production`, `latest`, …) and ad-hoc `.pt` paths; `model_version` tagged on every output
-- Manifest contract (`src/solarsoiled/manifest.py`) — every artifact-producing stage writes a sibling `manifest.json` with inputs hash, model SHA256, beta flag, known limitations
-- HTML eval report (`solarsoiled eval --report`) — single-file report with PR curve, F1-colored sweep table, failure-mode tables, base64-embedded overlay PNGs; no inference re-run required
-- FastAPI backend (`src/solarsoiled/api.py`) — async job queue, SSE streaming, `POST /feedback`, `GET /recommend-quick`; deployed on Render.com
-
----
-
-## What's In Progress
-
-- **Tariff vintage for the 1,310 city-jurisdiction sites.** A legacy-NEM home is worth **2.78×** more per lost kWh, which is the sharpest per-home targeting signal in the project, and it comes from a public-records join rather than from modelling. The county archive will never cover these — the split is jurisdictional, not age-related (city APN books: 0.0% county coverage; county books: 62.5%). Records request drafted at [`docs/outreach/`](docs/outreach/).
-- **The moss / lichen channel.** Rain removes dust but not moss, lichen, algae or bird droppings, so that entire loss channel sits **outside** what the NREL labels, `sl_sat`, and the measured recovery bracket describe (0.031–0.217 depending on the cleaning assumption; see the paper, which reports dollars instead because the dollars are assumption-invariant). It is the only remaining route to per-home differentiation and to closing the economics gap. The deciding variable (edge-band thickness, ~30 mm) is **sub-pixel at our best 6cm imagery**, so the next step is ground photography, not more compute. Written stop rule that would kill the thesis: [`docs/AOI_CLEANING_TARGETING_PLAN.md`](docs/AOI_CLEANING_TARGETING_PLAN.md).
-- **Paper — drafted, not yet submitted.** `paper/paper.tex` is complete at 18 pages and targets *Solar Energy*; `paper/paper_detection.tex` is the detection half and is **not** submission-ready (methods and results only, no introduction or discussion — PVSC or an arXiv note is the honest venue). Open items are tracked in [`paper/SPLIT_PLAN.md`](paper/SPLIT_PLAN.md). The roof-geometry hand-off that fed it: [`docs/HANDOFF_roof_geometry_for_paper.md`](docs/HANDOFF_roof_geometry_for_paper.md).
-
-_(Done and **not to be revisited**: Stage 1 and Stage 2 model work are both finished — further chasing is below measurement resolution in both. **Duke joint-curriculum, MERRA-2, mask containment, and SAM2 negative points were each tried and dropped** — measured as neutral or harmful. The Santa Cruz mailer `mailers_v13` (50 cards) went out live 2026-06-30.)_
-
----
-
-## Quick Start
-
-### Docker
+Setup and tests, which need no data:
 
 ```bash
-# CPU build, full pipeline (~10 min cold). Includes RF-DETR + SAM2.
-# Size depends on your storage driver: 10.1 GB local (containerd), 5.88 GB in CI
-# (overlay2). See the Dockerfile for why, and measure on your own host.
-make docker-build
-make docker-smoke        # asserts the image can import the detector — see below
-
-# API-only image: no rfdetr/sam2, ~6.4 GB smaller than the full build.
-docker build --build-arg EXTRAS=api -t solarsoiled:api .
-
-# GPU build (CUDA 12.1)
-docker build --build-arg TORCH_INDEX=https://download.pytorch.org/whl/cu121 -t solarsoiled:gpu .
-
-# End-to-end on an AOI. --user keeps artifacts owned by you, not root; it needs
-# the USER/HOME env baked into the image on 2026-09-01 (torch's getpass.getuser()
-# raises KeyError for a UID absent from the container's /etc/passwd without it).
-docker run --rm --user "$(id -u):$(id -g)" \
-  -v $(pwd)/models:/app/models \
-  -v $(pwd)/runs:/app/runs \
-  -v $(pwd)/outputs:/app/outputs \
-  -v $(pwd)/.cache:/app/.cache \
-  -v $(pwd)/data/external:/app/data/external \
-  --entrypoint solarsoiled solarsoiled:local run \
-    --aoi "-122.05,36.90,-121.85,37.05" \
-    --weights production \
-    --soiling-model soiling_production \
-    --last-cleaned 2026-01-01 \
-    --partner-id smoketest
-```
-
-**Mount all five volumes.** `runs/` carries the Stage-2 model and `data/external/` the static
-features; omitting either fails at the scoring stage, not at startup. `production` resolves to
-`rfdetr_w2_20260807.pth` — a `.pth`, not a `.pt`; the legacy ultralytics `.pt` files are AGPL and
-eval-only. The default `CMD` is the API server, so pass `--entrypoint solarsoiled` for CLI runs.
-
-**`make docker-smoke` is the check that matters.** Until 2026-09-01 the image installed only the
-`api` extra, so it built fine, started fine and served `--help` fine, then died on
-`ModuleNotFoundError: rfdetr` the moment anyone ran the shipping detector — because rfdetr and sam2
-are lazy imports. A smoke test built on `--help` would have passed for the three months it was
-broken. `docker-smoke` imports rfdetr and sam2 explicitly and resolves `production` through the
-registry, and needs no weights or data.
-
-**Verified in the container, 2026-09-01** (3 cached 21cm SCC tiles): detect produced 109 polygons
-via `rfdetr-w2-20260807` + SAM2, **byte-identical across two independent runs**, and Stage-2 scoring
-of the 3,362-array production matrix came out **bitwise identical to the host** (max |Δrisk_score| =
-0.0) despite the container running sklearn 1.9.0 against a calibrator pickled under 1.7.2. The one
-link not exercised is the weather-feature fetch, blocked by the Open-Meteo hourly quota — **on the
-host too**, so it is a quota limit, not a container one. When that quota trips, the run dies at
-sklearn's isotonic stage with a bare `ValueError: Found array with 0 sample(s)` *after* detection has
-already completed; look above it for `Open-Meteo hourly quota exceeded`.
-See [`docs/ONBOARDING.md`](docs/ONBOARDING.md) §1 for the runnable path.
-
-The `.cache/` mount (~440 MB after warm-up) persists weather data across runs, and also holds the
-HuggingFace cache — `HF_HOME` points into it so SAM2's ~900 MB checkpoint downloads once rather
-than on every `--rm` run. Outputs land in `outputs/aoi/<partner_id>/`.
-
-### Local (dev)
-
-> A fresh clone is **code only** — the data, model weights, and secrets are gitignored.
-> Pull them from the `handoff-v1` GitHub Release on this repo; org membership is the only
-> access needed, and `make verify-handoff` checksums the restore
-> ([`DATA.md`](DATA.md) has the commands, [`docs/ONBOARDING.md`](docs/ONBOARDING.md) §1 the full path).
-> Once the env + data are in place, `PYTHONPATH=. conda run -n solar-soiling python scripts/predict/holdout_ci.py`
-> reproduces the Stage-2 GA number in seconds — a good "is my setup working" check.
-
-```bash
-cd setup/ && bash setup_conda.sh
+bash setup/setup_conda.sh
 conda activate solar-soiling
-pip install -e .   # registers the solarsoiled CLI
+pip install -e .          # installs the solarsoiled CLI
+make test-fast
+```
 
-# Full pipeline on one AOI
+With the data in place, the full pipeline on an area of interest:
+
+```bash
 solarsoiled run \
   --aoi "minx,miny,maxx,maxy" \
   --weights production \
   --soiling-model runs/soiling/run_latest/model.ubj \
   --last-cleaned 2026-01-01 \
   --partner-id smoketest
-
-# Re-run only score + recommend on cached upstream artifacts
-solarsoiled run --aoi <…> --weights <…> --soiling-model <…> \
-  --last-cleaned 2026-01-01 --partner-id smoketest \
-  --skip-tile --skip-detect
-
-# Reproduce the Stage 1 gate (the number of record)
-PYTHONPATH=. python scripts/detect/eval_tile_f1.py \
-    --weights models/rfdetr_w2_20260807.pth --run-name gate_check
-
-# Reproduce the economics verdict
-PYTHONPATH=. python scripts/analyze/rate_sensitivity.py --show-stack
-PYTHONPATH=. python scripts/analyze/recovery_calendar.py        # simulated recovery fraction (0.045)
-PYTHONPATH=. python scripts/analyze/rebuild_aoi_economics.py --aoi santa-cruz-w2-21cm
-
-# Stage 2
-PYTHONPATH=. python scripts/predict/train_risk_model.py --run-name run_latest
-
-# Legacy 60cm YOLO path (AGPL, evaluation only)
-PYTHONPATH=. python scripts/data/audit_dataset.py --config configs/yolo/dataset_audit.yaml
-PYTHONPATH=. python scripts/detect/train.py --model models/yolo11s-seg.pt --epochs 50
 ```
 
-Model weights are gitignored — place `.pth` / `.pt` files in `models/` manually.
+There's also a Docker build (`make docker-build`, then `make docker-smoke` to check the detector
+actually imports inside the image).
 
----
+The cleaning decision is also deployed as a small API. It doesn't need any model weights, since
+it's just arithmetic over sourced constants:
 
-## Paper
+```bash
+curl -s "https://solarsoiled-api.onrender.com/decision?system_kw=6&install_date=2015-06-01"
+```
 
-**[`paper/paper.pdf`](paper/paper.pdf) — *Station Labels Cannot Rank Roofs: Why Public-Data Soiling
-Models Do Not Transfer, and What Cleaning Is Actually Worth.*** Cameron Gordon.
-**Working draft, not peer reviewed.** 18 pages. Drafted for *Solar Energy*;
-not yet submitted.
+It's on a free tier, so the first request can take about 30 seconds to wake up. Each response says
+where every input came from and what would have to be true for cleaning to pay.
 
-It asks how far a soiling-targeting system gets on public data alone, and reports where it fails
-and why. Three findings, in the order they reorder each other:
-
-1. **Locating arrays is solved.** Tile-level box-F1 **0.826** (95% CI [0.798, 0.853]), and **73.6%**
-   recall against building permits the detector never saw.
-2. **Ranking them is not, and our own validation hid that.** Folds holding out *site* or *year* but
-   not both flatter the model; closing the leak moves pooled AUC **0.710 → 0.622**. The limit is the
-   **label unit** — public labels are measured at stations, so every roof in a catchment inherits
-   one. Per-system telemetry does carry per-array signal (0.573 against the 0.5 a station-label model
-   cannot exceed by construction), but three standard cleaning assumptions put the same systems'
-   median annual loss at 2.72%, 9.80% and 20.93% and rank them at ρ 0.24–0.89. Per-system labels are
-   **necessary and not yet sufficient**.
-3. **A third result reorders the first two and is immune to the second.** On 149 metered California
-   rooftops one wash recovers a median **$28.10** of electricity against a **$150** service; the
-   median roof needs **$2.44/kWh** to break even. Annual loss cancels between the value of a clean
-   and the recovery fraction's denominator, so the dollar figure is **identical under all three
-   labelling assumptions** while the fraction itself spans 0.031 to 0.217.
-
-**The companion.** [`paper/paper_detection.tex`](paper/paper_detection.tex) holds the engineering
-results — the detection gate, the SAM2 prompt-box finding, the permit-recall probe and a web-Mercator
-projection trap. It is a draft, deliberately not a journal submission. Which paper is which, and why
-the split happened: [`paper/README.md`](paper/README.md).
-
-**Every headline number is checked against its artifact.** `paper/verify_numbers.py` fails the build
-if any value in `paper.tex` has drifted from the JSON that produced it, and it also flags *retired*
-values that reappear — a superseded number sitting in a caption still "appears in the manuscript",
-so the present-and-correct check alone is blind to it. It passes **30 of 30** plus 7 retired-value
-checks, last run 2026-09-24. It exists because three results in this paper changed after being
-written down as findings and **none of the three was caught by review**.
-
-⚠️ **You cannot run it from a fresh clone, and this is the project's main open reproducibility gap.**
-`verify_numbers.py` and most of `figures/` read `outputs/soiling/audit/*.json`, which is
-**gitignored and not committed**. Those artifacts are produced by a **separate, currently
-unpublished repo** (`soiling-validation-audit`) rather than by anything under `scripts/`. So the
-numbers are checkable *here*, by whoever has both trees, and not yet by a reader. Until that is
-closed, treat the PDFs as the evidence and the scripts as the method.
+## Building the paper
 
 ```bash
 cd paper
-python3 verify_numbers.py     # needs outputs/soiling/audit/ (not in this repo — see above)
-make figures                  # same dependency
-make                          # figures -> verify -> build/paper.pdf  (needs tectonic)
-make overleaf                 # upload bundle: tex + bbl + refs.bib + figures
+make        # figures -> number check -> build/paper.pdf (needs tectonic)
 ```
 
-The checked-in [`paper/paper.pdf`](paper/paper.pdf) and
-[`paper/paper_detection.pdf`](paper/paper_detection.pdf) are built from exactly this source, so you
-can read both without a LaTeX toolchain or the audit artifacts.
+`make` won't work from this repo, because the figures and `verify_numbers.py` (which fails the
+build if any number in the paper doesn't match its source file) read the audit outputs that aren't
+included. The checked-in [`paper.pdf`](paper/paper.pdf) and
+[`paper_detection.pdf`](paper/paper_detection.pdf) are built from this source.
+[`paper/README.md`](paper/README.md) explains which paper is which: the detection half is a
+separate, earlier-stage draft.
 
----
+## About this repo
 
-## Documentation
+This is a public snapshot of my working repository, with a few files held back (outreach records
+that name real homes, plus local tool configuration). [`MIRROR.md`](MIRROR.md) lists them and why.
+The `docs/` folder is the project's working notes, written as things happened, so older ones can be
+out of date. When in doubt, go by the paper and `docs/CANONICAL_NUMBERS.md`.
 
-| Doc | Purpose |
-|---|---|
-| [docs/ONBOARDING.md](docs/ONBOARDING.md) | **Start here** — env, data/secrets handoff, read order |
-| [docs/TEAM.md](docs/TEAM.md) | Ownership + how we work (branches, PRs, CODEOWNERS, parallel work) |
-| [docs/README.md](docs/README.md) | Full doc index — which doc is canonical for each question |
-| [docs/PERMISSIVE_STACK_MIGRATION.md](docs/PERMISSIVE_STACK_MIGRATION.md) | Stage-1 AGPL-escape plan (RF-DETR + SAM2), W1–W6 |
-| [docs/HANDOFF_dashboard_conversion.md](docs/HANDOFF_dashboard_conversion.md) · [docs/HANDOFF_imagery_ingestion.md](docs/HANDOFF_imagery_ingestion.md) | Pick-up-cold workstream handoffs (product surface · 21cm imagery) |
-| [docs/SOILING_STAGE2_GUIDE.md](docs/SOILING_STAGE2_GUIDE.md) | Stage 2 risk model — features, training, validation |
-| [docs/NAIP_ROBOFLOW_WORKFLOW.md](docs/NAIP_ROBOFLOW_WORKFLOW.md) | Full tile → label → train → export reference |
-| [docs/ROBOFLOW_IMPORT_RUNBOOK.md](docs/ROBOFLOW_IMPORT_RUNBOOK.md) | Step-by-step Roboflow import + retrain checklist |
-| [docs/PHASE1_HANDOFF.md](docs/PHASE1_HANDOFF.md) | Stage 1 active retrain runbook — R0 iterations, label batches, gates |
-| [docs/CRAIG_BRIEF_2026-08-19.md](docs/CRAIG_BRIEF_2026-08-19.md) | **The business case in one document**, written to be read cold |
-| [docs/ECONOMICS_GROUNDING_20260809.md](docs/ECONOMICS_GROUNDING_20260809.md) | The dollar-chain audit — every constant, sourced or marked UNSOURCED |
-| [docs/AOI_CLEANING_TARGETING_PLAN.md](docs/AOI_CLEANING_TARGETING_PLAN.md) | Moss/lichen thesis, substring shade physics, ranked experiments + stop rule |
-| [docs/SOILING_LEVEL_INVESTIGATION.md](docs/SOILING_LEVEL_INVESTIGATION.md) | Why the risk model can't rank homes within an AOI (structural, not fixable by features) |
-| [docs/HANDOFF_roof_geometry_for_paper.md](docs/HANDOFF_roof_geometry_for_paper.md) | Roof tilt/azimuth from 3DEP lidar — method, two-method validation, paper notes |
-| [docs/TILT_SOILING_EVIDENCE.md](docs/TILT_SOILING_EVIDENCE.md) | What the evidence does and does not support for tilt as a soiling driver |
-| [docs/PERSISTENT_SOILING_SCREEN.md](docs/PERSISTENT_SOILING_SCREEN.md) | The persistent (wash-only) loss channel the NREL labels exclude by construction |
-| [docs/CRAIG_WORKING_GUIDE.md](docs/CRAIG_WORKING_GUIDE.md) | Changing things safely without a technical background — which commands cost money |
-| [paper/README.md](paper/README.md) | The paper bundle — which paper is which, build order, the numbers check |
-| [docs/COMMERCIALIZATION.md](docs/COMMERCIALIZATION.md) | Licensing — AGPL resolved by the backbone swap; what is still exposed |
-| [docs/PRODUCT_VISION.md](docs/PRODUCT_VISION.md) | Strategy, beta/GA contract, customer-readiness arc |
-| [docs/Q2_PLAN.md](docs/Q2_PLAN.md) | Current roadmap and workstream status |
-| [docs/HYPERPARAM_PLAYBOOK.md](docs/HYPERPARAM_PLAYBOOK.md) | Training hyperparameter rationale |
+## License
 
----
-
-## Stack
-
-Python 3.11 · PyTorch 2.0+ · **RF-DETR (Apache-2.0)** · **SAM2** · XGBoost · GDAL / rasterio · laspy (3DEP lidar) · pvlib · RdTools · Roboflow · Open-Meteo ERA5 · CAMS / MERRA-2 · ESA WorldCover · OpenStreetMap Overpass · FastAPI · Typer · ReportLab · Lob.com · Leaflet · Cloudflare Pages · Render.com · Docker · scikit-learn (isotonic calibration, GroupKFold)
-
-**Licence: Apache-2.0.**
-
-[YOLOv11 / ultralytics](https://docs.ultralytics.com/) and SAHI are AGPL-3.0. Since 2026-09-01 they live in an optional `legacy` extra: not installed by default, and **absent from the deployed API image**. Nothing on the shipping path links them, which is what makes the Apache-2.0 licence above honest rather than aspirational. Verified by measurement — `import solarsoiled.cli` loaded 98 ultralytics submodules before that change and loads 0 after.
-
-They remain available for evaluating the legacy 60cm baseline: `pip install -e ".[legacy]"`. See [`docs/COMMERCIALIZATION.md`](docs/COMMERCIALIZATION.md).
+Apache-2.0. See [`LICENSE`](LICENSE).
