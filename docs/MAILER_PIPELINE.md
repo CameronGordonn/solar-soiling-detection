@@ -146,7 +146,7 @@ for the $ figure. (The site's CSS vars are *named* navy/teal/gold but their valu
 Print font is Helvetica as a neutral stand-in for the site's web-only Geist.
 
 **Front (marketing):**
-- **Brand:** "BETTER BEHAVIOR FOUNDATION", website `betterbehaviorfoundation.com`, phone `(831) 216-8749`.
+- **Brand:** "BETTER BEHAVIOR FOUNDATION", website `betterbehaviorfoundation.com`, phone from `SOLARSOILED_PHONE` in `.env`.
 - **Dollar headline:** "Your solar panels may be losing **$X per year** to dust and pollen…".
   The $ is `_dollars_lost(risk, area)` = `(area ÷ 5.67) × 5.5 sun-hours × 365 ×
   recovery% × $0.28/kWh`, where `recovery%` is **1.75 / 3 / 5%** by risk bucket
