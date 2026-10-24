@@ -1,5 +1,7 @@
 # Solar Soiling Detection
 
+[![Detected rooftop solar across Santa Cruz County, with the three headline numbers](docs/social-preview.png)](https://betterbehaviorfoundation.com/tools/dashboard.html)
+
 Finds rooftop solar arrays in public aerial imagery and works out whether paying to clean them is
 worth it, using only public data.
 
@@ -13,8 +15,6 @@ worth it, using only public data.
   imagery.
 - **Economics:** on 149 metered rooftops, one wash recovers a median **$28.10** of electricity
   against an assumed $150 service call, so none of the 1,865 sites comes out ahead on a cleaning.
-
-![Figure 1: the four questions the project asked and what each one returned](paper/assets/fig1_argument.png)
 
 Two-stage pipeline: RF-DETR + SAM2 find and outline each array (Stage 1), then an XGBoost model
 scores its soiling risk (Stage 2), and a cost model turns that into a cleaning decision. Built in
@@ -44,7 +44,9 @@ latitude and longitude get on their own (0.644). And a better ranking wouldn't c
 on 149 metered rooftops, one wash recovers a median $28.10 of electricity against a $150 service
 call.
 
-Figure 1 above is the whole argument in one picture. Question 4 is simple arithmetic, and in this
+![Figure 1: the four questions the project asked and what each one returned](paper/assets/fig1_argument.png)
+
+Figure 1 is the whole argument in one picture. Question 4 is simple arithmetic, and in this
 market it settles questions 2 and 3: a perfect ranking can't create value that isn't there.
 
 **Companion paper:** *Permissively Licensed Rooftop Array Detection at 21 cm, with an Executable
