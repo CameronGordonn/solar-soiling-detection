@@ -19,16 +19,16 @@ Lives in **`BBF-Website`** (separate repo), not solar-soiling-ml:
 - `public/tools/dashboard.js` — behavior (array select, `?id=` deep-link, lead capture)
 - `public/tools/dashboard.css` — styling
 - Mailer side (this repo): `scripts/outreach/generate_mailers.py` — the QR + printed contact details
-  (`PHONE = "(831) 216-8749"`, `EMAIL = "betterbehaviorfoundation@gmail.com"`).
+  (`PHONE = "[foundation phone]"`, `EMAIL = "betterbehaviorfoundation@gmail.com"`).
 
 ## What changed on 2026-07-13 (already done, in branch `dashboard-conversion-fixes`)
 
 1. **Unified contact identity (bug fix).** Dashboard lead-capture emails went to
    `solarsoil.app@gmail.com`; the printed postcards say `betterbehaviorfoundation@gmail.com` /
-   (831) 216-8749. All three `mailto:` in `dashboard.js` now use the BBF inbox so the dashboard
+   [foundation phone]. All three `mailto:` in `dashboard.js` now use the BBF inbox so the dashboard
    matches what recipients were told.
 2. **Phone-first CTA stack in the hero** (`#impact-actions` in `dashboard.html`). Order by intent:
-   `📞 Call us — (831) 216-8749` (`tel:`, high-contrast white pill, loudest) → **Get this roof
+   `📞 Call us — [foundation phone]` (`tel:`, high-contrast white pill, loudest) → **Get this roof
    cleaned →** (`#btn-lead`, solid green) → optional form (hidden) → the calculator demoted to a
    quiet underline link (`.cta-secondary`). Previously the calculator was the loudest button and the
    lead button was hidden inside a collapsed panel — the funnel was inverted.

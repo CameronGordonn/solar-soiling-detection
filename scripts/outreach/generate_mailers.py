@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import argparse
 import io
+import os
 import sys
 from pathlib import Path
 
@@ -60,7 +61,7 @@ RED      = colors.HexColor("#ef4444")  # risk badge — kept warm so the warning
 AMBER    = colors.HexColor("#f59e0b")
 
 WEBSITE  = "betterbehaviorfoundation.com"
-PHONE    = "(831) 216-8749"
+PHONE    = os.environ.get("SOLARSOILED_PHONE", "(000) 000-0000")  # printed on the card; set in .env
 EMAIL    = "betterbehaviorfoundation@gmail.com"
 
 # ── card dimensions ───────────────────────────────────────────────────────────
@@ -291,7 +292,7 @@ def _draw_postcard(c: Canvas, row: pd.Series) -> None:
     c.drawString(L_PAD, ADDR_H / 2 + 0.07 * IN, "QUESTIONS?")
     c.setFillColor(LIGHT)
     c.setFont("Helvetica-Bold", 8.5)
-    c.drawString(L_PAD, ADDR_H / 2 - 0.12 * IN, f"Call or text Craig at {PHONE}")
+    c.drawString(L_PAD, ADDR_H / 2 - 0.12 * IN, f"Call or text {PHONE}")
 
     # 501(c)(3) status comes via fiscal sponsorship under Ecologistics; the short
     # "A 501(c)(3) nonprofit project" form was chosen for the badge.
