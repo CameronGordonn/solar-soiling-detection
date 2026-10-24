@@ -180,7 +180,7 @@ python scripts/detect/ramp_eval.py \
     --weights runs/segment/R0_<timestamp>/weights/best.pt
 ```
 
-This appends one row to `outputs/eval/ramp_curve.csv`. Update the Results table in [docs/PHASE1_HANDOFF.md](PHASE1_HANDOFF.md).
+This appends one row to `outputs/eval/ramp_curve.csv`. Update the Results table in [docs/internal/PHASE1_HANDOFF.md](PHASE1_HANDOFF.md).
 
 **Acceptance bar:** NAIP test mAP50 ≥ 0.70 (GA gate). Below 0.45 = harness drift, stop.  
 **Watch precision separately** — the over-prediction failure mode (mAP50 0.128 / precision <0.1) is undersold by mAP50 alone.

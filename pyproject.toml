@@ -66,7 +66,7 @@ dependencies = [
     #
     # Linux-only because xgboost-cpu publishes NO macOS wheels (manylinux +
     # win_amd64/arm64 only, checked 2026-09-01), and this team has Mac users
-    # (docs/CODEX_QUICKSTART_MAC.md). Mac loses nothing: the nccl dependency is
+    # (docs/internal/CODEX_QUICKSTART_MAC.md). Mac loses nothing: the nccl dependency is
     # already gated on platform_system == "Linux", so a Mac install never had it.
     "xgboost-cpu>=2.1.1; platform_system == 'Linux'",
     "xgboost>=1.7; platform_system != 'Linux'",
@@ -116,7 +116,7 @@ outreach = [
 # Stage 1 inference/eval. Kept OUT of the default install because rfdetr pulls a
 # large torch/transformers stack and sam2 downloads a HF checkpoint on first use --
 # but WITHOUT this extra `scripts/detect/eval_tile_f1.py` cannot run at all, so the
-# detection lane must install it. See docs/ONBOARDING.md lane 2.
+# detection lane must install it. See docs/internal/ONBOARDING.md lane 2.
 detect = [
     "rfdetr>=1.9",       # scripts/detect/rfdetr_infer.py -- the Apache-2.0 detector
     # SAM-2 from Meta's own repository, pinned to a commit. This was `sam2>=1.1`

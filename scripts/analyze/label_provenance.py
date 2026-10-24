@@ -210,7 +210,7 @@ def main(argv=None) -> int:
     args = ap.parse_args(argv)
 
     if not args.csv.exists():
-        print(f"missing {args.csv}. See DATA.md / data/external/README.md.", file=sys.stderr)
+        print(f"missing {args.csv}. See docs/DATA.md / data/external/README.md.", file=sys.stderr)
         return 1
 
     rows = list(csv.DictReader(args.csv.open()))

@@ -14,9 +14,9 @@
 > - **R2-cameron-20260509 is AGPL, eval-only, and does not ship.** It is reachable as
 >   `stage1-60cm-legacy`.
 >
-> **Current Stage 1 runbook:** [PERMISSIVE_STACK_MIGRATION.md](PERMISSIVE_STACK_MIGRATION.md) for
+> **Current Stage 1 runbook:** [PERMISSIVE_STACK_MIGRATION.md](../PERMISSIVE_STACK_MIGRATION.md) for
 > the stack, `.claude/rules/stage1-detect.md` *(not in the public mirror)* for the gate and
-> operating rules, [CANONICAL_NUMBERS.md](CANONICAL_NUMBERS.md) for the numbers.
+> operating rules, [CANONICAL_NUMBERS.md](../CANONICAL_NUMBERS.md) for the numbers.
 >
 > Kept unedited below because the relabel-loop *method* is still the right method, and because the
 > repo's rule is to mark superseded material in place rather than delete it.

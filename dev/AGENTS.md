@@ -17,10 +17,10 @@ Product surface = a Typer CLI (`solarsoiled`) + a FastAPI backend.
 2. `docs/CANONICAL_NUMBERS.md` — **every headline number with its artifact and reproduce command.
    Read this before quoting any metric. If another doc disagrees with it, that doc is stale.**
 3. `docs/README.md` — doc index (which doc is canonical for what).
-4. `docs/Q2_PLAN.md` — live status, gates, current metrics.
+4. `docs/internal/Q2_PLAN.md` — live status, gates, current metrics.
 5. `.claude/rules/*.md` — per-area operating rules (`stage1-detect`, `stage2-risk`, `product`,
    `data-pipeline`, `training`). Read the one matching the files you're touching.
-6. `CONTRIBUTING.md` — setup, tests, PR flow. `DATA.md` — the gitignored data + how to get it.
+6. `docs/internal/CONTRIBUTING.md` — setup, tests, PR flow. `docs/DATA.md` — the gitignored data + how to get it.
 
 ## Setup, build, test
 
@@ -29,7 +29,7 @@ Product surface = a Typer CLI (`solarsoiled`) + a FastAPI backend.
 bash setup/setup_conda.sh              # creates env `solar-soiling`
 conda activate solar-soiling
 make bootstrap                         # pip install -e ".[dev,api]"
-make check-data                        # what gitignored data you still need (see DATA.md)
+make check-data                        # what gitignored data you still need (see docs/DATA.md)
 
 # Run scripts from repo root with PYTHONPATH=. so `src` imports resolve:
 PYTHONPATH=. python scripts/<stage>/<script>.py
@@ -56,7 +56,7 @@ labeling/`). The library is `src/` (`solarsoiled/`, `risk/`, `utils/`).
 ## Conventions
 
 - One workstream per branch/PR; `main` is protected (PR + 1 review). Commit subjects scoped by area
-  (`detect:`, `soiling:`, `docs:`, `product:`). No AI-attribution trailers. Details: `docs/TEAM.md`.
+  (`detect:`, `soiling:`, `docs:`, `product:`). No AI-attribution trailers. Details: `docs/internal/TEAM.md`.
 - Metrics: Stage 1's production metric is **tile-level box F1** from `scripts/detect/eval_tile_f1.py`
   (0.8260 on test). **SAHI F1 is retired** — it named a metric that no longer exists on the RF-DETR
   stack, and no SAHI number is comparable to a current one. Stage 2 is spatial-CV (**0.712**, not the

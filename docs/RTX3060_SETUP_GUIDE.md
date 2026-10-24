@@ -1,6 +1,6 @@
 # RTX 3060 Setup & Training
 
-Setup + training reference for the RTX 3060 (12 GB VRAM). For non-GPU workflows or general pipeline docs see `docs/NAIP_ROBOFLOW_WORKFLOW.md` and `docs/PHASE1_HANDOFF.md`.
+Setup + training reference for the RTX 3060 (12 GB VRAM). For non-GPU workflows or general pipeline docs see `docs/NAIP_ROBOFLOW_WORKFLOW.md` and `docs/internal/PHASE1_HANDOFF.md`.
 
 ## Setup
 
@@ -49,7 +49,7 @@ python scripts/detect/infer.py
 python scripts/detect/export_polygons_geojson.py
 ```
 
-For experiment matrices use `scripts/detect/train_experiment_matrix.py --config configs/yolo/experiments.yaml`. For the active Stage 1 retrain runbook see `docs/PHASE1_HANDOFF.md`.
+For experiment matrices use `scripts/detect/train_experiment_matrix.py --config configs/yolo/experiments.yaml`. For the active Stage 1 retrain runbook see `docs/internal/PHASE1_HANDOFF.md`.
 
 ## Monitoring
 

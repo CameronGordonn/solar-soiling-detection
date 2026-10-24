@@ -122,7 +122,7 @@ merging neither drops nor duplicates detections. That was an open question about
    because it was true of the W1 numbers when they were written.**]**
 2. **`best_F1` is threshold-optimised on the eval split** and is therefore optimistic. `F1@0.4` is
    the honest fixed-operating-point column.
-3. **Train was 83 of 175 source tiles** (Akshitha's 71 seeded tiles were unlabeled at build time).
+3. **Train was 83 of 175 source tiles** (71 seeded tiles were unlabeled at build time).
    Both arms saw identical data, so the *relative* verdict holds; re-run for the absolute numbers.
 4. R2's row is a 60cm-trained model on 21cm imagery — a domain-shift reference, not a competitor.
 
@@ -184,7 +184,7 @@ geospatial polygons; resample from `tile_index.json` CRS/affine).
 - New script `scripts/data/build_multiscale_tiles.py`: for each labeled array, render tiles at both
   ~0.3m and ~0.6m GSD; re-tile at the correct chip footprint (640px = 192m @30cm vs 384m @60cm);
   emit a `tile_index.json`-equivalent per GSD (see `.claude/rules/data-pipeline.md`).
-- Acquire 30cm NAIP for target CA counties (Cameron to confirm which — see §6).
+- Acquire 30cm NAIP for target CA counties (which counties is open — see §6).
 - CORRECTION (2026-07-10, Cameron): R2 is **NAIP-only**. The earlier claim that R2 is joint
   NAIP(60cm)+Duke(30cm) is **false** — the Duke(30cm) integration never worked and was abandoned
   months ago. So scale-mixing is **NOT** proven on this data; W2/W3 multiscale is an unproven bet
@@ -302,7 +302,7 @@ GSD-robustness result we do not have.
   clears the gate. Mark R2 `beta`/eval-only.
 - Remove/guard ultralytics as a *runtime* dependency of the served product (keep it as a dev/eval
   extra only if needed for the R2 baseline).
-- Update `CLAUDE.md`, `.claude/rules/stage1-detect.md`, `docs/Q2_PLAN.md`.
+- Update `CLAUDE.md`, `.claude/rules/stage1-detect.md`, `docs/internal/Q2_PLAN.md`.
 - **Verify** (see `verify` skill): drive `solarsoiled detect` end-to-end on an AOI and confirm
   `arrays.geojson` is produced by the permissive path.
 
@@ -317,7 +317,7 @@ on the **test** split (AP@50 ≈ 0.60+, best-F1 ≈ 0.63+)?
   quality.
 - **Closes most of the gap but not all:** continue to W2/W3 — 30cm data is the likely closer; re-gate
   after the unified multiscale model.
-- **Still far behind after a fair run + 30cm:** escalate to Cameron. The choice becomes a business
+- **Still far behind after a fair run + 30cm:** escalate to the project lead. The choice becomes a business
   tradeoff — pay Ultralytics $5k/yr, accept a quality hit for licensing freedom, or invest in labels
   (which lifts *any* backbone). Do not silently ship a regression.
 
@@ -365,7 +365,7 @@ For RF-DETR serving throughput call `model.optimize_for_inference(dtype=torch.fl
   product path) — not part of this migration. Don't entangle.
 - Don't retrain things that already work (Stage 2 risk model is GA-ready; leave it).
 
-## 7. Open questions for Cameron (surface early)
+## 7. Open questions (surface early)
 
 1. Which CA counties' 30cm NAIP to acquire first (highest-value AOIs)?
 2. Is DETR CPU-inference latency acceptable on the Render serving box, or budget a small GPU?

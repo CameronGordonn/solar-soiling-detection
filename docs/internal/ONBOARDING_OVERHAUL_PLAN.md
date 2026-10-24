@@ -6,7 +6,7 @@
 > out-of-station-and-year AUC is **0.622** (95% CI [0.571, 0.670]), not **0.710**; **lat/lon alone
 > score 0.644**; the regional figures are **0.655** pooled / **0.527** largest region, not
 > 0.677/0.548. Calibration is unaffected. Corrected numbers and artifacts:
-> [CANONICAL_NUMBERS.md](CANONICAL_NUMBERS.md); full argument: `paper/paper.tex` §4.4.
+> [CANONICAL_NUMBERS.md](../CANONICAL_NUMBERS.md); full argument: `paper/paper.tex` §4.4.
 > This document is kept as the record of what was believed at the time.
 
 
@@ -118,9 +118,9 @@ move that way. Use `rclone`.
   reads; new `verify-handoff` target that checksums a restore; `bootstrap` names the detect extra.
 - `models/yolov8s_solar_array_v1.pt` removed from `HEAD` (option 2 of audit A6 — history left
   alone). `check-data` no longer reports a present weight on a machine that received nothing.
-- `docs/ONBOARDING.md` rewritten as a linear path with three tiers and three lane quickstarts,
+- `docs/internal/ONBOARDING.md` rewritten as a linear path with three tiers and three lane quickstarts,
   each ending in a number that was measured on 2026-08-26, not asserted.
-- `DATA.md` rewritten around the bucket and named custodians. "Ask Cameron" is gone.
+- `docs/DATA.md` rewritten around the bucket and named custodians. "Ask Cameron" is gone.
 - `TEAM.md` and `CLAUDE.md` corrected where they contradicted reality.
 
 ### Measured, not asserted

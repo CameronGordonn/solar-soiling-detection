@@ -1,6 +1,6 @@
 # Closing the GAMMA_PDC question — 2026-08-27
 
-The open problem handed over in `docs/HANDOFF_20260827.md`. Everything below is measured in
+The open problem handed over in `docs/internal/HANDOFF_20260827.md`. Everything below is measured in
 this repo; assumptions are labelled.
 
 ---

@@ -1,10 +1,10 @@
 # SolarSoiled — Project Handoff (May 2026)
 
 > **ARCHIVED point-in-time snapshot (May 2026).** Not maintained — metrics here are stale and may
-> contradict current numbers. Live status: [`../Q2_PLAN.md`](../Q2_PLAN.md). Commercialization/license
+> contradict current numbers. Live status: [`../Q2_PLAN.md`](../internal/Q2_PLAN.md). Commercialization/license
 > constraints (the old §5) now live in [`../COMMERCIALIZATION.md`](../COMMERCIALIZATION.md).
 
-For whoever picks this up next: Cameron, Josh, or a new contributor. This doc covers project state and next steps as of graduation (May 2026). It does **not** re-cover train relabeling — that runbook lives in [PHASE1_HANDOFF.md](../PHASE1_HANDOFF.md). For quarter-level priorities see [Q2_PLAN.md](../Q2_PLAN.md). For product direction see [PRODUCT_VISION.md](../PRODUCT_VISION.md).
+For whoever picks this up next: Cameron, Josh, or a new contributor. This doc covers project state and next steps as of graduation (May 2026). It does **not** re-cover train relabeling — that runbook lives in [PHASE1_HANDOFF.md](../internal/PHASE1_HANDOFF.md). For quarter-level priorities see [Q2_PLAN.md](../internal/Q2_PLAN.md). For product direction see [PRODUCT_VISION.md](../PRODUCT_VISION.md).
 
 ---
 
@@ -22,7 +22,7 @@ Production metric is **SAHI F1** from `scripts/detect/sahi_threshold_sweep.py` �
 
 Gates: **beta** = SAHI F1 ≥ 0.55 · **GA** = SAHI F1 ≥ 0.65. Current: 0.396 (below beta gate).
 
-Train relabeling is in progress (val/test relabeled; train not yet). R0 retrain + iterative relabel is the active path — see [PHASE1_HANDOFF.md](../PHASE1_HANDOFF.md).
+Train relabeling is in progress (val/test relabeled; train not yet). R0 retrain + iterative relabel is the active path — see [PHASE1_HANDOFF.md](../internal/PHASE1_HANDOFF.md).
 
 ### Stage 2 — Soiling Risk Model
 
@@ -116,7 +116,7 @@ PYTHONPATH=. python scripts/predict/compare_runs.py
 - Tier 3: `examples/partner_engagement/` worked example.
 
 **Track C — Beta API (does not wait on Stage 1 GA):**
-`/detect`, `/risk`, `/recommend`, `/health` endpoints with auth + metering. See [Q2_PLAN.md](../Q2_PLAN.md) Track C. The Stage 1 → Stage 2 contract is stable enough to scaffold against today.
+`/detect`, `/risk`, `/recommend`, `/health` endpoints with auth + metering. See [Q2_PLAN.md](../internal/Q2_PLAN.md) Track C. The Stage 1 → Stage 2 contract is stable enough to scaffold against today.
 
 ---
 
@@ -138,7 +138,7 @@ The rest of the pipeline — CLI, Stage 2, manifest system — is backbone-agnos
 - **Josh** — Stage 1 training cuts; owns the Colab GPU compute for R-series runs.
 - **Tyler** — oversight; redirected project to diagnose-first after 2026-05-04 meeting.
 
-The strategic pivot (2026-05-04) away from joint training toward diagnose-first + iterative NAIP relabel is documented in [PHASE1_HANDOFF.md](../PHASE1_HANDOFF.md). The rationale (NAIP whole-array vs Duke per-panel label convention mismatch, alone-tile FP pattern) is in [Q2_PLAN.md](../Q2_PLAN.md) under "What we learned."
+The strategic pivot (2026-05-04) away from joint training toward diagnose-first + iterative NAIP relabel is documented in [PHASE1_HANDOFF.md](../internal/PHASE1_HANDOFF.md). The rationale (NAIP whole-array vs Duke per-panel label convention mismatch, alone-tile FP pattern) is in [Q2_PLAN.md](../internal/Q2_PLAN.md) under "What we learned."
 
 ---
 
@@ -146,8 +146,8 @@ The strategic pivot (2026-05-04) away from joint training toward diagnose-first 
 
 | What | Where |
 |---|---|
-| Active Stage 1 runbook | [docs/PHASE1_HANDOFF.md](../PHASE1_HANDOFF.md) |
-| Quarter priorities | [docs/Q2_PLAN.md](../Q2_PLAN.md) |
+| Active Stage 1 runbook | [docs/internal/PHASE1_HANDOFF.md](../internal/PHASE1_HANDOFF.md) |
+| Quarter priorities | [docs/internal/Q2_PLAN.md](../internal/Q2_PLAN.md) |
 | Stage 2 guide | [docs/SOILING_STAGE2_GUIDE.md](../SOILING_STAGE2_GUIDE.md) |
 | Model registry | [models/registry.yaml](../../models/registry.yaml) |
 | CLI entrypoint | `src/solarsoiled/cli.py` |

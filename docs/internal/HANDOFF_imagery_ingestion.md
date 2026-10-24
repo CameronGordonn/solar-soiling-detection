@@ -1,7 +1,7 @@
 # Handoff — High-res (21 cm) imagery ingestion for the recall win
 
 **Lane:** Akshitha (permissive-stack migration + reusable infra). **Written:** 2026-07-13.
-Companion to [`PERMISSIVE_STACK_MIGRATION.md`](PERMISSIVE_STACK_MIGRATION.md) (the canonical W1–W6
+Companion to [`PERMISSIVE_STACK_MIGRATION.md`](../PERMISSIVE_STACK_MIGRATION.md) (the canonical W1–W6
 plan) — this doc zooms in on the **imagery-ingestion seam** (its W2) and the scale-mixing guardrail.
 
 ## Why this matters

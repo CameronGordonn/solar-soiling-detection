@@ -172,9 +172,9 @@ def _preflight(paths: dict[str, Path]) -> None:
         "These are gitignored and are NOT produced by a clone. Get them with:",
         "",
         "    make check-data          # shows everything you are missing, by lane",
-        "    # then follow the rclone pull in DATA.md",
+        "    # then follow the rclone pull in docs/DATA.md",
         "",
-        "Provenance and the regeneration command for every artifact: DATA.md.",
+        "Provenance and the regeneration command for every artifact: docs/DATA.md.",
         "",
     ]
     raise SystemExit("\n".join(lines))

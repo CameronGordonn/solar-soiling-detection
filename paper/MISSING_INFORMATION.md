@@ -33,10 +33,10 @@ The one figure a reviewer will most want — one tile at 60 cm beside the same t
 21 cm, with GT, detections and SAM2 masks overlaid — is not generated, because the full
 21 cm tiles (`data/interim/scc21_labelset/images`) and `tile_labels/` are part of the
 `stage1-gate` handoff group and are **not present in this working copy**.
-*Fix:* `gh release download` per `DATA.md`, then extend `scripts/labeling/bucket_overlays.py`.
+*Fix:* `gh release download` per `docs/DATA.md`, then extend `scripts/labeling/bucket_overlays.py`.
 
 **M5 — The shortfall table was recomputed and disagrees with the 2026-08-23 brief.**
-`docs/PAPER_REWRITE_BRIEF_20260823.md` §4 gives 13.81× → 3.02×, best 2.76×. Recomputing
+`docs/internal/PAPER_REWRITE_BRIEF_20260823.md` §4 gives 13.81× → 3.02×, best 2.76×. Recomputing
 from `site_economics.csv` today gives 45.9× → 5.5×, best 3.60×, with band counts matching
 exactly (877/796/119/35/16/12/10). The difference is the ×0.500 level calibration applied
 2026-08-30, which postdates the brief. **The paper uses the current figures.** Someone
@@ -57,7 +57,7 @@ not a contribution ranking) and ORCIDs, if the venue wants them.
 
 **M8 — Venue and format not chosen.**
 Currently generic two-column `article`. Section order, length limit, anonymisation and
-citation style all depend on the target. `docs/PAPER_REWRITE_BRIEF_20260823.md` §0 lists
+citation style all depend on the target. `docs/internal/PAPER_REWRITE_BRIEF_20260823.md` §0 lists
 three candidate titles; the paper uses a variant of the first.
 
 ## Known-unknowable (state, do not chase)
@@ -67,7 +67,7 @@ three candidate titles; the paper uses a variant of the first.
   0.844 median IoU is the model ceiling or the label-noise floor. Stated as a limitation.
 - **No ground-truth production data exists for any scored rooftop.** This is the central
   unvalidated transfer and no in-repo work closes it; the PVDAQ lane
-  (`docs/PVDAQ_LANE_HANDOFF_20260831.md`) is the proposal, and its gate is specified but
+  (`docs/internal/PVDAQ_LANE_HANDOFF_20260831.md`) is the proposal, and its gate is specified but
   not yet runnable.
 - **The biological/wash-only channel has never been measured in this climate.** Excluded
   from the IWSR labels by construction.

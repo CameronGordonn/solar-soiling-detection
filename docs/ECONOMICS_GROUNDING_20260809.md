@@ -188,13 +188,13 @@ of importance and is the cheapest available improvement.~~ RETRACTED.** Two thin
 (1) The share was re-measured at **58.1%**, not 21.8%, so it was never a small patch.
 (2) **The experiment was run and it did nothing**: WorldCover was wired in properly, resolving
 all points, and within-AOI spread did not move. See
-[CRAIG_BRIEF_2026-08-19.md](CRAIG_BRIEF_2026-08-19.md) §"We wired WorldCover in properly and it
+[BUSINESS_BRIEF.md](BUSINESS_BRIEF.md) §"We wired WorldCover in properly and it
 did nothing" and [SOILING_LEVEL_INVESTIGATION.md](SOILING_LEVEL_INVESTIGATION.md).
 
 The limit is **structural**, not a plumbing gap: NREL labels are station-level, so there is no
 within-AOI signal to learn. No feature supplied to the AOI matrix can create one. The real fix is
 a label set with within-area variation, which is the PVDAQ lane
-([PVDAQ_LANE_HANDOFF_20260831.md](PVDAQ_LANE_HANDOFF_20260831.md)).
+([PVDAQ_LANE_HANDOFF_20260831.md](internal/PVDAQ_LANE_HANDOFF_20260831.md)).
 
 ### Follow-up: WorldCover was wired in, and it did NOT help (2026-08-09)
 

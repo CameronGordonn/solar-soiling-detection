@@ -8,7 +8,7 @@
 > out-of-station-and-year AUC is **0.622** (95% CI [0.571, 0.670]), not **0.710**; **lat/lon alone
 > score 0.644**; the regional figures are **0.655** pooled / **0.527** largest region, not
 > 0.677/0.548. Calibration is unaffected. Corrected numbers and artifacts:
-> [CANONICAL_NUMBERS.md](CANONICAL_NUMBERS.md); full argument: `paper/paper.tex` §4.4.
+> [CANONICAL_NUMBERS.md](../CANONICAL_NUMBERS.md); full argument: `paper/paper.tex` §4.4.
 > This document is kept as the record of what was believed at the time.
 
 
@@ -52,10 +52,10 @@ was written.
 The counts themselves move as the suite grows — they were 246/5 when this doc was written and are
 470/1 as of 2026-08-31. A higher count is not a problem; a count that changes when you re-run
 `make bootstrap` is. Current expected values live in
-[CANONICAL_NUMBERS.md](CANONICAL_NUMBERS.md#repo-health).
+[CANONICAL_NUMBERS.md](../CANONICAL_NUMBERS.md#repo-health).
 
 ```bash
-# ── TIER 2 ── the data hand-off. No credential beyond your GitHub access; see DATA.md
+# ── TIER 2 ── the data hand-off. No credential beyond your GitHub access; see docs/DATA.md
 gh release download handoff-v1 --repo Better-Behavior-Foundation/solar-soiling-ml \
     -p 'handoff-stage2.tar' -D /tmp/handoff
 tar xf /tmp/handoff/handoff-stage2.tar -C .        # 2.4 MB, unlocks the Stage-2 lane
@@ -147,13 +147,13 @@ These are the "don't learn this the hard way" items.
 
 ## 3. Read in this order
 
-1. [`README.md`](../README.md) — what the system is and why.
-2. [`CLAUDE.md`](../CLAUDE.md) — commands, key paths, pipeline layout. The map of the repo.
-3. [`DATA.md`](../DATA.md) — every artifact that is not in git: custody, how to pull, what is
+1. [`README.md`](../../README.md) — what the system is and why.
+2. [`CLAUDE.md`](../../CLAUDE.md) — commands, key paths, pipeline layout. The map of the repo.
+3. [`docs/DATA.md`](../DATA.md) — every artifact that is not in git: custody, how to pull, what is
    regenerable and with which command.
-4. [`docs/Q2_PLAN.md`](Q2_PLAN.md) — **live status**: phase tables, gates, current metrics.
-5. [`docs/TEAM.md`](TEAM.md) — who owns what, branches, PRs, reviews.
-6. [`docs/COLD_START_AUDIT_20260823.md`](COLD_START_AUDIT_20260823.md) — **Part B is the trap
+4. [`docs/internal/Q2_PLAN.md`](Q2_PLAN.md) — **live status**: phase tables, gates, current metrics.
+5. [`docs/internal/TEAM.md`](TEAM.md) — who owns what, branches, PRs, reviews.
+6. [`docs/internal/COLD_START_AUDIT_20260823.md`](COLD_START_AUDIT_20260823.md) — **Part B is the trap
    list**: the failure modes that produce plausible wrong numbers instead of errors. Read it once
    now and again the first time a number surprises you.
 7. Your lane's runbook in `.claude/rules/` *(not in the public mirror)*.
@@ -194,7 +194,7 @@ PYTHONPATH=. conda run -n solar-soiling python scripts/detect/eval_tile_f1.py \
 **You should see** `conf*=0.50` tuned on val, then test **P 0.850 / R 0.803 / F1 0.826**, 95% CI
 [0.798, 0.853], n_gt 585, **gate: PASS**. About 5–6 minutes on CPU for 74 tiles. If you reproduce
 that, you own Stage 1. Then: `.claude/rules/stage1-detect.md` *(not in the public mirror)*
-and [`PERMISSIVE_STACK_MIGRATION.md`](PERMISSIVE_STACK_MIGRATION.md).
+and [`PERMISSIVE_STACK_MIGRATION.md`](../PERMISSIVE_STACK_MIGRATION.md).
 
 To **retrain** rather than evaluate, also pull `handoff-stage1-train.tar` (809 MB) and rebuild the
 COCO layout RF-DETR wants: `python scripts/data/build_rfdetr_dataset.py`. Training runs on Colab.
@@ -211,7 +211,7 @@ make demo-aoi          # tile -> detect -> score -> recommend, on the Santa Cruz
 Verified end to end on 2026-08-26 with `--weights production`: it tiles from the 21cm county
 service, detects with `rfdetr-w2-20260807`, scores, and writes recommendations. **You do not need
 to pass `--imagery`.** `run` picks the imagery the model needs from its registered
-`gsd_ground_m` ([cli.py](../src/solarsoiled/cli.py) — under 0.35 gets county tiles, everything else
+`gsd_ground_m` ([cli.py](../../src/solarsoiled/cli.py) — under 0.35 gets county tiles, everything else
 NAIP), and `detect` refuses a GSD mismatch rather than quietly regressing.
 
 The real constraint is **geographic, not plumbing**: the county service is Santa Cruz only, so
@@ -236,7 +236,7 @@ it.
 | What | Notes |
 |---|---|
 | GitHub `Better-Behavior-Foundation` org | Membership is the unit; it grants `solar-soiling-ml` **and** `BBF-Website`. |
-| The data hand-off | **No extra credential.** It is a GitHub Release on this repo (`handoff-v1`), so org membership is the access. See `DATA.md`. |
+| The data hand-off | **No extra credential.** It is a GitHub Release on this repo (`handoff-v1`), so org membership is the access. See `docs/DATA.md`. |
 | Colab Pro | Stage-1 training runs. |
 | Cloudflare Pages | The live dashboard. |
 | Roboflow | Label sets. The only route back to `data/yolo/scc21` if it is ever lost. |
@@ -253,7 +253,7 @@ except as a reference snapshot.
 Stage 1 passed its GA gate and the registry now points at the permissive checkpoint; Stage 2 is
 GA-ready and frozen; and the **economics audit found the cleaning-value product does not clear in
 coastal Santa Cruz** (0 of 1,865 sites). That last one is a confirmed kill-risk, not a bug —
-[`ECONOMICS_GROUNDING_20260809.md`](ECONOMICS_GROUNDING_20260809.md). Detection is the asset.
+[`ECONOMICS_GROUNDING_20260809.md`](../ECONOMICS_GROUNDING_20260809.md). Detection is the asset.
 
 ---
 

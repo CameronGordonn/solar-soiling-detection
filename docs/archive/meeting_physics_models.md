@@ -2,7 +2,7 @@
 > parameters moved after it was written: SOMOSclean `sl_sat` 0.10 → **0.08** and `k` 30 → **15**,
 > recalibrated against coastal-CA NREL data (2026-06-01). Anything downstream of those constants
 > in here is off. Note also that `sl_sat` was later found to have been fitted against the wrong
-> point of the trajectory — see §6 of [CRAIG_BRIEF_2026-08-19.md](../CRAIG_BRIEF_2026-08-19.md).
+> point of the trajectory — see §6 of [BUSINESS_BRIEF.md](../BUSINESS_BRIEF.md).
 > Live: [SOILING_STAGE2_GUIDE.md](../SOILING_STAGE2_GUIDE.md) and `src/risk/physics_score.py`.
 
 # Meeting Notes — Physics-Based Soiling Models in SolarSoiled

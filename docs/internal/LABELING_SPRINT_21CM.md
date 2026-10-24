@@ -190,7 +190,7 @@ polygon area collapses against the 60cm set's 13.5 m².
 
 **Backbone-agnostic on purpose.** Step 5 emits YOLO-seg `.txt` *and* COCO `instances_*.json` from the
 same polygons: ultralytics eats the former, RF-DETR the latter (W1 in
-[PERMISSIVE_STACK_MIGRATION.md](PERMISSIVE_STACK_MIGRATION.md)). Nothing in this sprint commits us to
+[PERMISSIVE_STACK_MIGRATION.md](../PERMISSIVE_STACK_MIGRATION.md)). Nothing in this sprint commits us to
 a detector — that migration doc's own guardrail 1 is "data > model, and resolution > architecture
 here," which is precisely the bet being made this week.
 

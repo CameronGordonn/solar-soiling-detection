@@ -327,7 +327,7 @@ Two consequences, and they are the reason this section is ordered the way it is:
 
 ### 3.1 The options, ranked by confidence gained per dollar
 
-| # | Option | Cash | Cameron time | Calendar | What it can establish | What it cannot |
+| # | Option | Cash | Staff time | Calendar | What it can establish | What it cannot |
 |---|---|---|---|---|---|---|
 | **1** | **Blind prevalence read of the 6 cm imagery already on disk** | **$0** | ~2 days | 1 week | How many of 1,865 roofs show continuous edge occlusion, canopy overhang, or debris, with a CI. Whether Tier A is even non-empty. Whether a rubric two people agree on exists (Cohen's κ) | Nothing about dollars. Nothing about what is under a tree canopy that hides the array |
 | **2** | **Split-array wash on ONE volunteer with microinverters or optimizers** | ~$150 + recruiting | ~3 days | 4 to 6 weeks | Per-module recovery, directly, at roughly 1.5% MDE in two weeks, because weather is common-mode and cancels. Whether the effect is concentrated in specific modules | The string-inverter amplification (MLPE isolates it, so this measures the *lower* bound). One home is one home |
@@ -755,7 +755,7 @@ payload, fixed in `13185d3`).
 
 This project sits under Ecologistics, an active 501(c)(3) fiscal sponsor that holds the
 budget. Referring homeowners to paid cleaners is commercial activity and it is not the
-project's call to make. The specific questions, for Cameron to take to Ecologistics and to
+project's call to make. The specific questions, for the project to take to Ecologistics and to
 counsel, listed in increasing order of seriousness:
 
 1. **Is a free, unpaid, non-exclusive referral to a list of local cleaners consistent with
@@ -1049,12 +1049,12 @@ step is a physical one.
 **Every item here needs a person, an external party, or elapsed time.** Six iterations have
 exhausted what the data on disk can settle. Ordered by what unblocks the most:
 
-1. **Option 9, the ground-photo survey. Cameron, one afternoon.** It is step one of the plan
+1. **Option 9, the ground-photo survey. One afternoon.** It is step one of the plan
    and it decides whether Tier A exists at all. Everything below is downstream of it, and a
    negative result ends the programme cleanly and publishably.
-2. **Option 8, the City of Santa Cruz records request. Cameron, five minutes.** The 2 to 6
+2. **Option 8, the City of Santa Cruz records request. Five minutes.** The 2 to 6
    week clock does not start until it is sent, and it blocks nothing in the meantime.
-3. **The Option 1 rubric pilot. Needs a second reader, so it needs Akshitha.** v2 and v3 both
+3. **The Option 1 rubric pilot. Needs a second reader.** v2 and v3 both
    added fields to a rubric nobody has tested for inter-reader agreement. Twenty chips, two
    readers, before committing two days.
 4. **Benefit duration. One season, unavoidably.** The entire argument for the wash-only layer

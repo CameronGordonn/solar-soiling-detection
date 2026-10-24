@@ -310,7 +310,7 @@ two to three quarters, weighted toward the label work in §4.]`
 
 Every figure above is reproducible from the private repository; §1-§3 numbers are recorded
 with their measuring script, split, threshold and object count in
-`docs/CRAIG_BRIEF_2026-08-19.md`, `docs/ECONOMICS_GROUNDING_20260809.md` and
+`docs/BUSINESS_BRIEF.md`, `docs/ECONOMICS_GROUNDING_20260809.md` and
 `.claude/rules/stage1-detect.md`. §4's scoping is in
 `docs/PVDAQ_LABEL_PIPELINE_SPEC.md`; its feasibility phase was **executed and its results
 recorded on 2026-08-23** (`outputs/soiling/pvdaq_0a_csb12.json`, reproducible with
@@ -322,7 +322,7 @@ temperature coefficient, n=20 systems) and the within-cell spread is
 `src/risk/module_gamma.py` and are tabulated for all 1,629 residential systems in
 `outputs/soiling/module_gamma_by_system.csv`.
 
-Unsourced or assumed values are tracked as such in `CRAIG_BRIEF_2026-08-19.md` §6 and must
+Unsourced or assumed values are tracked as such in `BUSINESS_BRIEF.md` §6 and must
 not be quoted as measured: the production anchor of 1,500 kWh/kWp/yr, the minimum
 professional service price, the per-panel rate schedule, and a substituted utility export
 table.

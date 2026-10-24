@@ -2,7 +2,7 @@ name: CI
 
 # Runs the fast test subset on every PR and on pushes to main.
 # "Fast" = unit tests only; smoke/integration/contract are skipped because they
-# need trained weights or data that aren't in the repo (see DATA.md).
+# need trained weights or data that aren't in the repo (see docs/DATA.md).
 on:
   pull_request:
   push:

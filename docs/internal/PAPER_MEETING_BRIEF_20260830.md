@@ -128,7 +128,7 @@ duplicated the p10 value; it is 8.4%.)
 
 ## 2b. Three tilt results that are in no draft
 
-`docs/HANDOFF_roof_geometry_for_paper.md` was written for Josh on 2026-08-19 and none of it
+`docs/internal/HANDOFF_roof_geometry_for_paper.md` was written for Josh on 2026-08-19 and none of it
 reached the draft. Its §5 asked him to lead with three things; two are below.
 
 **The mercator trap — a methods contribution.** EPT X/Y are EPSG:3857 metres, Z is true metres.
@@ -190,8 +190,8 @@ on `soiling/pvdaq-labels-and-moss-audit`, where the `outputs/` JSONs were force-
 directory is gitignored.
 
 ```
-docs/PAPER_REWRITE_BRIEF_20260823.md              the twelve kill items
-docs/HANDOFF_20260827.md                          moss verdict, three channels, precision budget
+docs/internal/PAPER_REWRITE_BRIEF_20260823.md              the twelve kill items
+docs/internal/HANDOFF_20260827.md                          moss verdict, three channels, precision budget
 docs/GAMMA_RESOLUTION_20260827.md                 per-system temperature coefficient
 docs/PIPELINE_AUDIT_AND_PLAIN_REPORT_20260827.md  §2, the per-roof cleaning answer
 scripts/analyze/permit_recall_audit.py            73.6% / 55.3%

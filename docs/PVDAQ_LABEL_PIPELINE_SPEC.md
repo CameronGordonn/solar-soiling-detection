@@ -23,7 +23,7 @@ That is an **identifiability** problem, not a capacity problem. The training set
 zero examples of two arrays under the same weather with different measured losses, so no
 per-array feature has anything to fit against. This was confirmed experimentally: WorldCover
 was wired in properly and within-AOI spread moved 0.78 -> 0.77 points with the sign
-backwards (`docs/CRAIG_BRIEF_2026-08-19.md` §3). Adding more features to this label set is
+backwards (`docs/BUSINESS_BRIEF.md` §3). Adding more features to this label set is
 not expected to work and has already been measured not working once.
 
 PVDAQ changes the **label unit** from station to system. Two systems in the same half-degree

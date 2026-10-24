@@ -292,9 +292,8 @@ PYTHONPATH=. python scripts/outreach/generate_mailers.py \
 
 **State (2026-06-30): ✅ SENT LIVE — 50/50, 0 skipped, 0 failed.** The `mailers_v13` batch was
 mailed via a `live_` key on 2026-06-30 (all 50 `psc_…` IDs returned). **Actual cost $47.52**
-(~$0.95/card — the earlier ~$1.50/card was an over-estimate), funded from **Lob prepaid credits**
-(Auto Pay is intentionally *not* configured, so no card auto-charges — mail holds until credits
-cover it; this is the spend gate). The `live_` key was **rotated/deleted after the send**.
+(~$0.95/card — the earlier ~$1.50/card was an over-estimate). The `live_` key was
+**rotated/deleted after the send**.
 **⚠️ Do NOT re-run `--send` on this batch** — the idempotency key (below) dedupes a same-dir
 re-run, but a genuinely new campaign must render into a **new** mailers dir. Prior to the live send,
 the test-mode dry run passed 50/50; `mailers_v13/` holds 50 two-page green-themed cards (front +
@@ -303,7 +302,7 @@ back), all confirmed deliverable by Lob's test-mode `Postcard.create`.
 `LOB_API_KEY`. **Decision: mail with NO postal return address** — Lob accepts a postcard with no
 `from_address` (verified), so `_parse_return_address` returns None when `SOLARSOILED_RETURN_ADDRESS`
 is unset/placeholder and `mail_via_lob` omits `from_address`. Instead the card directs people to
-"Call or text Craig at (831) 216-8749". Fixes/decisions this pass: two-sided card (Lob requires
+the foundation's published phone number. Fixes/decisions this pass: two-sided card (Lob requires
 front+back), `size="4x6"`, `use_type="marketing"`, green site theme, **situs-address +
 owner-occupied targeting** (all 50 are Santa Cruz owner-occupied homes), front decluttered (name
 once + phone + mission), back redesigned as a left brand panel, **501(c)(3) badge** (status via
@@ -322,7 +321,7 @@ PYTHONPATH=. python scripts/outreach/mail_via_lob.py \
 #   Actual live cost was ~$47.52 for 50 (~$0.95/card). No return address needed (placeholder in
 #   .env → Lob mails without one). With a live_ key the script prompts y/N before charging.
 #   Each card carries an Idempotency-Key = "{mailers_dir.name}:{array_id}" so a re-run is deduped
-#   by Lob, never double-charged. Funding = Lob prepaid credits (no Auto Pay card).
+#   by Lob, never double-charged.
 ```
 
 `verify_addresses.py` gives a standalone deliverability table but only with a **live** key — its

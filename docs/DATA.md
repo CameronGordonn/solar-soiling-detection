@@ -6,10 +6,9 @@ A fresh clone has **code only**. Nothing below is in git: it is large, license-r
 PII-adjacent. This file is the whole story of how you get it.
 
 > **Custody, as of 2026-08-26.** The data lives in a **GitHub Release on this repo**, so custody is
-> the org itself rather than a person: anyone who can read this file can already fetch it. Org
-> owners **Craig** and **Akshitha** are the custodians of record. Cameron is not in this path and
-> does not need to be. The remaining single point of failure is the GitHub org, so keep more than
-> one owner on it, and check the restore works before you need it.
+> the org itself rather than a person: anyone with read access to the private repository can
+> fetch it. The remaining single point of failure is the GitHub org, so keep more than one owner
+> on it, and check the restore works before you need it.
 
 ## Get the data
 
@@ -135,8 +134,8 @@ Each row is a command, not a request to a person.
 
 ## Secrets
 
-`.env` and `keys.yaml` — copy from `.env.example` / `keys.example.yaml`. Real values come from the
-shared password-manager vault (Craig), **never Slack/email/git**. Keys: `SOLARSOILED_API_KEY`,
+`.env` and `keys.yaml` — copy from `.env.example` / `keys.example.yaml`. Real values are held
+by the project's maintainers, **never in Slack, email or git**. Keys: `SOLARSOILED_API_KEY`,
 `NASA_EARTHDATA_TOKEN`, `LOB_API_KEY` (⚠️ use the **test** key — `mail_via_lob --send` mails real
 postcards), Roboflow, and the R2 credential above. Deployed services (Render, Cloudflare Pages)
 hold their own copies in platform env settings; the vault is only for the human handoff.

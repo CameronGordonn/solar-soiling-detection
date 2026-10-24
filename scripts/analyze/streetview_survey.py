@@ -1,6 +1,6 @@
 """Street View substitute for the on-foot moss survey.
 
-`docs/CRAIG_BRIEF_2026-08-19.md` §5 Option 1 is an afternoon photographing the mossiest
+`docs/BUSINESS_BRIEF.md` §5 Option 1 is an afternoon photographing the mossiest
 arrays in town from public roads, measuring edge-band thickness against the module frame
 (35-40 mm) or cell pitch (156 mm) for scale. Street View is the same measurement from the
 same viewpoint on imagery already captured -- no travel, and it can be pointed at a ranked

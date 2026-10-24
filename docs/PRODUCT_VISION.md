@@ -12,15 +12,15 @@ SolarSoiled detects rooftop solar arrays from public aerial imagery, scores each
 
 ## Current state
 
-Live status lives in [docs/Q2_PLAN.md](Q2_PLAN.md) — see the "Project status" tables there. This table is a pointer to the surfaces; flag values mirror the canonical four (`shipped` / `in progress` / `queued` / `beta`).
+Live status lives in [docs/internal/Q2_PLAN.md](internal/Q2_PLAN.md) — see the "Project status" tables there. This table is a pointer to the surfaces; flag values mirror the canonical four (`shipped` / `in progress` / `queued` / `beta`).
 
 | Surface | Pointer | Status |
 |---|---|---|
-| Stage 1 — detection | [docs/NAIP_ROBOFLOW_WORKFLOW.md](NAIP_ROBOFLOW_WORKFLOW.md), [docs/PHASE1_HANDOFF.md](PHASE1_HANDOFF.md) | `beta` — 56% mAP50 NAIP Santa Cruz; target 70%+ |
+| Stage 1 — detection | [docs/NAIP_ROBOFLOW_WORKFLOW.md](NAIP_ROBOFLOW_WORKFLOW.md), [docs/internal/PHASE1_HANDOFF.md](internal/PHASE1_HANDOFF.md) | `beta` — 56% mAP50 NAIP Santa Cruz; target 70%+ |
 | Stage 2 — risk model | [docs/SOILING_STAGE2_GUIDE.md](SOILING_STAGE2_GUIDE.md) | ⚠️ **gates superseded 2026-09-22 (leaking folds; joint-fold AUC 0.622, not 0.710 — see [CANONICAL_NUMBERS.md](CANONICAL_NUMBERS.md))**. Pre-correction record: `beta` — **0.712 spatial-CV** ✓ (re-measured; 0.728 is `run_optionb` as stored and does not reproduce), pooled out-of-year AUC **0.710** ✓, calibration retained ✓. All three gates cleared 2026-07-05. **MERRA-2 is exhausted, not pending** — `run_merged_merra2` hurt performance (0.716 CV / 0.666 holdout); do not retry. Known limit: does not generalize out-of-region (0.677 pooled) |
 | Customer-readiness CLI + API | `src/solarsoiled/cli.py`, `src/solarsoiled/api.py`, [CLAUDE.md](../CLAUDE.md) | Tier 0 + Tier 1 `shipped`; Tier 2 `in progress`; Tier 3 `shipped` (FastAPI + Render deploy + `eval --report`); Tier 4 `shipped` (dashboard + outreach) |
-| Site (hosts the tools) | `../BBF-Website` (Cloudflare Pages) | `in progress` — tools folded into the BBF site; live at `betterbehaviorfoundation.com` after the DNS cutover; Render API backend wired |
-| Dashboard | `../BBF-Website/public/tools/dashboard.html` → `/tools/dashboard` | `shipped` — Leaflet map of **3,362 Santa Cruz array polygons across 1,865 sites**; 3-model tab switcher (XGBoost / SOMOSclean / Kimber); QR deep-link; energy calculator |
+| Site (hosts the tools) | BBF website, separate private repo (Cloudflare Pages) | `in progress` — tools folded into the BBF site; live at `betterbehaviorfoundation.com` after the DNS cutover; Render API backend wired |
+| Dashboard | `BBF-Website/public/tools/dashboard.html` (private repo) → `/tools/dashboard` | `shipped` — Leaflet map of **3,362 Santa Cruz array polygons across 1,865 sites**; 3-model tab switcher (XGBoost / SOMOSclean / Kimber); QR deep-link; energy calculator |
 | Homeowner outreach | `scripts/outreach/`, `outputs/outreach/` | `in progress` — test-50 batch (`mailers_v13` / `detected_targets.csv`) ready; Lob send gated on live key |
 | Operational runbook | [CLAUDE.md](../CLAUDE.md) | Source of truth for commands, paths, dataset status |
 
@@ -33,7 +33,7 @@ Three workstreams run concurrently. **Track C does not wait on Track A** — we 
 | Track | Scope | Ship criterion | Rationale |
 |---|---|---|---|
 | **A — Model quality** | Stage 1 joint training (Duke 160px + NAIP), pseudo-labeling round, Stage 2 year-holdout validation | mAP50 ≥70% for Stage 1; year-holdout pass for Stage 2 | Sets the GA bar |
-| **B — Visibility surface** | BBF site Tools section (`../BBF-Website/public/tools/`): homeowner dashboard, breakeven calculator, 3-model comparison | Live site + dashboard with working QR deep-link | `shipped` (built); live at the DNS cutover |
+| **B — Visibility surface** | BBF site Tools section (`BBF-Website/public/tools/` (private repo)): homeowner dashboard, breakeven calculator, 3-model comparison | Live site + dashboard with working QR deep-link | `shipped` (built); live at the DNS cutover |
 | **C — Decision API** | `POST /decision`, `GET /breakeven` (arithmetic, no model weights), plus `/jobs`, `/feedback`, `/results`, SSE; deployed on Render | Reachable endpoints; decision path available even when the model registry is not | `shipped` — `https://solarsoiled-api.onrender.com`. **Nothing calls it**: the dashboard is self-contained by design |
 | **D — Physical outreach** | Top-50 postcards with QR codes → personalized dashboard; close the physical-to-digital loop | 50 cards in homeowners' hands | `in progress` — scripts 20–23 built; dry-run validated; awaiting send go/no-go |
 
@@ -121,9 +121,9 @@ Contract sketches, not final specs. Every response carries the metadata block de
 
 ## Track B — Site + Dashboard
 
-The tools now live in the **BBF site** (`../BBF-Website`, Cloudflare Pages static export), served
+The tools now live in the **BBF site** (a separate private repository, deployed to Cloudflare Pages), served
 under `/tools/` and live at `betterbehaviorfoundation.com` after the DNS cutover. The retired
-`solarsoiled-landing/` GitHub Pages surface has been removed. `../BBF-Website/public/tools/` contains:
+`solarsoiled-landing/` GitHub Pages surface has been removed. `BBF-Website/public/tools/` (private repo) contains:
 - `dashboard.html` — interactive homeowner dashboard: Leaflet map of **3,362 Santa Cruz array polygons (1,865 sites)**, 3-model tab switcher, array detail panel (QR deep-linkable via `?id=<array_id>`), energy/money calculator
 - `breakeven.html` — branded cleaning-breakeven calculator (seasonal + persistent soiling)
 - `arrays_data.js` — pre-embedded GeoJSON with `risk_score` (XGBoost), `somos_score` (SOMOSclean physics), `kimber_score` (Kimber 2007) per array; no backend call on load
@@ -169,13 +169,13 @@ Not a commitment; shapes API and output design.
 - `/recommend`: subscription-gated — per-MW annual or per-site.
 - `force_rescore`: premium add-on.
 - Feedback submission: free, always.
-- **Consumer→cleaner marketplace (active wedge, post-2026-06):** the durable revenue line is **connecting qualified homeowners to cleaners** — we supply scored, net-$-ranked, high-soiler leads; cleaners want recurring lead flow (70–80% of first-time clients recur). Lead-gen referral or marketplace take, hosted in the **BBF** site's Tools section. The economics behind it: `outputs/economics/lightpro_opportunity.md`. Roadmap: [Q2_PLAN.md](Q2_PLAN.md#next-steps--post-2026-06-meeting).
+- **Consumer→cleaner marketplace (active wedge, post-2026-06):** the durable revenue line is **connecting qualified homeowners to cleaners** — we supply scored, net-$-ranked, high-soiler leads; cleaners want recurring lead flow (70–80% of first-time clients recur). Lead-gen referral or marketplace take, hosted in the **BBF** site's Tools section. The economics behind it: `outputs/economics/lightpro_opportunity.md`. Roadmap: [Q2_PLAN.md](internal/Q2_PLAN.md#next-steps--post-2026-06-meeting).
 
 ---
 
 ## Customer-readiness arc (Tier 0–3)
 
-The current code is research-shaped — 14 numbered scripts each with their own argparse and output convention. That's correct for "Cameron and Josh debug a model" and wrong for "we have a partner AOI on Friday and need full Stage 1 → Stage 2 in one command with versioned outputs and beta metadata." Below in priority order; tiers are largely independent and can run in parallel with model work.
+The current code is research-shaped — 14 numbered scripts each with their own argparse and output convention. That's correct for "two people debug a model" and wrong for "we have a partner AOI on Friday and need full Stage 1 → Stage 2 in one command with versioned outputs and beta metadata." Below in priority order; tiers are largely independent and can run in parallel with model work.
 
 - **Tier 0 — output manifest + dependency hygiene. `shipped`.** `pyproject.toml` registers the package; `src/solarsoiled/manifest.py` writes a sibling `manifest.json` from every artifact-producing script (02/04/05/06/09/10/11). Schema mirrors the v0 beta API response: `{schema_version, stage, model_version, model_weights_sha256, inputs_hash, generated_at, beta, metrics, known_limitations}`.
 - **Tier 1 — `solarsoiled` CLI. `shipped`.** Typer entrypoint registered as a console script (`pip install -e .` exposes `solarsoiled`). Subcommands `tile / detect / score / recommend / run / eval`; `run --aoi <bbox-or-geojson>` chains all four. The 14 scripts stay and still work standalone; the CLI imports their `main(argv=…)` functions as library calls. Per-AOI namespace: `outputs/aoi/<partner_id>/{aoi.geojson, tiles/, detect/, arrays.geojson, features/, risk.geojson, recommendations.json, manifest.json}`. Recommend engine is rule-based v1 with injectable forecast for tests; covered by 13 unit tests across `tests/test_aoi.py` and `tests/test_recommend.py`. End-to-end smoke against a fresh Stage 1 checkpoint is `queued` for the next training cut.

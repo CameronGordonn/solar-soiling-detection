@@ -80,7 +80,7 @@ Josh — of everything below, these are the three worth building the paper aroun
 
 1. **The two-method tilt validation** (immediately below). Two datasets with nothing in
    common agreeing to 0.0° on the median is the credibility anchor for the whole method.
-2. **The 2.6× correction that did not move the answer** (§5 of `CRAIG_BRIEF_2026-08-19.md`).
+2. **The 2.6× correction that did not move the answer** (§5 of `BUSINESS_BRIEF.md`).
    The dollar chain took its largest-ever upward revision — value of a lost kWh $0.1646 →
    $0.4284, AOI annual loss +156% — and the conclusion held at 0 of 1,865 sites. A negative
    result that survives its own strongest counter-correction is worth far more than one that
@@ -265,7 +265,7 @@ across NREL's training set. The real reasons are three, all measured:
    0.372 with longitude. Accordingly the learned effect has the **wrong sign** — steeper
    roofs predict *more* soiling, where physics says steep panels shed water and dust better.
 
-This is the same failure as `worldcover_tree` (§ `docs/CRAIG_BRIEF_2026-08-19.md`): same
+This is the same failure as `worldcover_tree` (§ `docs/BUSINESS_BRIEF.md`): same
 feature name, different referent. Reproduce all three with the partial-dependence and
 support-overlap checks described in §7.
 

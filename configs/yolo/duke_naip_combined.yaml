@@ -10,7 +10,7 @@
 # subsample to ~150 tiles in 02f_clean_duke_dataset.py if it dominates mAP.
 #
 # After training, run 05_evaluate_yolov8_seg.py separately per dataset to get
-# per-domain mAP (see docs/PHASE1_HANDOFF.md or scripts/05e_ramp_eval.py).
+# per-domain mAP (see docs/internal/PHASE1_HANDOFF.md or scripts/05e_ramp_eval.py).
 #
 # Adding Stanford or new NAIP areas: append paths under train/val/test.
 # Never mix tiles from the same geographic area across train and val/test.
