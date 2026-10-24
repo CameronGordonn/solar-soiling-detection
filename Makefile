@@ -10,12 +10,12 @@ help:
 	@echo "solar-soiling-ml — common targets"
 	@echo ""
 	@echo "  bootstrap             Install the package + dev/api extras into the active env"
-	@echo "  check-data            Tier 2: which hand-off artifacts are present, by lane (DATA.md)"
+	@echo "  check-data            Tier 2: which hand-off artifacts are present, by lane (docs/DATA.md)"
 	@echo "  verify-handoff        Checksum the restore against setup/handoff/MANIFEST.json"
 	@echo "  docker-build          Build the container image (CPU, full pipeline)"
 	@echo "  docker-smoke          Assert the built image can actually import the detector"
 	@echo "  test                  Run full test suite (requires conda env: solar-soiling)"
-	@echo "  test-fast             Tier 1: 248 unit tests, ~60s, needs NO data — run this first"
+	@echo "  test-fast             Tier 1: unit tests, ~60s, needs NO data — run this first"
 	@echo "  eval-production       SAHI F1 sweep on production weights — the number that matters"
 	@echo "  eval-r2               SAHI F1 sweep on R2 weights (r2_cameron_20260509)"
 	@echo "  sahi-combined         Re-run the sweep with perform_standard_pred=true (full+slice)"
@@ -39,7 +39,7 @@ bootstrap:
 	@echo "    pip install -e \".[dev,api,detect]\"     # rfdetr + sam2"
 	@echo ""
 	@echo "Next: 'make test-fast' (~60s, needs NO data -- your setup proof), then"
-	@echo "'make check-data' to see which hand-off artifacts you still need (DATA.md)."
+	@echo "'make check-data' to see which hand-off artifacts you still need (docs/DATA.md)."
 
 # Report presence of the gitignored data artifacts the pipeline needs, grouped by
 # the lane that needs them and by the verification tier they unlock (ONBOARDING.md §1).
@@ -53,7 +53,7 @@ bootstrap:
 #      one AGPL-lineage .pt was tracked in git. That file is gone from HEAD; the check now
 #      names the checkpoint the gate actually loads.
 # It also asked for `data/yolo/naip` (the retired 60cm set) and never mentioned the 21cm tiles
-# `scripts/detect/eval_tile_f1.py` reads. Provenance for every path is in DATA.md.
+# `scripts/detect/eval_tile_f1.py` reads. Provenance for every path is in docs/DATA.md.
 check-data:
 	@echo "── Tier 2 · Stage 2 + paper lane (reproduces holdout AUC 0.710) ──────────────"
 	@$(MAKE) --no-print-directory _probe PATHS="\
@@ -68,7 +68,7 @@ check-data:
 		data/interim/scc21_labelset/tile_index_21cm.json \
 		data/yolo/scc21/tile_labels \
 		data/interim/tile_index.json"
-	@echo "── Regenerable (see DATA.md for the command; absence is not a blocker) ───────"
+	@echo "── Regenerable (see docs/DATA.md for the command; absence is not a blocker) ───────"
 	@$(MAKE) --no-print-directory _probe PATHS="\
 		data/external/nrel_soiling_map_annual.csv \
 		data/external/static_features.csv \
