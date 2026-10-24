@@ -1,9 +1,31 @@
 # Solar Soiling Detection
 
-Finding rooftop solar arrays in public aerial imagery, estimating how much dirt (soiling) each one
-loses, and working out whether paying to clean them is worth it. Everything runs on public data.
+Finds rooftop solar arrays in public aerial imagery and works out whether paying to clean them is
+worth it, using only public data.
 
-**Author:** Cameron Gordon
+**Live map:** [betterbehaviorfoundation.com/tools/dashboard.html](https://betterbehaviorfoundation.com/tools/dashboard.html)
+· **Project page:** [betterbehaviorfoundation.com/solar](https://betterbehaviorfoundation.com/solar)
+· **Papers:** [main (18 pp)](paper/paper.pdf), [detection (7 pp)](paper/paper_detection.pdf)
+
+- **Detection:** tile-level box F1 **0.8260** (95% CI [0.798, 0.853]) on a held-out test set,
+  with an RF-DETR detector and SAM2 masks.
+- **Coverage:** **3,362 arrays at 1,865 sites** mapped across Santa Cruz County from 21 cm aerial
+  imagery.
+- **Economics:** on 149 metered rooftops, one wash recovers a median **$28.10** of electricity
+  against an assumed $150 service call, so none of the 1,865 sites comes out ahead on a cleaning.
+
+![Figure 1: the four questions the project asked and what each one returned](paper/assets/fig1_argument.png)
+
+Two-stage pipeline: RF-DETR + SAM2 find and outline each array (Stage 1), then an XGBoost model
+scores its soiling risk (Stage 2), and a cost model turns that into a cleaning decision. Built in
+2026 for the Better Behavior Foundation and since handed off; this repo is the finished project.
+
+## My role
+
+I was the sole engineer: detection, soiling model, validation, economics, CLI and API, the
+dashboard data pipeline, and both papers.
+
+<!-- Credits line for the annotators goes here once names are confirmed. -->
 
 ## Paper (working draft)
 
@@ -20,10 +42,8 @@ latitude and longitude get on their own (0.644). And a better ranking wouldn't c
 on 149 metered rooftops, one wash recovers a median $28.10 of electricity against a $150 service
 call.
 
-![Figure 1: the four questions the paper asks and what each one returned](paper/assets/fig1_argument.png)
-
-*Figure 1. The whole argument in one picture. Question 4 is simple arithmetic, and in this market
-it settles questions 2 and 3: a perfect ranking can't create value that isn't there.*
+Figure 1 above is the whole argument in one picture. Question 4 is simple arithmetic, and in this
+market it settles questions 2 and 3: a perfect ranking can't create value that isn't there.
 
 **Companion paper:** *Permissively Licensed Rooftop Array Detection at 21 cm, with an Executable
 Gate, and Per-Array Roof Geometry from Public Lidar.* [PDF, 7 pages](paper/paper_detection.pdf).
@@ -131,6 +151,38 @@ A few choices worth explaining:
 - **Keep the licence clean.** The detector is RF-DETR and SAM2, both Apache-2.0. The older YOLO /
   SAHI path is AGPL-3.0, so it's in an optional `legacy` extra that isn't installed by default.
 
+## Persistent soiling inspection screen
+
+The Stage 2 model only sees soiling that rain resets. A separate screen looks for arrays where a
+layer rain can't remove (moss, lichen, organic film) is plausible, using public lidar:
+
+- **70% low tilt:** flat arrays shed less in the rain. The score follows a measured drop-off from
+  horizontal to roughly 20-25 degrees.
+- **30% nearby canopy:** lidar vegetation returns at least 2.5 m above the array plane within 9 m.
+
+Arrays are ranked within an area and the top 10% are flagged for inspection. The weights are
+stated policy defaults, not fitted coefficients, and the output is an inspection list, not a loss
+estimate. Code: [`scripts/analyze/rank_moss_candidates.py`](scripts/analyze/rank_moss_candidates.py).
+Write-up: [`docs/PERSISTENT_SOILING_SCREEN.md`](docs/PERSISTENT_SOILING_SCREEN.md).
+
+## Status and open directions
+
+The project is finished and was handed off at the end of August 2026. Both papers are working
+drafts and have not been peer reviewed. The directions left open, each written up in `docs/`:
+
+- **Per-roof soiling labels.** Per-system telemetry carries real per-roof signal (AUC 0.573), but
+  the three standard soiling estimators disagree with each other. A geographically balanced label
+  set is the next step, not more model tuning.
+- **Validate the inspection screen.** Inspect a blinded sample of flagged and unflagged arrays and
+  check whether the screen actually finds more persistent soiling
+  ([PERSISTENT_SOILING_SCREEN.md](docs/PERSISTENT_SOILING_SCREEN.md)).
+- **Permit vintage.** City of Santa Cruz permit records would raise tariff-vintage coverage in the
+  study area from 17% to about 88%
+  ([AOI_CLEANING_TARGETING_PLAN.md](docs/AOI_CLEANING_TARGETING_PLAN.md), option 8).
+- **Other markets.** Recovered dollars rise with dry spells, so arid, high-dust and
+  commercial-scale sites are where cleaning could pay ([BUSINESS_BRIEF.md](docs/BUSINESS_BRIEF.md),
+  section 7).
+
 ## Repository layout
 
 ```
@@ -150,7 +202,7 @@ tests/             test suite
 The code and tests are all here, but the data isn't. Model weights, imagery, label sets and the
 paper's audit outputs live in a private repository, so anything that needs them (training, the
 detection gate, regenerating the paper's numbers) won't run from this repo. Some docs refer to a
-`gh release download` step; that won't work from here either. [`DATA.md`](DATA.md) lists what the
+`gh release download` step; that won't work from here either. [`docs/DATA.md`](docs/DATA.md) lists what the
 data is.
 
 Setup and tests, which need no data:
@@ -161,6 +213,10 @@ conda activate solar-soiling
 pip install -e .          # installs the solarsoiled CLI
 make test-fast
 ```
+
+On a clean clone (2026-10-23) the fast suite gives 523 passed, 32 skipped: tests that need the
+private data skip rather than fail. CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml))
+runs the same subset on every push and pull request.
 
 With the data in place, the full pipeline on an area of interest:
 
@@ -176,15 +232,18 @@ solarsoiled run \
 There's also a Docker build (`make docker-build`, then `make docker-smoke` to check the detector
 actually imports inside the image).
 
-The cleaning decision is also deployed as a small API. It doesn't need any model weights, since
-it's just arithmetic over sourced constants:
+The cleaning decision is also served by the API (`solarsoiled-api`, code in
+[`src/solarsoiled/api.py`](src/solarsoiled/api.py)). It doesn't need any model weights, since
+it's just arithmetic over sourced constants. Run locally:
 
 ```bash
-curl -s "https://solarsoiled-api.onrender.com/decision?system_kw=6&install_date=2015-06-01"
+PYTHONPATH=. solarsoiled-api &     # from the repo root
+curl -s "http://localhost:8000/decision?system_kw=6&install_date=2015-06-01"
 ```
 
-It's on a free tier, so the first request can take about 30 seconds to wake up. Each response says
-where every input came from and what would have to be true for cleaning to pay.
+Each response says where every input came from and what would have to be true for cleaning to
+pay. The hosted instance at `solarsoiled-api.onrender.com` runs an older build that doesn't have
+the `/decision` route.
 
 ## Building the paper
 
@@ -203,8 +262,10 @@ lidar roof geometry in full. [`paper/README.md`](paper/README.md) explains which
 
 ## About this repo
 
-This is a public snapshot of my working repository, with a few files held back (outreach records
-that name real homes, plus local tool configuration). [`MIRROR.md`](MIRROR.md) lists them and why.
+This repo is a squashed public snapshot of the project's private development repository, not its
+full history. A few files are held back (outreach records that name real homes, plus local tool
+configuration); [`docs/MIRROR.md`](docs/MIRROR.md) lists them and why. Team-period working
+documents (onboarding, plans, handoffs) are in [`docs/internal/`](docs/internal/).
 The `docs/` folder is the project's working notes, written as things happened, so older ones can be
 out of date. When in doubt, go by the paper and `docs/CANONICAL_NUMBERS.md`.
 
