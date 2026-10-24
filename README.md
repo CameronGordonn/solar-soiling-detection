@@ -23,9 +23,11 @@ scores its soiling risk (Stage 2), and a cost model turns that into a cleaning d
 ## My role
 
 I was the sole engineer: detection, soiling model, validation, economics, CLI and API, the
-dashboard data pipeline, and both papers.
+dashboard data pipeline, and both papers. When I left in August 2026 I prepared the handoff to
+the foundation's team.
 
-<!-- Credits line for the annotators goes here once names are confirmed. -->
+**Credits:** Akshitha Nagaraj and I annotated the 21 cm training labels. Josh lent GPU time for the
+first detector training runs, before the project moved to Colab Pro.
 
 ## Paper (working draft)
 
