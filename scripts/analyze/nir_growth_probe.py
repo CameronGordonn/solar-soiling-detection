@@ -2,7 +2,7 @@
 
 WHAT THIS CAN AND CANNOT ANSWER -- read before quoting any number from it
 ------------------------------------------------------------------------
-The physics in ``docs/CRAIG_BRIEF_2026-08-19.md`` §4 turns on the *thickness* of a
+The physics in ``docs/BUSINESS_BRIEF.md`` §4 turns on the *thickness* of a
 continuous moss band along the lower edge of a module: f = 0.1 (~16 mm) kills the thesis,
 f = 0.2-0.3 (~30-50 mm) makes it. **No aerial imagery we have or can get resolves that.**
 

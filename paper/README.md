@@ -152,7 +152,7 @@ Every figure reads a committed artifact directly. No figure contains a hand-ente
 need `PYTHONPATH` set to the repo root. The rest are pure file reads.
 
 Two of these inputs are **gitignored and must be pulled** before the figures build on a
-fresh clone (see `DATA.md`): `data/external/dgstats/` and
+fresh clone (see `docs/DATA.md`): `data/external/dgstats/` and
 `outputs/soiling/training_matrix.parquet`. The eval JSONs and `site_economics.csv` are
 committed.
 

@@ -6,12 +6,12 @@
 > out-of-station-and-year AUC is **0.622** (95% CI [0.571, 0.670]), not **0.710**; **lat/lon alone
 > score 0.644**; the regional figures are **0.655** pooled / **0.527** largest region, not
 > 0.677/0.548. Calibration is unaffected. Corrected numbers and artifacts:
-> [CANONICAL_NUMBERS.md](CANONICAL_NUMBERS.md); full argument: `paper/paper.tex` §4.4.
+> [CANONICAL_NUMBERS.md](../CANONICAL_NUMBERS.md); full argument: `paper/paper.tex` §4.4.
 > This document is kept as the record of what was believed at the time.
 
 
 **2026-08-23.** Findings from cloning this repo to an empty directory and following
-`docs/ONBOARDING.md` literally, plus the set of traps that silently produce *plausible wrong
+`docs/internal/ONBOARDING.md` literally, plus the set of traps that silently produce *plausible wrong
 numbers* rather than errors. Written because as of 2026-08-31 nobody left on the project has
 run a cold setup, and every gap below is one a newcomer eats as hours of debugging.
 
@@ -41,9 +41,9 @@ Verified by `git clone` into an empty dir (266 tracked files, 59 MB) and working
 
 - `setup/setup_conda.sh` — the script that actually creates the env
 - `make bootstrap` — installs the package + extras
-- `DATA.md` — provenance for every gitignored artifact
+- `docs/DATA.md` — provenance for every gitignored artifact
 
-`README.md:264` has the setup command and `README.md:259` points at `DATA.md`. But
+`README.md:264` has the setup command and `README.md:259` points at `docs/DATA.md`. But
 `CLAUDE.md` and `TEAM.md` both send new people to `ONBOARDING.md`, and §1 of ONBOARDING
 tells them to read README first, so the pointer chain only works if they read in that exact
 order and remember it two sections later. Someone who opens ONBOARDING and skims to
@@ -75,12 +75,12 @@ dies twelve frames deep in `pandas.io.parquet` with:
 FileNotFoundError: [Errno 2] No such file or directory: '.../outputs/soiling/training_matrix.parquet'
 ```
 
-No mention of `make check-data`, no mention of `DATA.md`, no hint that this file is a
+No mention of `make check-data`, no mention of `docs/DATA.md`, no hint that this file is a
 deliberate hand-off artifact rather than something the newcomer broke. This is the very
 first command the onboarding doc asks them to run.
 
 **Fix:** preflight the input paths in `holdout_ci.py` and fail with "missing X — run
-`make check-data`, see DATA.md". `make check-data` itself is good and reports all six
+`make check-data`, see docs/DATA.md". `make check-data` itself is good and reports all six
 artifacts correctly; it just isn't reachable from the failure.
 
 ### A4. `laspy` is an undeclared dependency
@@ -166,7 +166,7 @@ once and cost real time.
 | **`optimizer: auto`** | Silently overrides `lr0` to AdamW(0.002). Must stay `SGD`. | `configs/yolo/*.yaml` |
 | **Grouped CV on PVDAQ must group by CLUSTER** | 173 coordinates carry >1 system, one carries 21. Grouping by station or system leaks and yields a beautiful meaningless AUC. | `docs/PVDAQ_LABEL_PIPELINE_SPEC.md` §5 |
 | **The 15% shrink appears twice for the same reason** | SAM2 prompt boxes and lidar plane fits both shrink 15%, both to avoid pulling in neighbouring structure. Changing one does not change the other. | `rfdetr_infer.py`, `roof_geometry.py` |
-| **`main` is NOT protected** | Branch protection is unavailable on private repos under the org's free plan. "PR + 1 approval" is a convention nothing enforces. | `docs/ONBOARDING.md` §3 |
+| **`main` is NOT protected** | Branch protection is unavailable on private repos under the org's free plan. "PR + 1 approval" is a convention nothing enforces. | `docs/internal/ONBOARDING.md` §3 |
 | **Open-Meteo quota wall** | ~600 homes/day on the free tier. Bulk scoring hits it; gates are built in but a careless test run burns the day's budget. | `src/risk/weather_client.py` |
 | **Lob is live money** | `mail_via_lob.py --send` mails real postcards. `mailers_v13` already went 50/50 on 2026-06-30. Never re-run a sent batch. | `scripts/outreach/mail_via_lob.py` |
 
@@ -178,7 +178,7 @@ once and cost real time.
 git clone <repo> /tmp/coldclone && cd /tmp/coldclone
 make check-data                 # every hand-off artifact MISSING on a true cold clone
 git ls-files | grep '\.pt$'     # EMPTY as of 2026-08-26 (A6 resolved, HEAD only)
-grep -c "setup_conda" docs/ONBOARDING.md   # >= 1 as of 2026-08-26 (A1 fixed)
+grep -c "setup_conda" docs/internal/ONBOARDING.md   # >= 1 as of 2026-08-26 (A1 fixed)
 make test-fast                  # 246 passed, 5 skipped, 1 deselected, with NO data
 ```
 

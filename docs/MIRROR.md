@@ -44,7 +44,7 @@ before the ignore rule existed; replaying it would re-expose both.
 ## Where numbers live
 
 Every headline figure, the artifact that produced it and how to reproduce it are in
-[`docs/CANONICAL_NUMBERS.md`](docs/CANONICAL_NUMBERS.md). When any other doc disagrees
+[`docs/CANONICAL_NUMBERS.md`](CANONICAL_NUMBERS.md). When any other doc disagrees
 with that file, that file wins.
 
 ## Rebuilding this mirror

@@ -21,7 +21,7 @@ here, with a 0.3-0.8 %/yr band for sensitivity.
 
 Our own site measurement is *consistent but far less precise*: PVDAQ system 2107 read
 **-0.162 %/yr, 95% CI [-0.520, +0.175]** by RdTools year-on-year
-(``docs/CRAIG_BRIEF_2026-08-19.md`` §5). That interval contains 0.5 %/yr comfortably. One
+(``docs/BUSINESS_BRIEF.md`` §5). That interval contains 0.5 %/yr comfortably. One
 893 kW ground mount in Arbuckle is not a basis for a residential fleet rate, so the
 literature median leads and 2107 is a cross-check, not the source.
 

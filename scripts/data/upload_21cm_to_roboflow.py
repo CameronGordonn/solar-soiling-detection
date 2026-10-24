@@ -13,7 +13,7 @@ annotator, because hours of labeling on a degraded raster is unrecoverable work.
 IMAGE INTEGRITY: we upload lossless PNG at native ~0.21 m/px. Roboflow stores the original and
 annotates against it, but a generated *version* re-encodes to JPEG. We therefore treat Roboflow as an
 annotation store only — the export step pairs Roboflow's label txt with our local PNGs and throws
-Roboflow's images away. See docs/LABELING_SPRINT_21CM.md §5.
+Roboflow's images away. See docs/internal/LABELING_SPRINT_21CM.md §5.
 
 Safe to re-run: Roboflow deduplicates identical images within a project, so re-sending tiles already
 uploaded is a no-op rather than a second copy (verified 2026-07-31 — 249 uploads over a 4-tile smoke

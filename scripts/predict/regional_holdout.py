@@ -33,7 +33,7 @@ be traced back to what produced it.
 Note that a fleet label file (e.g. `outputs/soiling/pvdaq_fleet_labels.json`) is NOT a
 matrix. It has no engineered weather/AQ/static features, so it cannot be passed here
 directly -- it has to be built into a feature matrix first. See
-`docs/PVDAQ_LANE_HANDOFF_20260831.md` section 4.
+`docs/internal/PVDAQ_LANE_HANDOFF_20260831.md` section 4.
 
 Usage:
     PYTHONPATH=. conda run -n solar-soiling python scripts/predict/regional_holdout.py \
@@ -144,7 +144,7 @@ def main() -> None:
             hint = (f"\n{args.matrix.name} is not a .parquet file. If you meant a label file "
                     "such as outputs/soiling/pvdaq_fleet_labels.json, note that labels are not "
                     "a feature matrix -- they carry no engineered weather/AQ/static columns and "
-                    "have to be built into one first. See docs/PVDAQ_LANE_HANDOFF_20260831.md "
+                    "have to be built into one first. See docs/internal/PVDAQ_LANE_HANDOFF_20260831.md "
                     "section 4.")
         raise SystemExit(f"ERROR: could not read matrix {args.matrix}: "
                          f"{type(e).__name__}{hint}")

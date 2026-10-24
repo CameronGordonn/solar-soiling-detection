@@ -1,15 +1,15 @@
 > ⚠️ **ARCHIVED 2026-08-20.** Point-in-time onboarding brief for Akshitha (2026-07).
 > Its Stage-1 line quotes `val SAHI F1 0.570 (GA gate 0.65, beta 0.55)` — that metric and
 > that gate were both retired on 2026-08-07 and are not comparable to current numbers.
-> Current status: [Q2_PLAN.md](../Q2_PLAN.md). Team lanes: [TEAM.md](../TEAM.md).
+> Current status: [Q2_PLAN.md](../internal/Q2_PLAN.md). Team lanes: [TEAM.md](../internal/TEAM.md).
 
 ---
 
 # Kickoff brief — Akshitha onboarding (2026-07-15)
 
 A one-page orientation for the intro meeting. Full detail lives in the linked canonical docs; this
-is the 5-minute "where things stand." Onboarding steps: [`ONBOARDING.md`](../ONBOARDING.md).
-Ownership + process: [`TEAM.md`](../TEAM.md).
+is the 5-minute "where things stand." Onboarding steps: [`ONBOARDING.md`](../internal/ONBOARDING.md).
+Ownership + process: [`TEAM.md`](../internal/TEAM.md).
 
 ## What SolarSoiled is
 
@@ -19,7 +19,7 @@ Two-stage geospatial ML, county-agnostic, runs on any NAIP-covered AOI:
   land use / structural features.
 - **Product loop:** detect → score → recommend cleaning → postcard → QR → homeowner dashboard.
 
-## Where each phase stands (canonical: [`Q2_PLAN.md`](../Q2_PLAN.md))
+## Where each phase stands (canonical: [`Q2_PLAN.md`](../internal/Q2_PLAN.md))
 
 | Phase | Status | Headline |
 |---|---|---|

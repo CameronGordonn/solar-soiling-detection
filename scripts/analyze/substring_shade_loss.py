@@ -182,7 +182,7 @@ def resample(x_samples, y_samples, x_grid):
 
     `np.interp` CLAMPS outside the sample range rather than extrapolating, and this
     repo has already shipped two silent bugs from exactly that (see trap 9 in
-    `docs/HANDOFF_20260827.md`). Here a clamp would flatten the end of a curve into a
+    `docs/internal/HANDOFF_20260827.md`). Here a clamp would flatten the end of a curve into a
     plausible-looking constant with nothing raised. It is not known to fire on any
     current call, so this reports rather than changes behaviour; set
     SUBSTRING_STRICT_RESAMPLE=1 to make it fatal while working on the model.

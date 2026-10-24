@@ -13,7 +13,7 @@ It also supplies ``tilt_deg`` to ``src/solarsoiled/recommend.py``, whose
 ``_EXCEPTION_TILT_DEG = 5.0`` flat-roof rule currently never fires because tilt is
 always ``None`` in the AOI matrix.
 
-NOT for the risk model. ``docs/CRAIG_BRIEF_2026-08-19.md`` sec.3 ran the controlled
+NOT for the risk model. ``docs/BUSINESS_BRIEF.md`` sec.3 ran the controlled
 experiment: NREL labels are station-level, so no feature learned from them can rank
 roofs within one AOI. Tilt is that class of feature. This is a physics input, not a
 learned one.

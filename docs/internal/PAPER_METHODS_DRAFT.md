@@ -6,7 +6,7 @@
 > out-of-station-and-year AUC is **0.622** (95% CI [0.571, 0.670]), not **0.710**; **lat/lon alone
 > score 0.644**; the regional figures are **0.655** pooled / **0.527** largest region, not
 > 0.677/0.548. Calibration is unaffected. Corrected numbers and artifacts:
-> [CANONICAL_NUMBERS.md](CANONICAL_NUMBERS.md); full argument: `paper/paper.tex` §4.4.
+> [CANONICAL_NUMBERS.md](../CANONICAL_NUMBERS.md); full argument: `paper/paper.tex` §4.4.
 > This document is kept as the record of what was believed at the time.
 
 
@@ -56,7 +56,7 @@ regression signal.
 > `stage1-60cm-legacy`: AGPL, eval-only, not shipped. The shipping detector is RF-DETR @728 + SAM2
 > at **test tile-level box F1 0.8260**, and no SAHI number is comparable to it. Rewrite guidance:
 > [PAPER_REWRITE_BRIEF_20260823.md](PAPER_REWRITE_BRIEF_20260823.md); numbers:
-> [CANONICAL_NUMBERS.md](CANONICAL_NUMBERS.md).
+> [CANONICAL_NUMBERS.md](../CANONICAL_NUMBERS.md).
 
 On the validation split (140 ground-truth polygons), the **legacy 60cm** checkpoint reaches **SAHI F1
 0.570** at its calibrated operating point (confidence 0.20, IoU 0.50; precision 0.538, recall

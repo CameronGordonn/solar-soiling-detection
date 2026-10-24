@@ -163,7 +163,7 @@ def band_loss_pct(f: float, case: str = "portrait_full_string",
     matters enormously: the same moss line costs 7.00% landscape and 21.00%
     portrait-on-a-string-inverter. Neither module orientation nor install era is
     currently extracted per roof, so a per-roof estimate carries a ~3x fork until
-    they are. See `docs/PER_ARRAY_SOILING_PATH_20260826.md` section 6, step 1.
+    they are. See `docs/internal/PER_ARRAY_SOILING_PATH_20260826.md` section 6, step 1.
     """
     if case not in _LOSS_TABLE:
         raise KeyError(f"unknown case {case!r}; have {sorted(_LOSS_TABLE)}")

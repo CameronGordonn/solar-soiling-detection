@@ -1,4 +1,4 @@
-# Craig call brief — the soiling economics problem
+# Business brief: the soiling economics problem
 
 > ⚠️ **Stage 2 numbers in this document are superseded (2026-09-22).** The validation folds behind
 > them leaked: the 10 km spatial fold and leave-one-year-out each hold out one axis and not the
@@ -93,7 +93,7 @@ Two things to say carefully here:
 2. **Do not quote a large array's recovery against the $90 light-pro minimum.** That
    comparison makes the best 38.6 kW site look 1.41x short when the same site is **4.28x**
    short against its real 88-panel cost. It is the single easiest way to overstate how close
-   this is, and it will not survive Craig asking one follow-up question.
+   this is, and it will not survive one follow-up question.
 
 So the correct sentence is: **the gap closed from ~40x to ~2.8x, and it closed by correcting
 the tariff and by looking at bigger roofs — not by any change in the physics.** Closing the
@@ -209,7 +209,7 @@ came out of size's share, not the soiling model's. Caveat to state if pressed: `
 per-array while size and loss are per-site, so 11.1% is an estimate rather than a
 like-for-like decomposition.
 
-Source: `docs/HANDOFF_roof_geometry_for_paper.md` Result 1 (supersedes the two-way table in
+Source: `docs/internal/HANDOFF_roof_geometry_for_paper.md` Result 1 (supersedes the two-way table in
 `docs/SOILING_LEVEL_INVESTIGATION.md`).
 
 ---
@@ -388,7 +388,7 @@ house numbers in frame; cross-street only; stored outside both repos.
 
 ---
 
-## 7. Other things worth raising with Craig
+## 7. Other points for the business discussion
 
 1. **The detection stack is the asset, and it passed its gate.** RF-DETR @728 + SAM2,
    Apache-2.0 (we're off AGPL). Test tile-level box-F1 **0.826**, 95% CI [0.798, 0.853],
@@ -416,7 +416,7 @@ house numbers in frame; cross-street only; stored outside both repos.
    live calculator on our own site telling visitors to clean on day 0 while our report card
    said don't, because it still ran the retired 0.90. Already fixed.
 
-5. **Ask Craig for:** (a) a line on C&I / agricultural site access, (b) any contact with an
+5. **Open asks for the business side:** (a) a line on C&I / agricultural site access, (b) any contact with an
    inverter-API-equipped homeowner willing to donate half a roof, (c) a sanity check on
    whether a diagnosis-only product has a buyer, (d) whether the negative result changes the
    funding conversation, given we need funding by end of summer.

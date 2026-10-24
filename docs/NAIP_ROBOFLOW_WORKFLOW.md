@@ -146,7 +146,7 @@ Matrix (preferred for non-trivial runs):
 python scripts/detect/train_experiment_matrix.py --config configs/yolo/experiments.yaml
 ```
 
-Stage 1 retrain (current Phase 1 active workstream) — see [docs/PHASE1_HANDOFF.md](PHASE1_HANDOFF.md). Joint Duke + NAIP training is paused; resumes at R1+ in the ramp curriculum after R0 lands.
+Stage 1 retrain (current Phase 1 active workstream) — see [docs/internal/PHASE1_HANDOFF.md](internal/PHASE1_HANDOFF.md). Joint Duke + NAIP training is paused; resumes at R1+ in the ramp curriculum after R0 lands.
 
 Model sizes for this dataset (~250 tiles): `yolo11s-seg.pt` is the sweet spot. `yolo11n` for fast iteration / CPU; `yolo11m` if you have headroom and want a few more mAP points.
 

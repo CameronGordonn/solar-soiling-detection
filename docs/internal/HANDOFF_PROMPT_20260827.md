@@ -2,7 +2,7 @@
 
 ---
 
-Read `docs/HANDOFF_20260827.md` first, then `docs/BUG_AUDIT_20260827.md` and
+Read `docs/internal/HANDOFF_20260827.md` first, then `docs/BUG_AUDIT_20260827.md` and
 `docs/PIPELINE_AUDIT_AND_PLAIN_REPORT_20260827.md`. They carry the measured state; do not
 re-derive it.
 
@@ -47,7 +47,7 @@ Fix it properly rather than documenting it again:
   is what the numbers show.
 
 **3. Reconcile the outward-facing documents with what is now known.**
-`docs/GRANT_NARRATIVE_DRAFT.md` §4 currently reads more positively than the evidence supports.
+`docs/internal/GRANT_NARRATIVE_DRAFT.md` §4 currently reads more positively than the evidence supports.
 It was updated when Phase 0 passed but before the AOI came back at zero-clearing and before the
 gamma problem surfaced. Cameron has a funding deadline, so this matters and it is his file:
 propose edits, flag what you changed, and do not quietly rewrite his framing. The honest
@@ -78,6 +78,6 @@ of extrapolating; one came from a constant duplicated in two files drifting apar
 from a confident comment that was simply false. When a number looks good, test it before
 reporting it. Sensitivity sweeps on hardcoded constants find more than code review does.
 
-`docs/HANDOFF_20260827.md` has a "Traps" section covering the tooling gotchas (heredocs under
+`docs/internal/HANDOFF_20260827.md` has a "Traps" section covering the tooling gotchas (heredocs under
 `conda run`, output buffering, background jobs dying at session end, PVGIS year limits,
 Open-Meteo 429s). Read it before running anything long.

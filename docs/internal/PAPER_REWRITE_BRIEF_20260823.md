@@ -6,7 +6,7 @@
 > out-of-station-and-year AUC is **0.622** (95% CI [0.571, 0.670]), not **0.710**; **lat/lon alone
 > score 0.644**; the regional figures are **0.655** pooled / **0.527** largest region, not
 > 0.677/0.548. Calibration is unaffected. Corrected numbers and artifacts:
-> [CANONICAL_NUMBERS.md](CANONICAL_NUMBERS.md); full argument: `paper/paper.tex` §4.4.
+> [CANONICAL_NUMBERS.md](../CANONICAL_NUMBERS.md); full argument: `paper/paper.tex` §4.4.
 > This document is kept as the record of what was believed at the time.
 
 

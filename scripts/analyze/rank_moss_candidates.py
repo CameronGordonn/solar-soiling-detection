@@ -1,7 +1,7 @@
 """Build the Persistent Soiling inspection screen for detected arrays.
 
 The moss channel is the only soiling mechanism left that could clear the cleaning bar
-(`docs/CRAIG_BRIEF_2026-08-19.md` §4): rain removes dust but not moss, lichen, algae or
+(`docs/BUSINESS_BRIEF.md` §4): rain removes dust but not moss, lichen, algae or
 leaf litter, so it sits outside NREL's IWSR labels by construction and outside everything
 `loss_model.py` predicts. Settling it is a **max statistic** -- the question is whether
 band thickness reaches f = 0.2-0.3 *anywhere in this town*, not what the average roof looks

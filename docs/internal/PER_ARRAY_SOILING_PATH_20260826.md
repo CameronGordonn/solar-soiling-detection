@@ -6,7 +6,7 @@
 > out-of-station-and-year AUC is **0.622** (95% CI [0.571, 0.670]), not **0.710**; **lat/lon alone
 > score 0.644**; the regional figures are **0.655** pooled / **0.527** largest region, not
 > 0.677/0.548. Calibration is unaffected. Corrected numbers and artifacts:
-> [CANONICAL_NUMBERS.md](CANONICAL_NUMBERS.md); full argument: `paper/paper.tex` §4.4.
+> [CANONICAL_NUMBERS.md](../CANONICAL_NUMBERS.md); full argument: `paper/paper.tex` §4.4.
 > This document is kept as the record of what was believed at the time.
 
 
@@ -17,7 +17,7 @@ below is measured in this repo or cited to a paper; assumptions are labelled as 
 > **Superseded in two places, 2026-08-27.** The precision numbers below were measured before
 > the module temperature coefficient was resolved per system, so they mix a signal figure and a
 > noise figure that came from different assumptions. Current values, from
-> [`GAMMA_RESOLUTION_20260827.md`](GAMMA_RESOLUTION_20260827.md):
+> [`GAMMA_RESOLUTION_20260827.md`](../GAMMA_RESOLUTION_20260827.md):
 >
 > | | in this doc | current |
 > |---|---|---|
@@ -142,7 +142,7 @@ Do not build on the Zhao mechanism here.
 and biofilm are attached, growing organisms: rain does not flush them, it feeds them, and
 the only reset is mechanical cleaning. That is what makes the economics work.
 
-⚠️ **Correction to `CRAIG_BRIEF_2026-08-19.md` §4.** Its breakeven bars of 2.2-10.1% assume
+⚠️ **Correction to `BUSINESS_BRIEF.md` §4.** Its breakeven bars of 2.2-10.1% assume
 `recovery_frac = 1.0`. Modelled against AOI wetness, one wash actually recovers **0.51-0.61**
 of a year's biological loss, because biofilm partially regrows inside the year. The corrected
 bars for a 5 kW system at $150 are **6.4% at NEM 2.0** and **17.9% at NBT**, not 3.6% and

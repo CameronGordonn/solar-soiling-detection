@@ -6,7 +6,7 @@
 > out-of-station-and-year AUC is **0.622** (95% CI [0.571, 0.670]), not **0.710**; **lat/lon alone
 > score 0.644**; the regional figures are **0.655** pooled / **0.527** largest region, not
 > 0.677/0.548. Calibration is unaffected. Corrected numbers and artifacts:
-> [CANONICAL_NUMBERS.md](CANONICAL_NUMBERS.md); full argument: `paper/paper.tex` §4.4.
+> [CANONICAL_NUMBERS.md](../CANONICAL_NUMBERS.md); full argument: `paper/paper.tex` §4.4.
 > This document is kept as the record of what was believed at the time.
 
 
@@ -17,7 +17,7 @@ what you should never change, and where the line is.
 
 Read that doc first if you have not. Everything here assumes the setup in its sections 1 to 3 is
 already working: a clone in `~/repos/`, the folder itself open in VS Code, and the agent oriented
-by [AGENTS.md](../AGENTS.md).
+by [dev/AGENTS.md](../../dev/AGENTS.md).
 
 ---
 
@@ -40,12 +40,12 @@ between a bad edit and the live repo is you remembering this rule. Tell the agen
 every session where you intend to change something:
 
 > Create a branch off main before you make any edits. Never commit to main. Use the branch naming
-> convention in docs/TEAM.md.
+> convention in docs/internal/TEAM.md.
 
 **Rule 2: an agent's confidence is not evidence.**
 
 This repo has stale numbers scattered through older docs, and an agent will quote them without
-hesitating. [CANONICAL_NUMBERS.md](CANONICAL_NUMBERS.md) is the tiebreaker: if any doc disagrees
+hesitating. [CANONICAL_NUMBERS.md](../CANONICAL_NUMBERS.md) is the tiebreaker: if any doc disagrees
 with it, the doc is wrong. Ask for a file and line behind every figure. If the agent cannot
 produce one, the figure does not go in anything external.
 
@@ -56,8 +56,8 @@ These are reversible, reviewable, and do not touch the model or the data.
 | Task | How to ask for it | Why it is safe |
 |---|---|---|
 | Fix or rewrite a doc | "Rewrite docs/X.md for a non-technical reader. Do not change any number." | Text only. Git keeps the old version. |
-| Get a plain-English summary of a workstream | "Summarise docs/Q2_PLAN.md into a one-page status I can send the board." | Read only. |
-| Update status in `Q2_PLAN.md` | "Mark the Stage 2 lane as GA in docs/Q2_PLAN.md, matching what TEAM.md says." | Docs. This is genuinely your lane: you own direction. |
+| Get a plain-English summary of a workstream | "Summarise docs/internal/Q2_PLAN.md into a one-page status I can send the board." | Read only. |
+| Update status in `Q2_PLAN.md` | "Mark the Stage 2 lane as GA in docs/internal/Q2_PLAN.md, matching what TEAM.md says." | Docs. This is genuinely your lane: you own direction. |
 | Write a new handoff or brief | "Draft docs/BRIEF_<date>.md covering X, citing sources." | New file, nothing overwritten. |
 | Read what a script does before asking someone to run it | "Explain scripts/predict/holdout_ci.py in plain English, step by step." | Read only. |
 
@@ -116,7 +116,7 @@ The three that account for most of it:
 3. **Read the errno before touching a sandbox setting.** `Operation not permitted` is a sandbox
    problem and sandbox settings help. `No such file or directory` is not, and they do nothing.
 
-And the meta-rule: **the integrated terminal is not sandboxed.** If `pwd && head -5 AGENTS.md`
+And the meta-rule: **the integrated terminal is not sandboxed.** If `pwd && head -5 dev/AGENTS.md`
 works there but the agent says it cannot, the machine is fine and the fault is inside the agent.
 That single test splits the problem in half in ten seconds.
 
@@ -160,7 +160,7 @@ is a real constant in a real file, and the values below were read out of the cod
 
 **The conclusion that chain produces: zero of 1,865 sites in the AOI show a positive expected net,
 at any rate up to $0.70/kWh, at any system size, over 2,000 draws each.** That is
-[ECONOMICS_GROUNDING_20260809.md](ECONOMICS_GROUNDING_20260809.md), and it is kill-risk C1
+[ECONOMICS_GROUNDING_20260809.md](../ECONOMICS_GROUNDING_20260809.md), and it is kill-risk C1
 confirmed rather than a bug someone can fix.
 
 **Why that is factually accurate, and the one qualifier that must travel with it.** It is on

@@ -1,6 +1,6 @@
 """Resolve gamma_pdc per PVDAQ system, and report how far it moves from the old constant.
 
-Closes the open problem in `docs/HANDOFF_20260827.md`: every recorded PVDAQ soiling
+Closes the open problem in `docs/internal/HANDOFF_20260827.md`: every recorded PVDAQ soiling
 label was produced with `GAMMA_PDC` hardcoded fleet-wide at -0.0045, unvalidated, and
 the two scripts in the tree disagreed by 0.0010 -- a gap worth 1.045 pts of annual
 soiling label on system 10109, against a 0.72 pt method-noise SD.

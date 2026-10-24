@@ -8,7 +8,7 @@
 > out-of-station-and-year AUC is **0.622** (95% CI [0.571, 0.670]), not **0.710**; **lat/lon alone
 > score 0.644**; the regional figures are **0.655** pooled / **0.527** largest region, not
 > 0.677/0.548. Calibration is unaffected. Corrected numbers and artifacts:
-> [CANONICAL_NUMBERS.md](CANONICAL_NUMBERS.md); full argument: `paper/paper.tex` §4.4.
+> [CANONICAL_NUMBERS.md](../CANONICAL_NUMBERS.md); full argument: `paper/paper.tex` §4.4.
 > This document is kept as the record of what was believed at the time.
 
 
@@ -67,7 +67,7 @@ codebase, and answer questions in full. What it blocks is installing packages an
 which is exactly the category of thing that produces "I don't have access to the sandbox." Leaving
 it in Read Only means you never see that error.
 
-The agent reads [AGENTS.md](../AGENTS.md) at the repo root on its own, so it starts oriented
+The agent reads [dev/AGENTS.md](../../dev/AGENTS.md) at the repo root on its own, so it starts oriented
 without you having to explain the project first.
 
 ## 3. Ask
@@ -88,9 +88,9 @@ that a number travels with its provenance, and it applies to agents too.
 
 | Question | Canonical answer lives in |
 |---|---|
-| How the soiling model works | [SOILING_STAGE2_GUIDE.md](SOILING_STAGE2_GUIDE.md) |
-| What the soiling model cannot do | [PVDAQ_LANE_HANDOFF_20260831.md](PVDAQ_LANE_HANDOFF_20260831.md) and [SOILING_LEVEL_INVESTIGATION.md](SOILING_LEVEL_INVESTIGATION.md) |
-| Whether the business case closes | [ECONOMICS_GROUNDING_20260809.md](ECONOMICS_GROUNDING_20260809.md), short version in [CRAIG_BRIEF_2026-08-19.md](CRAIG_BRIEF_2026-08-19.md) |
+| How the soiling model works | [SOILING_STAGE2_GUIDE.md](../SOILING_STAGE2_GUIDE.md) |
+| What the soiling model cannot do | [PVDAQ_LANE_HANDOFF_20260831.md](PVDAQ_LANE_HANDOFF_20260831.md) and [SOILING_LEVEL_INVESTIGATION.md](../SOILING_LEVEL_INVESTIGATION.md) |
+| Whether the business case closes | [ECONOMICS_GROUNDING_20260809.md](../ECONOMICS_GROUNDING_20260809.md), short version in [BUSINESS_BRIEF.md](../BUSINESS_BRIEF.md) |
 | Where the project stands overall | [Q2_PLAN.md](Q2_PLAN.md) |
 
 Two limits worth knowing before you read any accuracy number, because they change what it means:
@@ -152,14 +152,14 @@ Full detail on the setup path and its verification tiers is in [ONBOARDING.md](O
 | `No such file or directory` on the workspace itself | Clone is on a synced/virtual filesystem, or the agent is running in the cloud | See "Read the errno" below |
 | Agent looks at the wrong files | A parent folder is open in VS Code | Open the repo folder itself |
 | `ERROR: conda not found` | No conda on the machine | `brew install miniforge`, or skip section 4 entirely |
-| A script cannot find a file | Data not pulled | `make check-data`, then [DATA.md](../DATA.md) |
+| A script cannot find a file | Data not pulled | `make check-data`, then [docs/DATA.md](../DATA.md) |
 | The agent cannot run **anything**, even `pwd` | VS Code opened the folder in Restricted Mode | `Cmd+Shift+P` > `Workspaces: Manage Workspace Trust` > Trust, then reload the window |
-| The agent cannot find `AGENTS.md` | A file is open, not a folder, so there is no workspace root | `File > Open Folder` on the repo root |
+| The agent cannot find `dev/AGENTS.md` | A file is open, not a folder, so there is no workspace root | `File > Open Folder` on the repo root |
 | Commands fail even after trusting the folder | macOS Seatbelt cannot spawn | Test with `sandbox-exec -p '(version 1)(allow default)' /bin/echo ok`. If that fails, set `sandbox_mode = "danger-full-access"` in `~/.codex/config.toml` |
 
 ### Splitting a "cannot run anything" fault in two
 
-The VS Code integrated terminal (`Ctrl+\``) is **not** sandboxed. Run `pwd && head -5 AGENTS.md`
+The VS Code integrated terminal (`Ctrl+\``) is **not** sandboxed. Run `pwd && head -5 dev/AGENTS.md`
 there. If that works, the folder and macOS are fine and the fault is inside the agent's sandbox. If
 it fails too, the fault is VS Code or the folder, and workspace trust is the first thing to check.
 

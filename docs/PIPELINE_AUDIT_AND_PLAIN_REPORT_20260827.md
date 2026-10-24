@@ -49,7 +49,7 @@ that cuts out the whole section.
 The difference between "harmless" and "expensive" is a moss line about **30 millimetres**
 thick. Our best aerial imagery sees about **78 millimetres per pixel.** The thing that
 decides the answer is smaller than one pixel. No amount of clever processing fixes that.
-Somebody has to stand in the street with a camera. That is why Craig's photos matter.
+Somebody has to stand in the street with a camera. That is why ground photos matter.
 
 ### How we predict where moss should be, using only free data
 Moss needs the panel to stay wet. So we count how many hours a year the air is damp enough
@@ -184,7 +184,7 @@ the number cannot be quoted by accident.
 
 ## 4. What is worth doing next
 
-1. **Craig's photographs.** Still the only thing that measures the one unknown. The written
+1. **Ground photographs.** Still the only thing that measures the one unknown. The written
    kill-rule stands: if the thickest moss line in town is under ~16 mm, the theory is dead.
    Given section 2, even a thick line probably does not rescue the economics, so this is now
    about closing the question honestly rather than finding a business.

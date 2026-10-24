@@ -5,7 +5,7 @@
 > **passed at 0.8260**. The 0.40 is a descendant of the "0.396" figure CLAUDE.md names
 > as a stale metric whose provenance nobody recorded.
 >
-> Live equivalents: [Q2_PLAN.md](../Q2_PLAN.md) for status, [CLAUDE.md](../../CLAUDE.md)
+> Live equivalents: [Q2_PLAN.md](../internal/Q2_PLAN.md) for status, [CLAUDE.md](../../CLAUDE.md)
 > for pipeline structure, [PRODUCT_VISION.md](../PRODUCT_VISION.md) for the product thesis.
 > Kept only for the core-loop narrative and the feedback-flywheel framing.
 

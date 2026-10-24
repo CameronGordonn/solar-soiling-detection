@@ -1,10 +1,10 @@
 # CLAUDE.md — solar-soiling-ml
 
-> **Session start:** the shared, canonical working state is [`docs/Q2_PLAN.md`](docs/Q2_PLAN.md)
+> **Session start:** the shared, canonical working state is [`docs/internal/Q2_PLAN.md`](docs/internal/Q2_PLAN.md)
 > (phase tables, gates, metrics) plus the per-workstream handoff docs in `docs/` — read those first;
 > they ship with the repo. `SESSION_STARTUP.md` (repo root) is an *optional personal* scratchpad:
 > gitignored, so it's not in a fresh clone, and **not** a team source of truth (see
-> [`docs/TEAM.md`](docs/TEAM.md)). Keep your own if you find it useful.
+> [`docs/internal/TEAM.md`](docs/internal/TEAM.md)). Keep your own if you find it useful.
 
 YOLOv11 polygon segmentation pipeline for detecting solar arrays in NAIP aerial imagery, plus an XGBoost soiling-risk model that scores each detected array.
 
@@ -39,7 +39,7 @@ YOLOv11 polygon segmentation pipeline for detecting solar arrays in NAIP aerial 
 
 > The old "holdout gate 2.1 pts short" line is **retired**. That single-year-2022 gate was replaced on 2026-07-05 because at n=97 it was measurement noise (SE 0.061), not a shortfall. Do not reinstate it.
 
-> **Known limit, corrected 2026-09-22:** the model does **not** generalize to an unseen region — pooled out-of-region AUC **0.655**, worst region **0.527**. (The 2026-08-30 figures, 0.677 / 0.548, came from a fold with no year axis whose script read hyperparameters from a config key that does not exist, so it silently fitted a stock model. Correcting both moved the number *down*.) 81% of NREL rows sit west of -114. Never claim it works "in any region". See [docs/PVDAQ_LANE_HANDOFF_20260831.md](docs/PVDAQ_LANE_HANDOFF_20260831.md).
+> **Known limit, corrected 2026-09-22:** the model does **not** generalize to an unseen region — pooled out-of-region AUC **0.655**, worst region **0.527**. (The 2026-08-30 figures, 0.677 / 0.548, came from a fold with no year axis whose script read hyperparameters from a config key that does not exist, so it silently fitted a stock model. Correcting both moved the number *down*.) 81% of NREL rows sit west of -114. Never claim it works "in any region". See [docs/internal/PVDAQ_LANE_HANDOFF_20260831.md](docs/internal/PVDAQ_LANE_HANDOFF_20260831.md).
 
 **Every headline number in this repo, with its artifact and reproduce command, is in [docs/CANONICAL_NUMBERS.md](docs/CANONICAL_NUMBERS.md). When a doc disagrees with it, the doc is stale.**
 
@@ -59,7 +59,7 @@ scripts/labeling/  — label QA: disagreement overlays, vintage audit, bucket re
 scripts/research/  — exploratory (pseudo-labels, SAM masks; not in active pipeline)
 ```
 
-**New here?** [docs/ONBOARDING.md](docs/ONBOARDING.md) §1 is a runnable setup path: `bash setup/setup_conda.sh` -> `make bootstrap` -> `make test-fast` (**558 passed, 3 skipped, 2 deselected** as of 2026-09-24; ~3m30s in CI, well under a minute on a warm dev box; needs no data). Data custody and the `gh release download` pull are in [DATA.md](DATA.md).
+**New here?** [docs/internal/ONBOARDING.md](docs/internal/ONBOARDING.md) §1 is a runnable setup path: `bash setup/setup_conda.sh` -> `make bootstrap` -> `make test-fast` (**558 passed, 3 skipped, 2 deselected** as of 2026-09-24; ~3m30s in CI, well under a minute on a warm dev box; needs no data). Data custody and the `gh release download` pull are in [docs/DATA.md](docs/DATA.md).
 
 **How to work here (read first):** @.claude/rules/working-agreement.md *(not in the public mirror)* — use the connected tools instead of handing back manual steps; proceed without asking on routine reversible work; name real blockers precisely.
 
@@ -127,7 +127,7 @@ solarsoiled-api                         # or: uvicorn solarsoiled.api:app --relo
 | MERRA-2 AQ cache | `.cache/soiling/merra2.sqlite` — gitignored |
 | Partner AOI outputs | `outputs/aoi/<partner_id>/{aoi.geojson, tiles/, detect/, arrays.geojson, features/, risk.geojson, recommendations.json, manifest.json}` |
 | Outreach outputs | `outputs/outreach/` |
-| Live dashboard | BBF site — `../BBF-Website/public/tools/dashboard.html` (live via Cloudflare at `https://betterbehaviorfoundation.com/tools/dashboard`; DNS cutover done, verified 200 on 2026-08-17) |
+| Live dashboard | BBF site — `BBF-Website/public/tools/dashboard.html` (private repo) (live via Cloudflare at `https://betterbehaviorfoundation.com/tools/dashboard`; DNS cutover done, verified 200 on 2026-08-17) |
 
 ---
 
@@ -143,7 +143,7 @@ solarsoiled-api                         # or: uvicorn solarsoiled.api:app --relo
 
 ## Quarter direction
 
-Status + direction live in [docs/Q2_PLAN.md](docs/Q2_PLAN.md) (canonical live status) and
+Status + direction live in [docs/internal/Q2_PLAN.md](docs/internal/Q2_PLAN.md) (canonical live status) and
 [docs/PRODUCT_VISION.md](docs/PRODUCT_VISION.md) (north-star). See [docs/README.md](docs/README.md)
 for the full doc index. **Read on demand** — these are linked, not auto-loaded, to keep per-session
 context lean.
@@ -151,6 +151,6 @@ context lean.
 ## Notes
 
 - Model naming: Ultralytics uses `yolo11*` (no `v`). Configs point to `models/yolo11s-seg.pt` and `models/yolo11m-seg.pt`.
-- Base weights (`.pt`/`.pth`) are gitignored — pull them from the R2 hand-off bucket, see [DATA.md](DATA.md). One exception, and it is a mistake rather than a pattern: `models/yolov8s_solar_array_v1.pt` was committed before the ignore rule existed, so the rule never applied to it. Removed from `HEAD` on 2026-08-26; still in history.
+- Base weights (`.pt`/`.pth`) are gitignored — pull them from the R2 hand-off bucket, see [docs/DATA.md](docs/DATA.md). One exception, and it is a mistake rather than a pattern: `models/yolov8s_solar_array_v1.pt` was committed before the ignore rule existed, so the rule never applied to it. Removed from `HEAD` on 2026-08-26; still in history.
 - Reference docs: `docs/NAIP_ROBOFLOW_WORKFLOW.md` (pipeline reference), `docs/RTX3060_SETUP_GUIDE.md` (GPU env). Read on demand.
 - Ultralytics YOLOv11 docs: https://docs.ultralytics.com/

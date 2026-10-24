@@ -270,7 +270,7 @@ def georeference_and_reproject(tiff_bytes, bbox, export_sr, bounds_3857, out_pat
     if out_path.suffix.lower() == ".png":
         # PNG for the AOI path: it is what the detector was trained on, and lossless. Never
         # JPEG -- an 8x8 DCT block is 1.7 m of ground at 21cm, about half a panel
-        # (docs/LABELING_SPRINT_21CM.md). Georef lives in the sidecar tile_index.json.
+        # (docs/internal/LABELING_SPRINT_21CM.md). Georef lives in the sidecar tile_index.json.
         from PIL import Image
         Image.fromarray(np.transpose(dst[:3], (1, 2, 0)), mode="RGB").save(out_path)
     else:

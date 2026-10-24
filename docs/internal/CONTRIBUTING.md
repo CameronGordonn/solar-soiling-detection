@@ -1,8 +1,8 @@
 # Contributing
 
-For humans working on solar-soiling-ml. New here? Start with [`docs/ONBOARDING.md`](docs/ONBOARDING.md)
+For humans working on solar-soiling-ml. New here? Start with [`docs/internal/ONBOARDING.md`](ONBOARDING.md)
 for the full first-day walkthrough; this is the quick reference. Using an AI coding agent? See
-[`AGENTS.md`](AGENTS.md).
+[`dev/AGENTS.md`](../../dev/AGENTS.md).
 
 ## Setup
 
@@ -15,7 +15,7 @@ make test-fast                     # verify: unit tests should pass
 ```
 
 Base `python3` lacks the geospatial stack — always work inside the `solar-soiling` env. Data is not
-in git; see [`DATA.md`](DATA.md) for what each artifact is and how to obtain it (Cameron hands over
+in git; see [`docs/DATA.md`](../DATA.md) for what each artifact is and how to obtain it (Cameron hands over
 the provided ones; the rest you regenerate).
 
 ## Running things
@@ -42,7 +42,7 @@ targets (eval, training, demo AOI, etc.). Scripts live under `scripts/<stage>/`;
   explains *why*. No AI-attribution trailers.
 - Never commit secrets, PII, `*.pt` weights, `.env`, caches, or data. If `git status` shows one, stop.
 
-Ownership map and the deploy/live-action approval rules are in [`docs/TEAM.md`](docs/TEAM.md).
+Ownership map and the deploy/live-action approval rules are in [`docs/internal/TEAM.md`](TEAM.md).
 
 ## Area rules
 

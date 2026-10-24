@@ -2,7 +2,7 @@
 # Pairs with branch protection on `main` (require PR + >=1 review). Order matters:
 # the LAST matching pattern wins, so specific lanes are listed after the default.
 #
-# Ownership mirrors docs/TEAM.md. Adjust here whenever lanes move.
+# Ownership mirrors docs/internal/TEAM.md. Adjust here whenever lanes move.
 #
 # Rewritten 2026-09-02, when Cameron's tenure ended (last day 2026-08-31). Every
 # pattern here previously named @CameronGordonn, which meant each PR after his
@@ -33,11 +33,11 @@
 
 # --- Permissive-stack migration (RF-DETR + SAM port) ---
 # The port directory doesn't exist yet. Uncomment/adjust the path when it lands
-# (see docs/PERMISSIVE_STACK_MIGRATION.md, docs/HANDOFF_imagery_ingestion.md).
+# (see docs/PERMISSIVE_STACK_MIGRATION.md, docs/internal/HANDOFF_imagery_ingestion.md).
 # /src/detect_permissive/   @akshitha-nagaraj
 
 # --- Registry: a beta->GA flip is a shipping decision, not a code change ---
 /models/registry.yaml       @craig11f
 
 # --- Canonical status doc: direction owns the merge (shared-edit collision point) ---
-/docs/Q2_PLAN.md            @craig11f
+/docs/internal/Q2_PLAN.md            @craig11f

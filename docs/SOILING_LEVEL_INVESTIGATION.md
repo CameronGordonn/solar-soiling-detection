@@ -1,6 +1,6 @@
 # Why does the AOI predict 5.53% and the nearest real station read 4.00%?
 
-**Sprint starting point for Cameron + Akshitha, written 2026-08-12.** Production is at a
+**Sprint starting point, written 2026-08-12.** Production is at a
 defensible baseline as of this date; this is the open question to dig into, and it is the
 one that most affects what the product can honestly say.
 
@@ -15,7 +15,7 @@ residential-scale sites (2 to 15 kW):
 > **Superseded 2026-08-19 (the table immediately below).** Roof orientation from 3DEP
 > lidar is a third driver worth 11.1%, taken out of *size's* share, not the soiling
 > model's. The current three-way split is 86.7% size / 11.1% orientation / **2.2%**
-> soiling — see `docs/HANDOFF_roof_geometry_for_paper.md` Result 1. The 97.3% / 2.5%
+> soiling — see `docs/internal/HANDOFF_roof_geometry_for_paper.md` Result 1. The 97.3% / 2.5%
 > below is the correct two-way answer and is kept so the decomposition can be redone.
 
 | driver | p10 → p90 | ratio | share of dollar variance | source |

@@ -1,19 +1,19 @@
 # Team — ownership & working conventions
 
 How we work now that this is a multi-person project. New here? Start with
-[`docs/ONBOARDING.md`](ONBOARDING.md).
+[`docs/internal/ONBOARDING.md`](ONBOARDING.md).
 
 ## Who owns what
 
 **Updated 2026-09-02. Cameron's last day was 2026-08-31; every lane he held has moved.**
-The table below is the current split, and [`.github/CODEOWNERS`](../.github/CODEOWNERS) is
+The table below is the current split, and [`.github/CODEOWNERS`](../../.github/CODEOWNERS) is
 its machine-readable half. Change both together or PR review routes to the wrong person.
 
 | Area | Owner | Notes |
 |---|---|---|
 | Overall direction, product, business | **Craig** | Roadmap, partner/outreach decisions, and the registry `beta→GA` flips. |
 | Stage-1 detector training runs | **Akshitha** | Runs on Colab Pro. Gate is `scripts/detect/eval_tile_f1.py`; the passing checkpoint is `rfdetr_w2_20260807`. |
-| Stage-1 permissive-stack migration (RF-DETR + SAM + the port) | **Akshitha** | The AGPL-escape workstream — CV research + infra. Runbook: [`PERMISSIVE_STACK_MIGRATION.md`](PERMISSIVE_STACK_MIGRATION.md). |
+| Stage-1 permissive-stack migration (RF-DETR + SAM + the port) | **Akshitha** | The AGPL-escape workstream — CV research + infra. Runbook: [`PERMISSIVE_STACK_MIGRATION.md`](../PERMISSIVE_STACK_MIGRATION.md). |
 | Product surface — API, dashboard, outreach funnel, A/B | **Akshitha** | FastAPI backend, BBF dashboard, conversion experiments. |
 | Reusable infra / faster ramp-up | **Akshitha** | Codifying what we've learned into tooling future projects reuse. |
 | Stage-2 soiling-risk model | **Akshitha** | Registry reads GA as of 2026-09-02 and frozen — but ⚠️ **the gates behind that flip were measured on leaking folds (found 2026-09-22): joint-fold AUC 0.622, not 0.710.** It does **not** generalise to an unseen region (out-of-region AUC **0.655**, corrected); the open work is a geographically balanced label set, not tuning. See [`PVDAQ_LANE_HANDOFF_20260831.md`](PVDAQ_LANE_HANDOFF_20260831.md). |
@@ -47,7 +47,7 @@ scratchpad + AI session context). That doesn't transfer to a teammate. For share
   to GitHub Pro or make this repository public`, confirmed 2026-08-17; Cameron decided to stay on
   the free plan and accept it). So "PR + ≥1 approval, no direct push" is a **convention we hold
   ourselves to**, not something GitHub enforces — nothing stops a direct push or a force-push.
-  Review routing is automatic via [`.github/CODEOWNERS`](../.github/CODEOWNERS), which mirrors the
+  Review routing is automatic via [`.github/CODEOWNERS`](../../.github/CODEOWNERS), which mirrors the
   lane split above, but CODEOWNERS without protection only *requests* review; it cannot block a
   merge.
 - **One workstream per branch / PR.** Don't mix (e.g.) the detector migration with a docs truth-up or
@@ -71,7 +71,7 @@ that way in git:
   again before you open the PR. Keep branches short-lived so they don't drift.
 - **Never force-push a shared branch**, and never push to `main` (PR only). Force-push is fine only on
   your own un-reviewed feature branch.
-- **The one file we both edit is [`docs/Q2_PLAN.md`](Q2_PLAN.md)** (canonical status). Keep those edits
+- **The one file we both edit is [`docs/internal/Q2_PLAN.md`](Q2_PLAN.md)** (canonical status). Keep those edits
   small and land them fast rather than sitting on a big status rewrite; CODEOWNERS routes its review to
   Cameron so status changes are seen. If you hit a conflict there, it's almost always a clean
   hand-merge — take both sides.

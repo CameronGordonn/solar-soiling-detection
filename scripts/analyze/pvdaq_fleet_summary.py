@@ -1,7 +1,7 @@
 """Summarise the merged PVDAQ fleet labels: n, geography, and the NREL comparison.
 
 A separate FILE rather than a heredoc, because `conda run ... python - <<'PY'` writes
-nothing and reports success -- trap 1 in docs/HANDOFF_20260827.md, which the unattended
+nothing and reports success -- trap 1 in docs/internal/HANDOFF_20260827.md, which the unattended
 finisher hit: it merged and uploaded correctly and silently produced no summary.
 
 Geography is the point. The label set this replaces is 81.0% west of -114 and 5.2%
