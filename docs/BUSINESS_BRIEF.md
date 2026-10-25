@@ -209,7 +209,7 @@ came out of size's share, not the soiling model's. Caveat to state if pressed: `
 per-array while size and loss are per-site, so 11.1% is an estimate rather than a
 like-for-like decomposition.
 
-Source: `docs/internal/HANDOFF_roof_geometry_for_paper.md` Result 1 (supersedes the two-way table in
+Source: `HANDOFF_roof_geometry_for_paper.md` (private repo) Result 1 (supersedes the two-way table in
 `docs/SOILING_LEVEL_INVESTIGATION.md`).
 
 ---

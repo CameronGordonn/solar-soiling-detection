@@ -14,7 +14,7 @@ footprint of its NAIP tile (fetch_scc_imagery.py:georeference_and_reproject), so
 polygon coords are identical between the two rasters. We assert that footprint equality per tile
 rather than assuming it.
 
-Split policy (docs/internal/LABELING_SPRINT_21CM.md):
+Split policy (LABELING_SPRINT_21CM.md (private repo)):
   - val/test -> mode=fresh   : NO seeds uploaded. These are the measurement instrument; anchoring
                                annotators to 60cm-era polygons biases every metric we report.
   - train    -> mode=seeded  : seeds uploaded as Roboflow predictions to confirm/correct/extend.

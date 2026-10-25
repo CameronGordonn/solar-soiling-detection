@@ -12,7 +12,7 @@ from figstyle import REPO, BLUE, ORANGE, GREEN, MUTED, RED, apply_style, save
 
 SITES = REPO / "outputs/aoi/santa-cruz-w2-21cm/site_economics.csv"
 # Variance shares measured over the 1,710 residential-scale (2-15 kW) sites;
-# docs/internal/HANDOFF_roof_geometry_for_paper.md, Result 1.
+# HANDOFF_roof_geometry_for_paper.md (private repo), Result 1.
 SHARES = [("System size (kW)\nfrom the detector", 86.7, BLUE),
           ("Roof orientation (POA)\nfrom lidar", 11.1, GREEN),
           ("Soiling loss %\nfrom the risk model", 2.2, ORANGE)]

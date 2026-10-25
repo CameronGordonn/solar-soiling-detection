@@ -60,10 +60,3 @@ superseded copy in place rather than deleting it.
 The homeowner dashboard and breakeven calculator are hosted on the Better Behavior Foundation site
 at <https://betterbehaviorfoundation.com/tools/dashboard.html>. Their source lives in a separate
 private repository.
-
-## internal/ and archive/
-
-[`internal/`](internal/) holds the team-period working documents: onboarding, ownership, plans,
-handoffs and meeting briefs. They were written for the people on the project at the time, name
-them, and are kept as the record. [`archive/`](archive/) holds older point-in-time notes; each
-carries a banner saying what in it is no longer true.

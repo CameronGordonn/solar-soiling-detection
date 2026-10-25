@@ -12,17 +12,17 @@ SolarSoiled detects rooftop solar arrays from public aerial imagery, scores each
 
 ## Current state
 
-Live status lives in [docs/internal/Q2_PLAN.md](internal/Q2_PLAN.md) — see the "Project status" tables there. This table is a pointer to the surfaces; flag values mirror the canonical four (`shipped` / `in progress` / `queued` / `beta`).
+Live status lives in Q2_PLAN.md *(not in the public mirror)* — see the "Project status" tables there. This table is a pointer to the surfaces; flag values mirror the canonical four (`shipped` / `in progress` / `queued` / `beta`).
 
 | Surface | Pointer | Status |
 |---|---|---|
-| Stage 1 — detection | [docs/NAIP_ROBOFLOW_WORKFLOW.md](NAIP_ROBOFLOW_WORKFLOW.md), [docs/internal/PHASE1_HANDOFF.md](internal/PHASE1_HANDOFF.md) | `beta` — 56% mAP50 NAIP Santa Cruz; target 70%+ |
+| Stage 1 — detection | [docs/NAIP_ROBOFLOW_WORKFLOW.md](NAIP_ROBOFLOW_WORKFLOW.md), PHASE1_HANDOFF.md *(not in the public mirror)* | `beta` — 56% mAP50 NAIP Santa Cruz; target 70%+ |
 | Stage 2 — risk model | [docs/SOILING_STAGE2_GUIDE.md](SOILING_STAGE2_GUIDE.md) | ⚠️ **gates superseded 2026-09-22 (leaking folds; joint-fold AUC 0.622, not 0.710 — see [CANONICAL_NUMBERS.md](CANONICAL_NUMBERS.md))**. Pre-correction record: `beta` — **0.712 spatial-CV** ✓ (re-measured; 0.728 is `run_optionb` as stored and does not reproduce), pooled out-of-year AUC **0.710** ✓, calibration retained ✓. All three gates cleared 2026-07-05. **MERRA-2 is exhausted, not pending** — `run_merged_merra2` hurt performance (0.716 CV / 0.666 holdout); do not retry. Known limit: does not generalize out-of-region (0.677 pooled) |
-| Customer-readiness CLI + API | `src/solarsoiled/cli.py`, `src/solarsoiled/api.py`, [CLAUDE.md](../CLAUDE.md) | Tier 0 + Tier 1 `shipped`; Tier 2 `in progress`; Tier 3 `shipped` (FastAPI + Render deploy + `eval --report`); Tier 4 `shipped` (dashboard + outreach) |
+| Customer-readiness CLI + API | `src/solarsoiled/cli.py`, `src/solarsoiled/api.py`, CLAUDE.md *(not in the public mirror)* | Tier 0 + Tier 1 `shipped`; Tier 2 `in progress`; Tier 3 `shipped` (FastAPI + Render deploy + `eval --report`); Tier 4 `shipped` (dashboard + outreach) |
 | Site (hosts the tools) | BBF website, separate private repo (Cloudflare Pages) | `in progress` — tools folded into the BBF site; live at `betterbehaviorfoundation.com` after the DNS cutover; Render API backend wired |
 | Dashboard | `BBF-Website/public/tools/dashboard.html` (private repo) → `/tools/dashboard` | `shipped` — Leaflet map of **3,362 Santa Cruz array polygons across 1,865 sites**; 3-model tab switcher (XGBoost / SOMOSclean / Kimber); QR deep-link; energy calculator |
 | Homeowner outreach | `scripts/outreach/`, `outputs/outreach/` | `in progress` — test-50 batch (`mailers_v13` / `detected_targets.csv`) ready; Lob send gated on live key |
-| Operational runbook | [CLAUDE.md](../CLAUDE.md) | Source of truth for commands, paths, dataset status |
+| Operational runbook | CLAUDE.md *(not in the public mirror)* | Source of truth for commands, paths, dataset status |
 
 ---
 
@@ -169,7 +169,7 @@ Not a commitment; shapes API and output design.
 - `/recommend`: subscription-gated — per-MW annual or per-site.
 - `force_rescore`: premium add-on.
 - Feedback submission: free, always.
-- **Consumer→cleaner marketplace (active wedge, post-2026-06):** the durable revenue line is **connecting qualified homeowners to cleaners** — we supply scored, net-$-ranked, high-soiler leads; cleaners want recurring lead flow (70–80% of first-time clients recur). Lead-gen referral or marketplace take, hosted in the **BBF** site's Tools section. The economics behind it: `outputs/economics/lightpro_opportunity.md`. Roadmap: [Q2_PLAN.md](internal/Q2_PLAN.md#next-steps--post-2026-06-meeting).
+- **Consumer→cleaner marketplace (active wedge, post-2026-06):** the durable revenue line is **connecting qualified homeowners to cleaners** — we supply scored, net-$-ranked, high-soiler leads; cleaners want recurring lead flow (70–80% of first-time clients recur). Lead-gen referral or marketplace take, hosted in the **BBF** site's Tools section. The economics behind it: `outputs/economics/lightpro_opportunity.md`. Roadmap: Q2_PLAN.md *(not in the public mirror)*.
 
 ---
 

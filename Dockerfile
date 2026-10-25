@@ -151,7 +151,7 @@ ENV HF_HOME=/app/.cache/huggingface
 # (ultralytics is the AGPL legacy 60cm path -- it is imported, not shipped-on.)
 ENV YOLO_CONFIG_DIR=/tmp/Ultralytics
 
-# The repo's import convention is `PYTHONPATH=. python scripts/...` (CLAUDE.md),
+# The repo's import convention is `PYTHONPATH=. python scripts/...`,
 # because scripts/ do `from src.risk... import` and `src` is not an installed
 # package -- only `solarsoiled` is (pyproject packages.find where=["src"]).
 # The `solarsoiled` CLI papers over this by inserting REPO_ROOT into sys.path

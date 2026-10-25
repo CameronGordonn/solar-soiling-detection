@@ -243,7 +243,7 @@ reported.
 
 **Benchmark future work against 0.655 pooled / 0.527 worst region** (not 0.6774/0.548, and not
 0.5313). The
-"hold out Arizona = 0.5313" block in [PVDAQ_LANE_HANDOFF_20260831.md](internal/PVDAQ_LANE_HANDOFF_20260831.md)
+"hold out Arizona = 0.5313" block in PVDAQ_LANE_HANDOFF_20260831.md *(not in the public mirror)*
 §1 does not reproduce from anything committed: the script has no Arizona-by-name mode and no
 349-row mode. See §4b there for the full note.
 
@@ -267,7 +267,7 @@ Source of truth: `scripts/analyze/pvdaq_fleet_extract.py --status` (a live count
 
 **The denominator is 1,359, not 1,629** — quoting 1,629 overstates the fleet by 20%. The gate
 itself is **specified but not yet runnable**: nothing converts fleet labels into a feature matrix
-yet. See [PVDAQ_LANE_HANDOFF_20260831.md](internal/PVDAQ_LANE_HANDOFF_20260831.md) §4a.
+yet. See PVDAQ_LANE_HANDOFF_20260831.md *(not in the public mirror)* §4a.
 
 ---
 
@@ -300,7 +300,7 @@ These get conflated. They are unrelated.
 |---|---|---|
 | **2.6×** | Rise in the value of a lost kWh across the AOI once tariff vintage is measured | live |
 | **2.8×** | A NEM 2.0 legacy home vs the current tariff, per lost kWh | live, and the sharpest targeting signal found |
-| ~~2.8×~~ | Between-system spread vs per-label uncertainty | **RETRACTED.** n=12 across different metros, so it carried climate variation the fixed effects remove. Replaced by **1.7×** ([HANDOFF_20260827.md](internal/HANDOFF_20260827.md) §4) |
+| ~~2.8×~~ | Between-system spread vs per-label uncertainty | **RETRACTED.** n=12 across different metros, so it carried climate variation the fixed effects remove. Replaced by **1.7×** (HANDOFF_20260827.md *(not in the public mirror)* §4) |
 
 ---
 
@@ -314,7 +314,7 @@ Measured 2026-08-31, after `tests/test_canonical_numbers.py` added 38 cases (it 
 Supersedes "248 tests" and "246 passed, 5 skipped". The suite grows; an older count is not a sign
 of a broken environment, and this row is expected to move whenever tests are added.
 
-The *reasoning* attached to the old count in [ONBOARDING.md](internal/ONBOARDING.md) §1 is still correct and
+The *reasoning* attached to the old count in ONBOARDING.md *(not in the public mirror)* §1 is still correct and
 still worth reading: `solarsoiled.paths.REPO_ROOT` follows the editable install rather than your
 working directory, so a suite that finds another clone's `models/registry.yaml` will pass on
 somebody else's data. If your count differs from the one above, re-run `make bootstrap` from the

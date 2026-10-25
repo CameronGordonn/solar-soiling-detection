@@ -36,7 +36,7 @@ The one figure a reviewer will most want — one tile at 60 cm beside the same t
 *Fix:* `gh release download` per `docs/DATA.md`, then extend `scripts/labeling/bucket_overlays.py`.
 
 **M5 — The shortfall table was recomputed and disagrees with the 2026-08-23 brief.**
-`docs/internal/PAPER_REWRITE_BRIEF_20260823.md` §4 gives 13.81× → 3.02×, best 2.76×. Recomputing
+`PAPER_REWRITE_BRIEF_20260823.md` (private repo) §4 gives 13.81× → 3.02×, best 2.76×. Recomputing
 from `site_economics.csv` today gives 45.9× → 5.5×, best 3.60×, with band counts matching
 exactly (877/796/119/35/16/12/10). The difference is the ×0.500 level calibration applied
 2026-08-30, which postdates the brief. **The paper uses the current figures.** Someone
@@ -57,7 +57,7 @@ not a contribution ranking) and ORCIDs, if the venue wants them.
 
 **M8 — Venue and format not chosen.**
 Currently generic two-column `article`. Section order, length limit, anonymisation and
-citation style all depend on the target. `docs/internal/PAPER_REWRITE_BRIEF_20260823.md` §0 lists
+citation style all depend on the target. `PAPER_REWRITE_BRIEF_20260823.md` (private repo) §0 lists
 three candidate titles; the paper uses a variant of the first.
 
 ## Known-unknowable (state, do not chase)
@@ -67,7 +67,7 @@ three candidate titles; the paper uses a variant of the first.
   0.844 median IoU is the model ceiling or the label-noise floor. Stated as a limitation.
 - **No ground-truth production data exists for any scored rooftop.** This is the central
   unvalidated transfer and no in-repo work closes it; the PVDAQ lane
-  (`docs/internal/PVDAQ_LANE_HANDOFF_20260831.md`) is the proposal, and its gate is specified but
+  (`PVDAQ_LANE_HANDOFF_20260831.md` (private repo)) is the proposal, and its gate is specified but
   not yet runnable.
 - **The biological/wash-only channel has never been measured in this climate.** Excluded
   from the IWSR labels by construction.

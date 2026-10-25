@@ -6,7 +6,7 @@ WHY THIS EXISTS. Every PVDAQ soiling label this repo has recorded was produced w
 gap is not cosmetic: measured on system 10109 it moves the annual soiling label by
 **1.045 pts**, against a method-noise SD of 0.72 and a within-cell between-system
 spread of 1.41. A single unvalidated constant had more leverage on a label than the
-physical signal Phase 3 exists to detect. See `docs/internal/HANDOFF_20260827.md`.
+physical signal Phase 3 exists to detect. See `HANDOFF_20260827.md` (private repo).
 
 The fix is to stop guessing. `pvdaq/csv/system_metadata/<id>_system_metadata.json`
 carries module manufacturer, model and cell technology for the residential fleet, and

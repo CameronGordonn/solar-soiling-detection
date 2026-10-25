@@ -194,7 +194,7 @@ did nothing" and [SOILING_LEVEL_INVESTIGATION.md](SOILING_LEVEL_INVESTIGATION.md
 The limit is **structural**, not a plumbing gap: NREL labels are station-level, so there is no
 within-AOI signal to learn. No feature supplied to the AOI matrix can create one. The real fix is
 a label set with within-area variation, which is the PVDAQ lane
-([PVDAQ_LANE_HANDOFF_20260831.md](internal/PVDAQ_LANE_HANDOFF_20260831.md)).
+(PVDAQ_LANE_HANDOFF_20260831.md *(not in the public mirror)*).
 
 ### Follow-up: WorldCover was wired in, and it did NOT help (2026-08-09)
 

@@ -302,7 +302,7 @@ GSD-robustness result we do not have.
   clears the gate. Mark R2 `beta`/eval-only.
 - Remove/guard ultralytics as a *runtime* dependency of the served product (keep it as a dev/eval
   extra only if needed for the R2 baseline).
-- Update `CLAUDE.md`, `.claude/rules/stage1-detect.md`, `docs/internal/Q2_PLAN.md`.
+- Update `CLAUDE.md`, `.claude/rules/stage1-detect.md`, `Q2_PLAN.md` (private repo).
 - **Verify** (see `verify` skill): drive `solarsoiled detect` end-to-end on an AOI and confirm
   `arrays.geojson` is produced by the permissive path.
 

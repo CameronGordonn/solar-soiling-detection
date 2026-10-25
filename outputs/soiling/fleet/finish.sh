@@ -3,7 +3,7 @@
 # preserves and documents the label set. Does NOT run the regional-holdout gate:
 # that needs a training matrix (weather aggregates + static features per row) which
 # does not exist for PVDAQ labels and is itself a quota-bound build. See §4 of
-# docs/PVDAQ_LANE_HANDOFF_20260831.md.
+# PVDAQ_LANE_HANDOFF_20260831.md (private repo).
 set -u
 cd /home/cameron/repos/solar-soiling-ml
 LOG=outputs/soiling/fleet/_finish.log
