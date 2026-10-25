@@ -300,10 +300,10 @@ archives/
 
 # Agent / tooling internal state — these are local session artifacts, not
 # project content. Never commit them.
-.claude/*
-# ...except the shared lane runbooks: docs/ONBOARDING.md points teammates here,
-# so they must ship with a clone (they are project content, not session state).
-!.claude/rules/
+.claude/
+CLAUDE.md
+AGENTS.md
+dev/
 .codex
 .codex/
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Thread 1 — geocode + SOMOSclean-score the county's permitted solar homes for the dashboard.
 
-Pipeline (see docs/internal/PERMIT_HOMES_DASHBOARD_HANDOFF.md):
+Pipeline (see PERMIT_HOMES_DASHBOARD_HANDOFF.md (private repo)):
   1. Load county solar permits, dedup to one row per parcel (max kW, latest year).
   2. Extract a clean street from the messy ``situs_raw`` (+ ZIP from the description when present).
   3. Geocode ALL parcels in one pass via the **US Census batch geocoder** (free, bulk).

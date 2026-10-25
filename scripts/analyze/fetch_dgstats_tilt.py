@@ -1,7 +1,7 @@
 """Cache the CaliforniaDGStats installer-reported tilt for the AOI county, and
 check it against our 3DEP lidar plane fits.
 
-WHY THIS SCRIPT EXISTS. `docs/internal/HANDOFF_roof_geometry_for_paper.md` §3 "Result 0"
+WHY THIS SCRIPT EXISTS. `HANDOFF_roof_geometry_for_paper.md` (private repo) §3 "Result 0"
 calls the two-method tilt agreement the credibility anchor of the whole geometry
 method: PG&E interconnection paperwork and our lidar fits both land on a 19.0
 degree median, from different instruments a decade apart. That document then
@@ -33,7 +33,7 @@ Writes:
 
 `/data/` is gitignored, so `git add -f` the two files above or a fresh clone
 cannot reproduce the anchor -- the same hazard as the force-added JSONs in
-`docs/internal/HANDOFF_20260827.md`.
+`HANDOFF_20260827.md` (private repo).
 """
 
 from __future__ import annotations

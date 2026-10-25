@@ -86,7 +86,7 @@ DC_CAPACITY_KW = 893.0
 #
 # Numbers recorded from this probe BEFORE 2026-08-27 (degradation -0.162 %/yr,
 # standing layer 0.0 pts, CODS 1.0000 in 8/8 years) were produced at -0.0035.
-# See the sensitivity note in `docs/internal/HANDOFF_20260827.md`.
+# See the sensitivity note in `HANDOFF_20260827.md` (private repo).
 GAMMA_PDC = resolve_system_gamma(2107, capacity_kw=DC_CAPACITY_KW).gamma_pdc
 
 SEED = 1234

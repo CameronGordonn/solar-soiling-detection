@@ -1,7 +1,7 @@
 """Pseudo-label unlabeled NAIP tiles with the current best YOLO model.
 
 Semi-supervised loop: run model on new tiles → review report → merge staging into
-data/yolo/naip/ and retrain. Repeat with improved model. See docs/internal/PHASE1_HANDOFF.md.
+data/yolo/naip/ and retrain. Repeat with improved model. See PHASE1_HANDOFF.md (private repo).
 """
 
 import argparse

@@ -42,7 +42,7 @@ bootstrap:
 	@echo "'make check-data' to see which hand-off artifacts you still need (docs/DATA.md)."
 
 # Report presence of the gitignored data artifacts the pipeline needs, grouped by
-# the lane that needs them and by the verification tier they unlock (ONBOARDING.md §1).
+# the lane that needs them and by the verification tier they unlock (see "Running it" in the README).
 #
 # Two things this target got wrong until 2026-08-23, both of which made it useless as the
 # hand-off check it is used as:

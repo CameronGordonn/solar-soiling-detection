@@ -1,6 +1,6 @@
 # Training Hyperparameter Playbook
 
-Reference for which Ultralytics training knobs we've already evaluated, which are worth tuning next, and the order to try them in. Operational runbook is [PHASE1_HANDOFF.md](internal/PHASE1_HANDOFF.md); this doc is the "what knob and why" companion. Priority groupings below (Priority 1–4) are tuning *order* — not the same thing as the customer-readiness Tiers in [PRODUCT_VISION.md](PRODUCT_VISION.md).
+Reference for which Ultralytics training knobs we've already evaluated, which are worth tuning next, and the order to try them in. Operational runbook is PHASE1_HANDOFF.md *(not in the public mirror)*; this doc is the "what knob and why" companion. Priority groupings below (Priority 1–4) are tuning *order* — not the same thing as the customer-readiness Tiers in [PRODUCT_VISION.md](PRODUCT_VISION.md).
 
 **Default values shown are Ultralytics defaults.** Current joint v2 values from [configs/yolo/experiments_joint_v2.yaml](../configs/yolo/experiments_joint_v2.yaml). New augmentation/optimization knobs must be wired through both [scripts/detect/train.py](../scripts/detect/train.py) argparse and [scripts/detect/train_experiment_matrix.py](../scripts/detect/train_experiment_matrix.py) extraction — they are **not** auto-forwarded from YAML.
 
@@ -110,7 +110,7 @@ After each overnight, read the metrics and pick **one** knob per next run. Don't
 | **NAIP test 0.45–0.55** | Warm start partially eroded | Try in this order, one per overnight: (1) `freeze: 10`, (2) `scale: 0.3`, (3) `hsv_s: 0.4` + `hsv_v: 0.2`, (4) `flipud: 0.5`, (5) `lrf: 0.001` + `warmup_epochs: 5` |
 | **NAIP test ≥ 0.56, Duke test < 0.10** | NAIP held, Duke ignored | Not an aug problem — Duke 4× upscale is the bottleneck. Try `imgsz: 768` or smaller Duke fine-tune subset. |
 | **NAIP test ≥ 0.56, Duke test ≥ 0.10** | Both domains learning | No aug changes. Run threshold sweep, ship as new production checkpoint, queue v11m scale-up. |
-| **NAIP test ≥ 0.70** | GA gate cleared | Stop tuning. Promote checkpoint, calibrate, update Phase 1 status in [Q2_PLAN.md](internal/Q2_PLAN.md). |
+| **NAIP test ≥ 0.70** | GA gate cleared | Stop tuning. Promote checkpoint, calibrate, update Phase 1 status in Q2_PLAN.md *(not in the public mirror)*. |
 
 ---
 

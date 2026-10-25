@@ -267,9 +267,9 @@ lidar roof geometry in full. [`paper/README.md`](paper/README.md) explains which
 ## About this repo
 
 This repo is a squashed public snapshot of the project's private development repository, not its
-full history. A few files are held back (outreach records that name real homes, plus local tool
-configuration); [`docs/MIRROR.md`](docs/MIRROR.md) lists them and why. Team-period working
-documents (onboarding, plans, handoffs) are in [`docs/internal/`](docs/internal/).
+full history. A few files are held back (outreach records that name real homes, the team's
+internal working documents, and local tool configuration); [`docs/MIRROR.md`](docs/MIRROR.md)
+lists them and why.
 The `docs/` folder is the project's working notes, written as things happened, so older ones can be
 out of date. When in doubt, go by the paper and `docs/CANONICAL_NUMBERS.md`.
 

@@ -12,9 +12,10 @@ clone and needs no data.
 ## What is not here, and why
 
 **Outreach records — six files.** They name real homes, companies, or carry
-ready-to-send correspondence. **The `.claude/` folder** is local assistant configuration
-and is held back too. Doc links to all of these are annotated *(not in the public
-mirror)* rather than deleted, so the index still describes the real project.
+ready-to-send correspondence. **The team's internal working documents** and **the
+coding-agent files** (`CLAUDE.md`, `dev/`, `.claude/`) are held back too. Doc links to all
+of these are annotated *(not in the public mirror)* rather than deleted, so the index still
+describes the real project.
 
 | held back | reason |
 |---|---|
@@ -24,6 +25,8 @@ mirror)* rather than deleted, so the index still describes the real project.
 | `docs/outreach/cpra_city_email_READY.txt` | ready-to-send correspondence |
 | `outputs/aoi/santa-cruz-w2-21cm/array_install_era.csv` | per-array install dates, joinable to parcels |
 | `tests/test_qr_compat.py` | reads published_qr_ids.csv |
+| `docs/internal/`, `docs/archive/` | the team's internal working documents (onboarding, plans, handoffs and meeting notes), written for the people on the project at the time |
+| `CLAUDE.md`, `dev/AGENTS.md` | coding-agent instructions for the private working repo |
 | `.claude/` | local assistant configuration and runbooks; the gate definitions they summarise are in `scripts/detect/eval_tile_f1.py` and `docs/CANONICAL_NUMBERS.md` |
 
 **The data bundle.** Model weights, aerial tiles, label sets and the soiling-validation

@@ -294,7 +294,7 @@ def main(argv=None):
     logger.info(f"  area m2: median {med:.1f} (60cm set: {NAIP_MEDIAN_M2})")
     if qa["per_panel_drift_suspected"]:
         logger.error("  MEDIAN AREA COLLAPSED vs the 60cm set — likely per-panel labeling drift. "
-                     "Check the convention (docs/internal/LABELING_SPRINT_21CM.md §2) before training.")
+                     "Check the convention (LABELING_SPRINT_21CM.md (private repo) §2) before training.")
     if missing:
         logger.warning(f"  {len(missing)} tile(s) missing labels — finish those batches.")
 
